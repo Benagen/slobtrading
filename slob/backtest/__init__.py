@@ -1,5 +1,8 @@
 """Backtesting engine and performance analysis."""
 
-# Imports will be added as modules are implemented
+from .risk_manager import RiskManager, PositionSizer
 
-__all__ = []
+__all__ = [
+    'RiskManager',
+    'PositionSizer'
+]
