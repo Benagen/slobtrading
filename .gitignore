@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Data cache (kan bli stor)
+data_cache/raw/
+data_cache/processed/
+*.parquet
+*.db
+*.db-journal
+
+# Output files
+outputs/charts/*.html
+outputs/charts/*.png
+outputs/reports/*.html
+outputs/logs/*.log
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# ML models
+slob/ml/models/*.pkl
+slob/ml/models/*.joblib
+slob/ml/models/*.h5
+
+# Environment
+.env
+.env.local
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~.nib
