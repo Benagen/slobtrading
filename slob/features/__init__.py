@@ -1,5 +1,5 @@
-"""Feature engineering for ML models."""
+"""Feature engineering components for ML classifier."""
 
-# Imports will be added as modules are implemented
+from .feature_engineer import FeatureEngineer
 
-__all__ = []
+__all__ = ['FeatureEngineer']

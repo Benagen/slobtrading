@@ -1,5 +1,6 @@
-"""Machine learning models for setup classification."""
+"""Machine learning components for setup filtering."""
 
-# Imports will be added as modules are implemented
+from .setup_classifier import SetupClassifier
+from .model_trainer import ModelTrainer
 
-__all__ = []
+__all__ = ['SetupClassifier', 'ModelTrainer']
