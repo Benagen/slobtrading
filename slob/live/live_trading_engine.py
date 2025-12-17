@@ -18,6 +18,13 @@ from .candle_aggregator import CandleAggregator, Candle
 from .event_bus import EventBus, EventType
 from .candle_store import CandleStore
 
+# Optional IB support (only imported if used)
+try:
+    from .ib_ws_fetcher import IBWSFetcher
+    IB_AVAILABLE = True
+except ImportError:
+    IB_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -57,31 +64,60 @@ class LiveTradingEngine:
 
     def __init__(
         self,
-        api_key: str,
-        api_secret: str,
-        symbols: List[str],
+        api_key: str = None,
+        api_secret: str = None,
+        symbols: List[str] = None,
         paper_trading: bool = True,
-        db_path: str = "data/candles.db"
+        db_path: str = "data/candles.db",
+        data_source: str = 'alpaca',
+        ib_host: str = '127.0.0.1',
+        ib_port: int = 7497,
+        ib_client_id: int = 1,
+        ib_account: str = None
     ):
         """
         Initialize live trading engine.
 
         Args:
-            api_key: Alpaca API key
-            api_secret: Alpaca API secret
+            api_key: Alpaca API key (required if data_source='alpaca')
+            api_secret: Alpaca API secret (required if data_source='alpaca')
             symbols: List of symbols to trade (e.g., ["NQ"])
             paper_trading: Use paper trading (default: True)
             db_path: Path to candle database
+            data_source: Data source ('alpaca' or 'ib')
+            ib_host: IB Gateway/TWS host (if data_source='ib')
+            ib_port: IB port (7497 TWS paper, 4002 Gateway paper)
+            ib_client_id: IB client ID (1-999)
+            ib_account: IB account (DU for paper, U for live)
         """
+        self.data_source = data_source.lower()
         self.api_key = api_key
         self.api_secret = api_secret
-        self.symbols = symbols
+        self.symbols = symbols or ['NQ']
         self.paper_trading = paper_trading
         self.db_path = db_path
 
+        # IB-specific
+        self.ib_host = ib_host
+        self.ib_port = ib_port
+        self.ib_client_id = ib_client_id
+        self.ib_account = ib_account
+
+        # Validate configuration
+        if self.data_source == 'alpaca':
+            if not api_key or not api_secret:
+                raise ValueError("api_key and api_secret required for Alpaca")
+        elif self.data_source == 'ib':
+            if not IB_AVAILABLE:
+                raise ImportError(
+                    "ib_insync not installed. Run: pip install ib_insync"
+                )
+        else:
+            raise ValueError(f"Invalid data_source: {data_source}. Must be 'alpaca' or 'ib'")
+
         # Components (will be initialized in start())
         self.event_bus: Optional[EventBus] = None
-        self.ws_fetcher: Optional[AlpacaWSFetcher] = None
+        self.ws_fetcher = None  # AlpacaWSFetcher or IBWSFetcher
         self.tick_buffer: Optional[TickBuffer] = None
         self.candle_aggregator: Optional[CandleAggregator] = None
         self.candle_store: Optional[CandleStore] = None
@@ -95,7 +131,7 @@ class LiveTradingEngine:
 
         logger.info(
             f"LiveTradingEngine initialized "
-            f"(symbols={symbols}, paper={paper_trading})"
+            f"(data_source={self.data_source}, symbols={symbols}, paper={paper_trading})"
         )
 
     async def start(self):
@@ -136,19 +172,33 @@ class LiveTradingEngine:
         flush_task = asyncio.create_task(self.tick_buffer.auto_flush(interval=10))
         self.tasks.append(flush_task)
 
-        # Initialize AlpacaWSFetcher
-        logger.info("Initializing AlpacaWSFetcher...")
-        self.ws_fetcher = AlpacaWSFetcher(
-            api_key=self.api_key,
-            api_secret=self.api_secret,
-            paper_trading=self.paper_trading,
-            on_tick=self._on_tick,
-            on_error=self._on_error
-        )
+        # Initialize data fetcher (Alpaca or IB)
+        if self.data_source == 'alpaca':
+            logger.info("Initializing AlpacaWSFetcher...")
+            self.ws_fetcher = AlpacaWSFetcher(
+                api_key=self.api_key,
+                api_secret=self.api_secret,
+                paper_trading=self.paper_trading,
+                on_tick=self._on_tick,
+                on_error=self._on_error
+            )
+            logger.info("Connecting to Alpaca WebSocket...")
+            await self.ws_fetcher.connect()
 
-        # Connect to WebSocket
-        logger.info("Connecting to Alpaca WebSocket...")
-        await self.ws_fetcher.connect()
+        elif self.data_source == 'ib':
+            logger.info("Initializing IBWSFetcher...")
+            self.ws_fetcher = IBWSFetcher(
+                host=self.ib_host,
+                port=self.ib_port,
+                client_id=self.ib_client_id,
+                account=self.ib_account,
+                paper_trading=self.paper_trading
+            )
+            self.ws_fetcher.on_tick = self._on_tick
+            self.ws_fetcher.on_error = self._on_error
+
+            logger.info(f"Connecting to IB at {self.ib_host}:{self.ib_port}...")
+            await self.ws_fetcher.connect()
 
         # Subscribe to symbols
         logger.info(f"Subscribing to symbols: {self.symbols}")
