@@ -99,7 +99,7 @@ class Week1CheckpointTest:
             self.engine = LiveTradingEngine(
                 api_key=api_key,
                 api_secret=api_secret,
-                symbols=["NQ"],
+                symbols=["AAPL", "MSFT", "GOOGL"],  # Using stocks instead of NQ futures
                 paper_trading=True,
                 db_path=f"data/week1_checkpoint_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
             )

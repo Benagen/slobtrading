@@ -351,6 +351,12 @@ class AlpacaWSFetcher:
         if timestamp_str.endswith('Z'):
             timestamp_str = timestamp_str[:-1] + '+00:00'
 
+        # Alpaca sends nanosecond precision (9 decimals), but Python only supports
+        # microsecond precision (6 decimals). Truncate to 6 decimal places.
+        # Example: '2025-12-17T16:16:34.756327828+00:00' -> '2025-12-17T16:16:34.756327+00:00'
+        import re
+        timestamp_str = re.sub(r'(\.\d{6})\d+([+-]\d{2}:\d{2})$', r'\1\2', timestamp_str)
+
         return datetime.fromisoformat(timestamp_str)
 
     async def reconnect(self):
