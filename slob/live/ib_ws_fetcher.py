@@ -40,7 +40,7 @@ except ImportError:
         "ib_insync not installed. Install with: pip install ib_insync"
     )
 
-from slob.data.tick import Tick
+from slob.live.alpaca_ws_fetcher import Tick
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +188,9 @@ class IBWSFetcher:
                     continue
 
                 # Subscribe to market data
+                # Request delayed data if real-time not available
+                self.ib.reqMarketDataType(3)  # 1=live, 2=frozen, 3=delayed, 4=delayed frozen
+
                 ticker = self.ib.reqMktData(
                     contract=contract,
                     genericTickList='',  # Trade ticks only
@@ -195,12 +198,17 @@ class IBWSFetcher:
                     regulatorySnapshot=False
                 )
 
-                # Register tick handler
+                # Register tick handler (event-based)
                 ticker.updateEvent += self._on_ticker_update
 
-                # Store subscription
+                # Store subscription and ticker for polling
                 self.subscribed_contracts[symbol] = contract
                 self.contract_to_symbol[contract.conId] = symbol
+
+                # Also store ticker for polling (delayed data may not trigger events)
+                if not hasattr(self, 'tickers'):
+                    self.tickers = {}
+                self.tickers[symbol] = ticker
 
                 logger.info(f"✅ Subscribed to: {symbol} (conId={contract.conId})")
 
@@ -213,15 +221,49 @@ class IBWSFetcher:
         """
         Start listening for messages.
 
-        Runs until stopped or disconnected.
+        Polls tickers for delayed data (events may not trigger for delayed data).
         """
         logger.info("Started listening for messages")
         self.is_running = True
 
+        # Last known prices for change detection
+        last_prices = {}
+
         try:
-            # Keep connection alive with heartbeat
+            # Poll tickers every second (delayed data may not trigger events)
             while self.is_running and self.ib.isConnected():
                 await asyncio.sleep(1)
+
+                # Poll all tickers
+                if hasattr(self, 'tickers'):
+                    for symbol, ticker in self.tickers.items():
+                        # Get current price (prefer last, fallback to mid)
+                        price = None
+                        if ticker.last and ticker.last > 0:
+                            price = float(ticker.last)
+                        elif ticker.bid and ticker.ask and ticker.bid > 0 and ticker.ask > 0:
+                            price = (float(ticker.bid) + float(ticker.ask)) / 2
+
+                        # Only emit if price changed (reduce duplicate ticks)
+                        if price and price > 0:
+                            if symbol not in last_prices or abs(price - last_prices[symbol]) > 0.01:
+                                last_prices[symbol] = price
+
+                                # Create tick manually (bypass event system)
+                                tick = Tick(
+                                    symbol=symbol,
+                                    price=price,
+                                    size=int(ticker.lastSize) if ticker.lastSize else 1,
+                                    timestamp=datetime.now(),
+                                    exchange=ticker.contract.exchange
+                                )
+
+                                self.tick_count += 1
+                                self.message_count += 1
+                                self.last_message_time = datetime.now()
+
+                                if self.on_tick:
+                                    await self._safe_call_handler(tick)
 
         except Exception as e:
             logger.error(f"Listen loop error: {e}")
@@ -236,17 +278,31 @@ class IBWSFetcher:
             ticker: Updated ticker object
         """
         try:
-            # Check if valid trade tick
-            if ticker.time and ticker.last and ticker.last > 0:
+            # Try to get price from either last trade or mid-price (bid/ask)
+            price = None
+            size = 1
+
+            # Prefer last trade price
+            if ticker.last and ticker.last > 0:
+                price = float(ticker.last)
+                size = int(ticker.lastSize) if ticker.lastSize else 1
+
+            # Fallback to mid-price if no trade (for delayed data)
+            elif ticker.bid and ticker.ask and ticker.bid > 0 and ticker.ask > 0:
+                price = (float(ticker.bid) + float(ticker.ask)) / 2
+                size = 1  # Synthetic tick from quote
+
+            # Only create tick if we have valid price
+            if price and price > 0:
                 # Get symbol from contract ID
                 symbol = self.contract_to_symbol.get(ticker.contract.conId, 'UNKNOWN')
 
                 # Create Tick
                 tick = Tick(
                     symbol=symbol,
-                    price=float(ticker.last),
-                    size=int(ticker.lastSize) if ticker.lastSize else 1,
-                    timestamp=ticker.time,
+                    price=price,
+                    size=size,
+                    timestamp=datetime.now(),  # Use current time for delayed/synthetic ticks
                     exchange=ticker.contract.exchange
                 )
 
@@ -326,19 +382,26 @@ class IBWSFetcher:
                 currency='USD'
             )
 
-            # Query contract details
+            # Query contract details (sorted by expiry, closest first)
             details = await self.ib.reqContractDetailsAsync(contract)
 
             if not details:
                 logger.error(f"No contracts found for {symbol}")
                 return None
 
-            # Get front month (first in list, most liquid)
+            # Sort by expiry date (closest first) to get true front month
+            details = sorted(
+                details,
+                key=lambda d: d.contract.lastTradeDateOrContractMonth
+            )
+
+            # Get front month (closest expiry, most liquid)
             front_month = details[0].contract
 
             logger.info(
                 f"Resolved {symbol} to {front_month.localSymbol} "
-                f"(expiry: {front_month.lastTradeDateOrContractMonth})"
+                f"(expiry: {front_month.lastTradeDateOrContractMonth}) "
+                f"[Found {len(details)} contracts]"
             )
 
             return front_month

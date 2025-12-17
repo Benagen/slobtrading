@@ -90,7 +90,7 @@ class IBCheckpointTest:
             self.engine = LiveTradingEngine(
                 data_source='ib',
                 ib_host='127.0.0.1',
-                ib_port=7497,  # TWS paper trading
+                ib_port=4002,  # IB Gateway paper trading
                 ib_client_id=1,
                 ib_account=self.ib_account,
                 symbols=['NQ'],
