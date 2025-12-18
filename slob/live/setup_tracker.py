@@ -552,6 +552,10 @@ class SetupTracker:
             candidate.liq2_time = candle['timestamp']
             candidate.liq2_price = candle['high']
 
+            # Initialize spike tracking (will be updated in WAITING_ENTRY)
+            candidate.spike_high = candle['high']
+            candidate.spike_high_time = candle['timestamp']
+
             # Transition to WAITING_ENTRY
             success = StateTransitionValidator.transition_to(
                 candidate,
@@ -575,12 +579,21 @@ class SetupTracker:
         Update candidate in WAITING_ENTRY state.
 
         Actions:
+        - Update spike high (track highest price after LIQ #2)
         - Check if candle closes below no-wick low (entry trigger)
         - Calculate entry price (next candle open)
-        - Calculate SL/TP
+        - Calculate SL/TP (using spike high, not just LIQ #2 price)
         - Transition to SETUP_COMPLETE
         - Invalidate if timeout
         """
+        # Update spike high (track highest price for SL calculation)
+        if candle['high'] > candidate.spike_high:
+            candidate.spike_high = candle['high']
+            candidate.spike_high_time = candle['timestamp']
+            logger.debug(
+                f"Spike high updated: {candidate.id[:8]} @ {candidate.spike_high:.2f}"
+            )
+
         # Check timeout
         candles_since_liq2 = candidate.candles_processed - len(candidate.consol_candles) - 1
         if candles_since_liq2 > self.config.max_entry_wait_candles:
@@ -605,8 +618,9 @@ class SetupTracker:
             # In real trading, order will be placed at next open
             candidate.entry_price = candle['close']
 
-            # Calculate SL/TP
-            candidate.sl_price = candidate.liq2_price + self.config.sl_buffer_pips
+            # Calculate SL/TP using SPIKE HIGH (not just LIQ #2 price)
+            # This accounts for price spike after breakout
+            candidate.sl_price = candidate.spike_high + self.config.sl_buffer_pips
             candidate.tp_price = self.lse_low - self.config.tp_buffer_pips
 
             # Calculate risk/reward

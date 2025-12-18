@@ -1,6 +1,54 @@
 # Known Issues - SLOB Live Trading System
 
-## 1. LIQ #2 Detection Edge Case ✅ FIXED
+## 1. SL Calculation Using Spike High ✅ FIXED
+
+**Status**: Fixed (2025-12-18)
+
+**Problem**:
+SL calculation used LIQ #2 breakout price instead of spike high (highest price after breakout). This could result in SL being too tight if price spiked significantly higher after initial breakout.
+
+**Location**: `slob/live/setup_tracker.py:621-623`
+
+**Root Cause**:
+```python
+# OLD: Used initial LIQ #2 breakout price
+candidate.sl_price = candidate.liq2_price + self.config.sl_buffer_pips
+```
+
+**Solution Implemented**:
+1. Added `spike_high` and `spike_high_time` attributes to `SetupCandidate` (setup_state.py:163-166)
+2. Initialize `spike_high` when LIQ #2 detected (setup_tracker.py:555-557)
+3. Update `spike_high` during WAITING_ENTRY state (setup_tracker.py:590-595)
+4. Use `spike_high` in SL calculation (setup_tracker.py:621-623)
+
+**Code Changes**:
+```python
+# In _update_watching_liq2() - Initialize spike tracking
+candidate.spike_high = candle['high']
+candidate.spike_high_time = candle['timestamp']
+
+# In _update_waiting_entry() - Update spike high
+if candle['high'] > candidate.spike_high:
+    candidate.spike_high = candle['high']
+    candidate.spike_high_time = candle['timestamp']
+
+# In _update_waiting_entry() - Use spike high for SL
+candidate.sl_price = candidate.spike_high + self.config.sl_buffer_pips  # FIXED!
+```
+
+**Testing**:
+- ✅ Test created: `test_scenario_1_3_spike_high_tracking`
+- ✅ Test passing: Verifies SL uses spike high (15335) not LIQ #2 (15310)
+- ✅ All existing tests still pass (21/22)
+
+**Impact**:
+- Improved risk management for post-breakout spikes
+- SL properly accounts for maximum price reached after LIQ #2
+- No breaking changes to existing functionality
+
+---
+
+## 2. LIQ #2 Detection Edge Case ✅ FIXED
 
 **Status**: Fixed (2025-12-18)
 

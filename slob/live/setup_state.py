@@ -158,7 +158,12 @@ class SetupCandidate:
 
     liq2_detected: bool = False
     liq2_time: Optional[datetime] = None
-    liq2_price: Optional[float] = None
+    liq2_price: Optional[float] = None  # Initial breakout price
+
+    # Spike high tracking (highest price after LIQ #2 detected)
+    # This is used for SL calculation to account for spike after breakout
+    spike_high: Optional[float] = None
+    spike_high_time: Optional[datetime] = None
 
     # ─────────────────────────────────────────────────────────────
     # ENTRY TRIGGER (close below no-wick low)
