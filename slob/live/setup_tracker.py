@@ -179,10 +179,16 @@ class SetupTracker:
                     f"(price: {candle['high']:.2f}, LSE High: {self.lse_high:.2f})"
                 )
 
-            # Update all active candidates
+            # Update all active candidates (skip just-created candidates)
             results = []
             for candidate_id in list(self.active_candidates.keys()):
                 candidate = self.active_candidates[candidate_id]
+
+                # Skip updating candidate if this is the LIQ #1 candle that created it
+                # (prevents LIQ #1 from being added to consolidation candles)
+                if candidate.liq1_time and candidate.liq1_time == candle['timestamp']:
+                    continue
+
                 result = await self._update_candidate(candidate, candle)
 
                 if result.setup_completed or result.setup_invalidated:
@@ -468,6 +474,15 @@ class SetupTracker:
             candidate.consol_confirmed = True
             candidate.consol_confirmed_time = candle['timestamp']
 
+            # CRITICAL: Remove current candle from consol_candles to freeze consolidation bounds
+            # This candle may be the LIQ #2 breakout, so it shouldn't be part of the consolidation range
+            candidate.consol_candles.pop()  # Remove the candle we just added
+
+            # Recalculate bounds without this candle (frozen consolidation)
+            candidate.consol_high = max(c['high'] for c in candidate.consol_candles)
+            candidate.consol_low = min(c['low'] for c in candidate.consol_candles)
+            candidate.consol_range = candidate.consol_high - candidate.consol_low
+
             # Transition to WATCHING_LIQ2
             success = StateTransitionValidator.transition_to(
                 candidate,
@@ -480,6 +495,11 @@ class SetupTracker:
                     f"✅ Consolidation confirmed: {candidate.id[:8]} "
                     f"(range: {candidate.consol_range:.2f}, quality: {candidate.consol_quality_score:.2f})"
                 )
+
+                # CRITICAL FIX: Re-process this candle in new state!
+                # This candle might also be LIQ #2 (breaking consol_high)
+                logger.debug(f"Re-processing candle in WATCHING_LIQ2 state for {candidate.id[:8]}")
+                return await self._update_watching_liq2(candidate, candle)
 
         return CandleUpdate(
             message=f"Consolidation: {len(candidate.consol_candles)} min, "

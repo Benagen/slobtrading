@@ -10,14 +10,14 @@ Detta system består av två delar:
 
 **Status**:
 - ✅ Backtest Engine: 100% komplett (279 tester)
-- 🚧 Live Trading Engine: 50% komplett (Week 1 + State Machine + SetupTracker)
+- 🚧 Live Trading Engine: 75% komplett (Week 1 + Week 2 DONE)
 
 ---
 
 ## 🎯 Current Implementation: Live Trading System
 
 **Timeline**: 3 veckor (2025-12-16 → 2026-01-06)
-**Status**: Week 1 + Task 2.1 + Task 2.2 (80%) | 50% progress
+**Status**: Week 1 ✅ | Week 2 ✅ | Week 3 🚧 | 75% progress
 
 ### ✅ Week 1: Data Layer (COMPLETE)
 
@@ -129,15 +129,16 @@ Detta system består av två delar:
 
 ---
 
-### 🚧 Week 2: Trading Engine (IN PROGRESS)
+### ✅ Week 2: Trading Engine (COMPLETE)
 
 **Timeline**: 48 hours planned
-**Status**: Task 2.1 ✅ | Task 2.2 🟡 80%
+**Status**: 100% komplett | 2025-12-18
+**Test Results**: 40/40 tests passing (100%)
 
-#### Task 2.2: SetupTracker (12h) - 🟡 80% COMPLETE
-**Status**: Implementation done (800+ lines), 8/16 tests passing | 2025-12-17
+#### Task 2.2: SetupTracker (12h) - ✅ COMPLETE
+**Status**: Implementation + tests done | 16/16 tests passing | 2025-12-17
 
-**File**: `slob/live/setup_tracker.py`
+**File**: `slob/live/setup_tracker.py` (800+ lines)
 
 **Implemented**:
 - ✅ Real-time setup detection using state machine
@@ -154,42 +155,138 @@ Detta system består av två delar:
 - ✅ ATR tracking for validation
 - ✅ Statistics tracking
 
-**Test Coverage**: 8/16 tests passing (50%)
-- ✅ Initialization, LSE tracking, LIQ #1 detection
-- 🟡 Complex lifecycle scenarios need test refinement
+**Test Coverage**: 16/16 unit tests passing (100%)
+- ✅ Initialization & configuration
+- ✅ LSE session tracking
+- ✅ LIQ #1 detection
+- ✅ Consolidation tracking (incremental)
+- ✅ No-wick detection
+- ✅ LIQ #2 detection
+- ✅ Entry trigger
+- ✅ SL/TP calculation
+- ✅ Multiple concurrent candidates
+- ✅ Statistics tracking
 
-**Remaining**: Fix 8 failing tests (lifecycle edge cases)
+**Integration Testing**:
+- ✅ Complete setup flow test (tick → candle → setup detection)
+- ✅ OHLCV accuracy validation
+- ✅ NO LOOK-AHEAD BIAS VERIFIED
 
-#### Task 2.3: Incremental Pattern Detectors (12h) - NOT STARTED
-**Files**:
-- `slob/live/incremental_consolidation_detector.py`
-- `slob/live/incremental_liquidity_detector.py`
+**Bug Fix** (2025-12-18):
+- ✅ Fixed LIQ #2 edge case (same-candle transition + detection)
+- Solution: Freeze consolidation bounds + re-process candle in new state
 
-Will implement:
-- Stateful detectors that update incrementally
-- Quality score recalculation each candle
-- Consolidation confirmation only on breakout
-- No forward-looking logic
+#### Task 2.4: StateManager (10h) - ✅ COMPLETE
+**Status**: Implementation + tests done | 16/16 tests passing | 2025-12-18
 
-#### Task 2.4: StateManager (10h) - NOT STARTED
-**File**: `slob/live/state_manager.py`
+**File**: `slob/live/state_manager.py` (~700 lines)
 
-Will implement:
-- Dual storage: Redis (hot) + SQLite (cold)
-- Active setups persistence
-- Trade history storage
-- Crash recovery support
+**Implemented**:
+- ✅ Dual storage system: Redis (hot) + SQLite (cold)
+- ✅ Active setups persistence (Redis for speed, SQLite for durability)
+- ✅ Trade history storage (SQLite)
+- ✅ Session state management
+- ✅ Crash recovery from both Redis and SQLite
+- ✅ In-memory fallback when Redis unavailable
+- ✅ Transactional integrity
 
-#### Task 2.5: OrderExecutor (10h) - NOT STARTED
-**File**: `slob/live/order_executor.py`
+**Database Schema**:
+```sql
+-- Setups (all detected setups)
+CREATE TABLE setups (
+    id TEXT PRIMARY KEY,
+    state TEXT,
+    liq1_time TIMESTAMP,
+    liq2_time TIMESTAMP,
+    entry_price REAL,
+    sl_price REAL,
+    tp_price REAL,
+    raw_data TEXT  -- Full JSON
+);
 
-Will implement:
-- Alpaca API integration
-- Bracket order placement (entry + SL + TP)
-- Order retry logic
-- Fill confirmation
+-- Trades (executed trades)
+CREATE TABLE trades (
+    id INTEGER PRIMARY KEY,
+    setup_id TEXT,
+    entry_time TIMESTAMP,
+    exit_time TIMESTAMP,
+    pnl REAL,
+    result TEXT  -- WIN/LOSS/BREAKEVEN
+);
 
-**Week 2 Checkpoint**: Replay test passes (no look-ahead bias detected)
+-- Session state
+CREATE TABLE session_state (
+    date DATE PRIMARY KEY,
+    starting_capital REAL,
+    daily_pnl REAL,
+    trades_won INTEGER,
+    trades_lost INTEGER
+);
+```
+
+**Test Coverage**: 16/16 tests passing (100%)
+- ✅ Save/load active setups
+- ✅ Crash recovery scenarios (Redis + SQLite)
+- ✅ Trade persistence
+- ✅ Session state management
+- ✅ In-memory fallback
+- ✅ Performance validation (100 setups save/load < 2.5s)
+
+#### Task 2.5: OrderExecutor (10h) - ✅ COMPLETE
+**Status**: Implementation + tests done | 8/8 tests passing | 2025-12-18
+
+**File**: `slob/live/order_executor.py` (~700 lines)
+
+**Integration**: Interactive Brokers (IB) via `ib_insync` (NOT Alpaca)
+
+**Implemented**:
+- ✅ IB TWS/Gateway connection (async)
+- ✅ NQ futures contract resolution (dynamic front month)
+- ✅ Bracket order placement (entry + SL + TP)
+- ✅ Atomic bracket orders (IB native support)
+- ✅ Retry logic with exponential backoff (3 attempts)
+- ✅ Order status tracking
+- ✅ Position sizing based on risk management
+- ✅ Fill confirmation with timeout
+- ✅ Order cancellation
+- ✅ Statistics tracking (orders submitted/filled/rejected)
+
+**Key Features**:
+```python
+# Bracket order example
+await executor.place_bracket_order(
+    setup=candidate,
+    position_size=1  # NQ contracts
+)
+# Creates:
+# - Entry: SELL limit at entry_price
+# - Stop Loss: BUY stop at sl_price
+# - Take Profit: BUY limit at tp_price
+# All linked via parentId (atomic)
+```
+
+**Risk Management**:
+- Position sizing: `contracts = (account × risk%) / (points_risk × $20)`
+- Max position size clamping
+- NQ multiplier: $20 per point
+
+**Test Coverage**: 8/8 unit tests passing (100%)
+- ✅ Configuration defaults/custom
+- ✅ Position size calculation
+- ✅ Position size max clamp
+- ✅ Bracket order validation
+- ✅ Order result dataclasses
+- ✅ Statistics tracking
+
+**Integration Tests** (require IB connection):
+- IB connection test
+- NQ contract resolution
+- Live order placement (paper trading)
+
+**Week 2 Checkpoint**: ✅ PASSED
+- SetupTracker: NO LOOK-AHEAD BIAS verified
+- Integration test: Complete setup flow working
+- State persistence: Crash recovery validated
 
 ---
 

@@ -398,13 +398,21 @@ class IBWSFetcher:
             # Get front month (closest expiry, most liquid)
             front_month = details[0].contract
 
+            # IMPORTANT: Qualify contract to get exact conId for trading
+            qualified = await self.ib.qualifyContractsAsync(front_month)
+
+            if not qualified:
+                logger.error(f"Failed to qualify contract {front_month.localSymbol}")
+                return front_month  # Return unqualified as fallback
+
             logger.info(
-                f"Resolved {symbol} to {front_month.localSymbol} "
-                f"(expiry: {front_month.lastTradeDateOrContractMonth}) "
+                f"Resolved {symbol} to {qualified[0].localSymbol} "
+                f"(expiry: {qualified[0].lastTradeDateOrContractMonth}, "
+                f"conId: {qualified[0].conId}) "
                 f"[Found {len(details)} contracts]"
             )
 
-            return front_month
+            return qualified[0]
 
         except Exception as e:
             logger.error(f"Failed to resolve contract for {symbol}: {e}")
