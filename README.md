@@ -288,6 +288,57 @@ await executor.place_bracket_order(
 - Integration test: Complete setup flow working
 - State persistence: Crash recovery validated
 
+#### LiveTradingEngine Integration - ✅ COMPLETE
+**Status**: All Week 2 components integrated | 2025-12-18
+
+**File**: `slob/live/live_trading_engine.py` (~780 lines)
+
+**Complete End-to-End Flow**:
+```
+Data Feed (IB/Alpaca)
+  ↓
+TickBuffer
+  ↓
+CandleAggregator
+  ↓
+SetupTracker (LIQ #1 → Consolidation → LIQ #2 → Entry)
+  ↓
+StateManager (Save setup state)
+  ↓
+OrderExecutor (Place bracket order: Entry + SL + TP)
+  ↓
+StateManager (Save trade)
+```
+
+**Features**:
+- Week 1 + Week 2 components fully integrated
+- Crash recovery on startup (restore active setups + open trades)
+- Event-driven architecture (Candle → Setup → Order)
+- Risk-based position sizing
+- Dry-run mode (enable_trading=False)
+- Graceful shutdown (saves all state before exit)
+- Health monitoring (60s intervals)
+
+**Integration Tests**: 3/3 passing
+- ✅ Setup detection and persistence
+- ✅ Order placement dry-run (position sizing)
+- ✅ Crash recovery scenario
+
+**Usage**:
+```python
+# Interactive Brokers (NQ futures)
+engine = LiveTradingEngine(
+    symbols=["NQ"],
+    data_source='ib',
+    enable_trading=True,  # Enable live trading
+    account_balance=100000.0,
+    risk_per_trade=0.01  # 1% risk per trade
+)
+
+await engine.start()
+await engine.run()
+```
+
 ---
 
 ### 📋 Week 3: Deployment & Testing (NOT STARTED)

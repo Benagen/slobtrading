@@ -18,6 +18,12 @@ from .candle_aggregator import CandleAggregator, Candle
 from .event_bus import EventBus, EventType
 from .candle_store import CandleStore
 
+# Week 2 components
+from .setup_tracker import SetupTracker, SetupTrackerConfig
+from .state_manager import StateManager, StateManagerConfig
+from .order_executor import OrderExecutor, OrderExecutorConfig
+from .setup_state import SetupCandidate, SetupState
+
 # Optional IB support (only imported if used)
 try:
     from .ib_ws_fetcher import IBWSFetcher
@@ -45,11 +51,16 @@ class LiveTradingEngine:
     - Health monitoring
     - Graceful shutdown
 
-    Week 2+ Will Add:
-    - Setup tracking
-    - Order execution
-    - Position management
+    Week 2 Functionality:
+    - Setup tracking (SetupTracker)
+    - State persistence (StateManager)
+    - Order execution (OrderExecutor)
     - Risk management
+
+    Week 3 Will Add:
+    - Docker deployment
+    - Monitoring (Prometheus/Grafana)
+    - Telegram alerts
 
     Usage:
         engine = LiveTradingEngine(
@@ -69,11 +80,17 @@ class LiveTradingEngine:
         symbols: List[str] = None,
         paper_trading: bool = True,
         db_path: str = "data/candles.db",
+        state_db_path: str = "data/slob_state.db",
         data_source: str = 'alpaca',
         ib_host: str = '127.0.0.1',
         ib_port: int = 7497,
         ib_client_id: int = 1,
-        ib_account: str = None
+        ib_account: str = None,
+        enable_trading: bool = True,
+        redis_host: str = 'localhost',
+        redis_port: int = 6379,
+        account_balance: float = 100000.0,
+        risk_per_trade: float = 0.01
     ):
         """
         Initialize live trading engine.
@@ -84,11 +101,17 @@ class LiveTradingEngine:
             symbols: List of symbols to trade (e.g., ["NQ"])
             paper_trading: Use paper trading (default: True)
             db_path: Path to candle database
+            state_db_path: Path to state database (SQLite)
             data_source: Data source ('alpaca' or 'ib')
             ib_host: IB Gateway/TWS host (if data_source='ib')
             ib_port: IB port (7497 TWS paper, 4002 Gateway paper)
             ib_client_id: IB client ID (1-999)
             ib_account: IB account (DU for paper, U for live)
+            enable_trading: Enable order execution (False for dry-run)
+            redis_host: Redis host for state storage
+            redis_port: Redis port
+            account_balance: Starting account balance
+            risk_per_trade: Risk per trade (e.g., 0.01 = 1%)
         """
         self.data_source = data_source.lower()
         self.api_key = api_key
@@ -96,6 +119,14 @@ class LiveTradingEngine:
         self.symbols = symbols or ['NQ']
         self.paper_trading = paper_trading
         self.db_path = db_path
+        self.state_db_path = state_db_path
+
+        # Week 2 configuration
+        self.enable_trading = enable_trading
+        self.redis_host = redis_host
+        self.redis_port = redis_port
+        self.account_balance = account_balance
+        self.risk_per_trade = risk_per_trade
 
         # IB-specific
         self.ib_host = ib_host
@@ -115,12 +146,17 @@ class LiveTradingEngine:
         else:
             raise ValueError(f"Invalid data_source: {data_source}. Must be 'alpaca' or 'ib'")
 
-        # Components (will be initialized in start())
+        # Week 1 components (will be initialized in start())
         self.event_bus: Optional[EventBus] = None
         self.ws_fetcher = None  # AlpacaWSFetcher or IBWSFetcher
         self.tick_buffer: Optional[TickBuffer] = None
         self.candle_aggregator: Optional[CandleAggregator] = None
         self.candle_store: Optional[CandleStore] = None
+
+        # Week 2 components
+        self.setup_tracker: Optional[SetupTracker] = None
+        self.state_manager: Optional[StateManager] = None
+        self.order_executor: Optional[OrderExecutor] = None
 
         # State
         self.started_at: Optional[datetime] = None
@@ -210,8 +246,78 @@ class LiveTradingEngine:
             {'symbols': self.symbols, 'paper': self.paper_trading}
         )
 
+        # ─────────────────────────────────────────────────────────────
+        # WEEK 2: Setup Tracking & Trading
+        # ─────────────────────────────────────────────────────────────
+
+        # Initialize StateManager
+        logger.info("Initializing StateManager...")
+        state_config = StateManagerConfig(
+            redis_host=self.redis_host,
+            redis_port=self.redis_port,
+            sqlite_path=self.state_db_path,
+            enable_redis=True
+        )
+        self.state_manager = StateManager(state_config)
+        await self.state_manager.initialize()
+
+        # Recover state from previous session (crash recovery)
+        logger.info("Recovering state from previous session...")
+        recovered_state = await self.state_manager.recover_state()
+        logger.info(
+            f"State recovered: {len(recovered_state['active_setups'])} active setups, "
+            f"{len(recovered_state['open_trades'])} open trades"
+        )
+
+        # Initialize SetupTracker
+        logger.info("Initializing SetupTracker...")
+        tracker_config = SetupTrackerConfig(
+            consol_min_duration=3,
+            consol_max_duration=30,
+            consol_min_quality=0.6,
+            atr_multiplier_min=0.3,
+            atr_multiplier_max=2.0,
+            max_entry_wait_candles=10,
+            max_retracement_pips=50.0
+        )
+        self.setup_tracker = SetupTracker(tracker_config)
+
+        # Restore active setups from crash recovery
+        if recovered_state['active_setups']:
+            logger.info(f"Restoring {len(recovered_state['active_setups'])} active setups...")
+            for setup in recovered_state['active_setups']:
+                self.setup_tracker.active_candidates[setup.id] = setup
+
+        # Initialize OrderExecutor (if trading enabled)
+        if self.enable_trading:
+            if self.data_source == 'ib':
+                logger.info("Initializing OrderExecutor (IB)...")
+                executor_config = OrderExecutorConfig(
+                    host=self.ib_host,
+                    port=self.ib_port,
+                    client_id=self.ib_client_id + 1,  # Different client ID from data fetcher
+                    account=self.ib_account,
+                    paper_trading=self.paper_trading,
+                    default_position_size=1,
+                    max_position_size=5
+                )
+                self.order_executor = OrderExecutor(executor_config)
+                await self.order_executor.initialize()
+            else:
+                logger.warning("OrderExecutor not implemented for Alpaca yet (IB only)")
+        else:
+            logger.info("Trading disabled - running in dry-run mode")
+
+        # Initialize session for today
+        from datetime import date
+        today = date.today()
+        session = await self.state_manager.get_session(today)
+        if not session:
+            logger.info(f"Initializing new trading session for {today}...")
+            await self.state_manager.init_session(today, self.account_balance)
+
         logger.info("=" * 60)
-        logger.info("✅ LIVE TRADING ENGINE STARTED")
+        logger.info("✅ LIVE TRADING ENGINE STARTED (Week 1 + Week 2)")
         logger.info("=" * 60)
 
     async def run(self):
@@ -292,6 +398,9 @@ class LiveTradingEngine:
         """
         Handle completed candle.
 
+        Week 1: Save to database
+        Week 2: Process through SetupTracker
+
         Args:
             candle: Completed M1 candle
         """
@@ -305,6 +414,103 @@ class LiveTradingEngine:
 
         # Emit event
         await self.event_bus.emit(EventType.CANDLE_COMPLETED, candle)
+
+        # ─────────────────────────────────────────────────────────────
+        # WEEK 2: Process candle through SetupTracker
+        # ─────────────────────────────────────────────────────────────
+        if self.setup_tracker:
+            try:
+                # Convert Candle to dict format expected by SetupTracker
+                candle_dict = {
+                    'timestamp': candle.timestamp,
+                    'open': candle.open,
+                    'high': candle.high,
+                    'low': candle.low,
+                    'close': candle.close,
+                    'volume': candle.volume
+                }
+
+                # Process candle
+                await self.setup_tracker.on_candle(candle_dict)
+
+                # Check for completed setups
+                for setup in self.setup_tracker.completed_setups:
+                    await self._on_setup_complete(setup)
+
+                # Save active candidates to state manager
+                for candidate in self.setup_tracker.active_candidates.values():
+                    await self.state_manager.save_setup(candidate)
+
+            except Exception as e:
+                logger.error(f"Error processing candle through SetupTracker: {e}", exc_info=True)
+
+    async def _on_setup_complete(self, setup: SetupCandidate):
+        """
+        Handle completed setup - place bracket order.
+
+        Args:
+            setup: Completed setup candidate
+        """
+        logger.info("=" * 60)
+        logger.info(f"🎯 SETUP COMPLETE: {setup.id[:8]}")
+        logger.info("=" * 60)
+        logger.info(f"   Entry:  {setup.entry_price}")
+        logger.info(f"   SL:     {setup.sl_price}")
+        logger.info(f"   TP:     {setup.tp_price}")
+        logger.info(f"   R:R:    {setup.risk_reward_ratio:.1f}")
+        logger.info("=" * 60)
+
+        # Save completed setup to database
+        await self.state_manager.save_setup(setup)
+
+        # Emit event
+        await self.event_bus.emit(EventType.SETUP_DETECTED, setup)
+
+        # Place order (if trading enabled)
+        if self.enable_trading and self.order_executor:
+            try:
+                # Calculate position size based on risk
+                position_size = self.order_executor.calculate_position_size(
+                    account_balance=self.account_balance,
+                    risk_per_trade=self.risk_per_trade,
+                    entry_price=setup.entry_price,
+                    stop_loss_price=setup.sl_price
+                )
+
+                logger.info(f"Placing bracket order: {position_size} contracts...")
+
+                # Place bracket order
+                order_result = await self.order_executor.place_bracket_order(
+                    setup=setup,
+                    position_size=position_size
+                )
+
+                if order_result.success:
+                    logger.info(f"✅ Order placed successfully!")
+                    logger.info(f"   Entry Order ID: {order_result.entry_order.order_id}")
+                    logger.info(f"   SL Order ID: {order_result.stop_loss_order.order_id}")
+                    logger.info(f"   TP Order ID: {order_result.take_profit_order.order_id}")
+
+                    # Save trade to database
+                    trade_data = {
+                        'setup_id': setup.id,
+                        'symbol': setup.symbol,
+                        'entry_time': setup.entry_trigger_time.isoformat(),
+                        'entry_price': setup.entry_price,
+                        'position_size': position_size,
+                        'sl_price': setup.sl_price,
+                        'tp_price': setup.tp_price,
+                        'result': 'OPEN'
+                    }
+                    await self.state_manager.persist_trade(trade_data)
+
+                else:
+                    logger.error(f"❌ Order placement failed: {order_result.error_message}")
+
+            except Exception as e:
+                logger.error(f"Error placing order: {e}", exc_info=True)
+        else:
+            logger.info("Trading disabled - order would be placed here")
 
     async def _on_tick_overflow(self, tick: Tick):
         """
@@ -370,6 +576,19 @@ class LiveTradingEngine:
                 event_stats = self.event_bus.get_stats()
                 logger.info(f"EventBus: {event_stats}")
 
+                # Week 2 stats
+                if self.setup_tracker:
+                    tracker_stats = self.setup_tracker.get_stats()
+                    logger.info(f"SetupTracker: {tracker_stats}")
+
+                if self.state_manager:
+                    state_stats = self.state_manager.get_stats() if hasattr(self.state_manager, 'get_stats') else {'status': 'running'}
+                    logger.info(f"StateManager: {state_stats}")
+
+                if self.order_executor:
+                    executor_stats = self.order_executor.get_stats()
+                    logger.info(f"OrderExecutor: {executor_stats}")
+
                 logger.info("=" * 60)
 
             except asyncio.CancelledError:
@@ -428,6 +647,15 @@ class LiveTradingEngine:
             logger.info("Closing database...")
             self.candle_store.close()
 
+        # Week 2 shutdown
+        if self.order_executor:
+            logger.info("Closing OrderExecutor...")
+            await self.order_executor.close()
+
+        if self.state_manager:
+            logger.info("Closing StateManager...")
+            await self.state_manager.close()
+
         # Final statistics
         logger.info("=" * 60)
         logger.info("FINAL STATISTICS")
@@ -444,6 +672,12 @@ class LiveTradingEngine:
 
         if self.candle_store:
             logger.info(f"CandleStore: {self.candle_store.get_stats()}")
+
+        if self.setup_tracker:
+            logger.info(f"SetupTracker: {self.setup_tracker.get_stats()}")
+
+        if self.order_executor:
+            logger.info(f"OrderExecutor: {self.order_executor.get_stats()}")
 
         logger.info("=" * 60)
         logger.info("✅ SHUTDOWN COMPLETE")
@@ -470,30 +704,61 @@ async def main():
     Example main function for running the live trading engine.
 
     Usage:
+        # IB (Interactive Brokers) - recommended for NQ futures
         python -m slob.live.live_trading_engine
+
+        # Alpaca (stocks only)
+        python -m slob.live.live_trading_engine --alpaca
     """
     import os
+    import sys
     from dotenv import load_dotenv
 
     # Load environment variables
     load_dotenv()
 
-    # Get Alpaca credentials
-    api_key = os.getenv('ALPACA_API_KEY')
-    api_secret = os.getenv('ALPACA_API_SECRET')
+    # Determine data source
+    use_alpaca = '--alpaca' in sys.argv
+    data_source = 'alpaca' if use_alpaca else 'ib'
 
-    if not api_key or not api_secret:
-        logger.error("Missing Alpaca credentials in environment variables")
-        return
+    if data_source == 'alpaca':
+        # Alpaca (stocks)
+        api_key = os.getenv('ALPACA_API_KEY')
+        api_secret = os.getenv('ALPACA_API_SECRET')
 
-    # Create engine
-    engine = LiveTradingEngine(
-        api_key=api_key,
-        api_secret=api_secret,
-        symbols=["NQ"],  # NQ = Nasdaq 100 E-mini futures
-        paper_trading=True,
-        db_path="data/candles.db"
-    )
+        if not api_key or not api_secret:
+            logger.error("Missing Alpaca credentials in environment variables")
+            return
+
+        engine = LiveTradingEngine(
+            api_key=api_key,
+            api_secret=api_secret,
+            symbols=["AAPL"],  # Example stock
+            paper_trading=True,
+            db_path="data/candles.db",
+            state_db_path="data/slob_state.db",
+            data_source='alpaca',
+            enable_trading=False  # OrderExecutor not implemented for Alpaca yet
+        )
+
+    else:
+        # Interactive Brokers (NQ futures)
+        logger.info("Using Interactive Brokers for NQ futures")
+
+        engine = LiveTradingEngine(
+            symbols=["NQ"],  # NQ = Nasdaq 100 E-mini futures
+            paper_trading=True,
+            db_path="data/candles.db",
+            state_db_path="data/slob_state.db",
+            data_source='ib',
+            ib_host='127.0.0.1',
+            ib_port=7497,  # TWS paper trading (4002 for Gateway)
+            ib_client_id=1,
+            ib_account=os.getenv('IB_ACCOUNT', 'DU123456'),
+            enable_trading=True,  # Enable IB trading
+            account_balance=100000.0,
+            risk_per_trade=0.01  # 1% risk per trade
+        )
 
     # Setup signal handlers
     engine.setup_signal_handlers()
