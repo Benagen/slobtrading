@@ -1,0 +1,86 @@
+2025-12-18 14:36:49,649 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:36:49,649 | INFO     | __main__                  | PHASE 1 PAPER TRADING VALIDATION
+2025-12-18 14:36:49,650 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:36:49,650 | INFO     | __main__                  | Account: DU0282477
+2025-12-18 14:36:49,650 | INFO     | __main__                  | Port: 4002
+2025-12-18 14:36:49,650 | INFO     | __main__                  | Duration: 24.0 hours
+2025-12-18 14:36:49,650 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:36:49,650 | INFO     | __main__                  | Using TWS paper trading (port 7497)
+2025-12-18 14:36:49,650 | INFO     | __main__                  | Initializing Live Trading Engine...
+2025-12-18 14:36:49,662 | INFO     | slob.live.candle_store    | Database schema initialized
+2025-12-18 14:36:49,663 | INFO     | slob.live.candle_store    | ✅ CandleStore initialized at data/candles.db
+2025-12-18 14:36:49,663 | INFO     | __main__                  | Connecting to Interactive Brokers...
+2025-12-18 14:36:49,663 | INFO     | slob.live.live_trading_engine | 🚀 Initializing Engine for NQ on port 4002
+2025-12-18 14:36:49,663 | INFO     | slob.live.ib_ws_fetcher   | Connecting to IB at 127.0.0.1:4002
+2025-12-18 14:36:49,664 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 2...
+2025-12-18 14:36:49,665 | INFO     | ib_insync.client          | Connected
+2025-12-18 14:36:49,669 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 14:36:49,675 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 14:36:49,676 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 14:36:49,676 | INFO     | ib_insync.wrapper         | Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2025-12-18 14:36:49,676 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 14:36:49,676 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 14:36:50,084 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 14:36:50,084 | INFO     | slob.live.ib_ws_fetcher   | ✅ Successfully connected to IB (clientId=2)
+2025-12-18 14:36:50,285 | INFO     | slob.live.ib_ws_fetcher   | Resolved NQ to NQZ5 (expiry: 20251219, conId: 563947738) [Found 10 contracts]
+2025-12-18 14:36:50,286 | INFO     | slob.live.ib_ws_fetcher   | ✅ Subscribed to: NQ (conId=563947738)
+2025-12-18 14:36:50,286 | INFO     | slob.live.order_executor  | Initializing OrderExecutor...
+2025-12-18 14:36:50,287 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 1...
+2025-12-18 14:36:50,288 | INFO     | ib_insync.client          | Connected
+2025-12-18 14:36:50,292 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 14:36:50,486 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 14:36:50,487 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 14:36:50,487 | INFO     | ib_insync.wrapper         | Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2025-12-18 14:36:50,487 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 14:36:50,487 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 14:36:50,576 | INFO     | ib_insync.wrapper         | Warning 10167, reqId 5: Requested market data is not subscribed. Displaying delayed market data., contract: Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ')
+2025-12-18 14:36:50,576 | ERROR    | slob.live.ib_ws_fetcher   | IB error [10167]: Requested market data is not subscribed. Displaying delayed market data. (reqId=5)
+2025-12-18 14:36:50,891 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 14:36:50,892 | INFO     | slob.live.order_executor  | ✅ Connected to IB: 127.0.0.1:4002
+2025-12-18 14:36:51,067 | INFO     | slob.live.order_executor  | ✅ NQ contract resolved: NQZ5
+2025-12-18 14:36:51,067 | INFO     | slob.live.order_executor  | ✅ OrderExecutor initialized
+2025-12-18 14:36:51,068 | INFO     | __main__                  | ✅ Connected successfully!
+2025-12-18 14:36:51,068 | INFO     | __main__                  | Starting paper trading for 24.0 hours...
+2025-12-18 14:36:51,068 | INFO     | __main__                  | Monitoring for 5/1 SLOB setups...
+2025-12-18 14:36:51,068 | INFO     | __main__                  | Press Ctrl+C to stop
+2025-12-18 14:36:51,068 | INFO     | slob.live.live_trading_engine | 🟢 Engine loop started. Waiting for market data...
+2025-12-18 14:37:04,006 | ERROR    | slob.live.event_bus       | Error in handler 'save_candle' for candle_completed: 'Event' object has no attribute 'is_complete'
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/event_bus.py", line 235, in _safe_call_handler
+    await loop.run_in_executor(None, handler, event)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/concurrent/futures/thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_store.py", line 137, in save_candle
+    if not candle.is_complete():
+AttributeError: 'Event' object has no attribute 'is_complete'
+2025-12-18 14:38:03,222 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:36:00 -> 2025-12-18 14:38:00). Filling with flat candles.
+2025-12-18 14:38:03,253 | ERROR    | slob.live.event_bus       | Error in handler 'save_candle' for candle_completed: 'Event' object has no attribute 'is_complete'
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/event_bus.py", line 235, in _safe_call_handler
+    await loop.run_in_executor(None, handler, event)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/concurrent/futures/thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_store.py", line 137, in save_candle
+    if not candle.is_complete():
+AttributeError: 'Event' object has no attribute 'is_complete'
+2025-12-18 14:38:03,255 | ERROR    | slob.live.event_bus       | Error in handler 'save_candle' for candle_completed: 'Event' object has no attribute 'is_complete'
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/event_bus.py", line 235, in _safe_call_handler
+    await loop.run_in_executor(None, handler, event)
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/concurrent/futures/thread.py", line 52, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_store.py", line 137, in save_candle
+    if not candle.is_complete():
+AttributeError: 'Event' object has no attribute 'is_complete'
+2025-12-18 14:38:34,378 | INFO     | __main__                  | Shutting down...
+2025-12-18 14:38:34,380 | INFO     | slob.live.live_trading_engine | 🛑 Shutting down Engine...
+2025-12-18 14:38:34,380 | INFO     | slob.live.ib_ws_fetcher   | Disconnecting from IB...
+2025-12-18 14:38:34,382 | INFO     | ib_insync.ib              | Disconnecting from 127.0.0.1:4002, 316 B sent in 13 messages, 22.4 kB received in 354 messages, session time 105 s.
+2025-12-18 14:38:34,382 | INFO     | ib_insync.client          | Disconnecting
+2025-12-18 14:38:34,384 | INFO     | slob.live.ib_ws_fetcher   | ✅ Disconnected from IB
+2025-12-18 14:38:34,384 | INFO     | ib_insync.ib              | Disconnecting from 127.0.0.1:4002, 225 B sent in 10 messages, 20.3 kB received in 274 messages, session time 104 s.
+2025-12-18 14:38:34,384 | INFO     | ib_insync.client          | Disconnecting
+2025-12-18 14:38:34,385 | INFO     | __main__                  | Paper trading session complete.
+2025-12-18 14:38:34,386 | INFO     | ib_insync.client          | Disconnected.
+2025-12-18 14:38:34,386 | INFO     | ib_insync.client          | Disconnected.
+2025-12-18 14:38:34,533 | INFO     | slob.live.candle_store    | ✅ Database connection closed

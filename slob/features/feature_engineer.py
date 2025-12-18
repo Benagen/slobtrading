@@ -180,12 +180,12 @@ class FeatureEngineer:
 
         if liq1_idx is None or entry_idx >= len(df):
             return {
-                'atr': 0.0,
+                'atr_relative': 0.0,
                 'atr_percentile': 50.0,
                 'consol_range_atr_ratio': 1.0,
                 'bollinger_bandwidth': 0.0,
                 'consol_tightness': 0.5,
-                'price_volatility_std': 0.0,
+                'price_volatility_cv': 0.0,
                 'atr_change_rate': 0.0
             }
 
@@ -202,8 +202,9 @@ class FeatureEngineer:
         else:
             atr = (atr_window['High'] - atr_window['Low']).mean() if len(atr_window) > 0 else 1.0
 
-        # 1. ATR value
-        features['atr'] = float(atr)
+        # 1. ATR value (relative to entry price for stationarity)
+        entry_price = df.iloc[entry_idx]['Close']
+        features['atr_relative'] = float(atr / entry_price) if entry_price > 0 else 0.0
 
         # 2. ATR percentile (is market volatile?)
         if len(atr_window) >= 14:
@@ -235,14 +236,19 @@ class FeatureEngineer:
         # 5. Consolidation tightness
         features['consol_tightness'] = float(consol.get('tightness', 0.5))
 
-        # 6. Price volatility std during consolidation
+        # 6. Price volatility coefficient of variation during consolidation (stationary)
         consol_start = consol.get('start_idx', liq1_idx)
         consol_end = consol.get('end_idx', entry_idx)
         if consol_start < consol_end and consol_end <= len(df):
             consol_closes = df.iloc[consol_start:consol_end]['Close']
-            features['price_volatility_std'] = float(consol_closes.std() if len(consol_closes) > 1 else 0.0)
+            if len(consol_closes) > 1:
+                mean_price = consol_closes.mean()
+                std_price = consol_closes.std()
+                features['price_volatility_cv'] = float(std_price / mean_price) if mean_price > 0 else 0.0
+            else:
+                features['price_volatility_cv'] = 0.0
         else:
-            features['price_volatility_std'] = 0.0
+            features['price_volatility_cv'] = 0.0
 
         # 7. ATR change rate (is volatility increasing/decreasing?)
         if len(atr_window) >= 28:
@@ -330,11 +336,11 @@ class FeatureEngineer:
         nowick_candle = setup.get('nowick_candle')
         liq2_idx = setup.get('liq2_idx')
 
-        # 1. Entry distance to LSE high
-        features['entry_to_lse_high'] = float(abs(entry_price - lse_high))
+        # 1. Entry distance to LSE high (as percentage for stationarity)
+        features['entry_to_lse_high_pct'] = float(abs(entry_price - lse_high) / entry_price) if entry_price > 0 else 0.0
 
-        # 2. Entry distance to LSE low
-        features['entry_to_lse_low'] = float(abs(entry_price - lse_low))
+        # 2. Entry distance to LSE low (as percentage for stationarity)
+        features['entry_to_lse_low_pct'] = float(abs(entry_price - lse_low) / entry_price) if entry_price > 0 else 0.0
 
         # 3. Risk:Reward ratio
         risk = abs(sl_level - entry_price)
@@ -344,11 +350,13 @@ class FeatureEngineer:
         else:
             features['risk_reward_ratio'] = 2.0  # Default
 
-        # 4. No-wick body size
+        # 4. No-wick body as percentage of candle range (stationary)
         if nowick_candle is not None:
-            features['nowick_body_size'] = float(abs(nowick_candle.get('Close', 0) - nowick_candle.get('Open', 0)))
+            candle_range_full = nowick_candle.get('High', 0) - nowick_candle.get('Low', 0)
+            body_size = abs(nowick_candle.get('Close', 0) - nowick_candle.get('Open', 0))
+            features['nowick_body_pct'] = float(body_size / candle_range_full) if candle_range_full > 0 else 0.0
         else:
-            features['nowick_body_size'] = 0.0
+            features['nowick_body_pct'] = 0.0
 
         # 5. No-wick wick ratio
         if nowick_candle is not None:
@@ -361,14 +369,14 @@ class FeatureEngineer:
         else:
             features['nowick_wick_ratio'] = 0.0
 
-        # 6. LIQ #2 sweep distance (how far above consolidation)
+        # 6. LIQ #2 sweep as percentage of consolidation high (stationary)
         consol = setup.get('consolidation', {})
         consol_high = consol.get('high', entry_price)
         if liq2_idx is not None and liq2_idx < len(df):
             liq2_high = df.iloc[liq2_idx]['High']
-            features['liq2_sweep_distance'] = float(liq2_high - consol_high)
+            features['liq2_sweep_pct'] = float((liq2_high - consol_high) / consol_high) if consol_high > 0 else 0.0
         else:
-            features['liq2_sweep_distance'] = 0.0
+            features['liq2_sweep_pct'] = 0.0
 
         # 7. Entry price position in consolidation (0-1)
         consol_low = consol.get('low', entry_price)
@@ -378,8 +386,8 @@ class FeatureEngineer:
         else:
             features['entry_price_consol_position'] = 0.5
 
-        # 8. LSE range
-        features['lse_range'] = float(lse_high - lse_low)
+        # 8. LSE range as percentage of LSE low (stationary)
+        features['lse_range_pct'] = float((lse_high - lse_low) / lse_low) if lse_low > 0 else 0.0
 
         return features
 
@@ -468,8 +476,8 @@ class FeatureEngineer:
             'vol_distribution_skew', 'vol_at_nowick',
 
             # Volatility (7)
-            'atr', 'atr_percentile', 'consol_range_atr_ratio',
-            'bollinger_bandwidth', 'consol_tightness', 'price_volatility_std',
+            'atr_relative', 'atr_percentile', 'consol_range_atr_ratio',
+            'bollinger_bandwidth', 'consol_tightness', 'price_volatility_cv',
             'atr_change_rate',
 
             # Temporal (10)
@@ -478,9 +486,9 @@ class FeatureEngineer:
             'consol_duration', 'time_liq1_to_entry',
 
             # Price Action (8)
-            'entry_to_lse_high', 'entry_to_lse_low', 'risk_reward_ratio',
-            'nowick_body_size', 'nowick_wick_ratio', 'liq2_sweep_distance',
-            'entry_price_consol_position', 'lse_range',
+            'entry_to_lse_high_pct', 'entry_to_lse_low_pct', 'risk_reward_ratio',
+            'nowick_body_pct', 'nowick_wick_ratio', 'liq2_sweep_pct',
+            'entry_price_consol_position', 'lse_range_pct',
 
             # Pattern Quality (4)
             'consol_quality_score', 'liq1_confidence', 'liq2_confidence',

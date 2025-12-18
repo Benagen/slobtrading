@@ -1,0 +1,78 @@
+2025-12-18 14:45:05,808 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:45:05,810 | INFO     | __main__                  | PHASE 1 PAPER TRADING VALIDATION
+2025-12-18 14:45:05,810 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:45:05,810 | INFO     | __main__                  | Account: DU0282477
+2025-12-18 14:45:05,811 | INFO     | __main__                  | Port: 4002
+2025-12-18 14:45:05,811 | INFO     | __main__                  | Duration: 24.0 hours
+2025-12-18 14:45:05,811 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:45:05,811 | INFO     | __main__                  | Using TWS paper trading (port 7497)
+2025-12-18 14:45:05,812 | INFO     | __main__                  | Initializing Live Trading Engine...
+2025-12-18 14:45:05,813 | INFO     | slob.live.candle_store    | ✅ CandleStore initialized at data/candles.db
+2025-12-18 14:45:05,814 | INFO     | __main__                  | Connecting to Interactive Brokers...
+2025-12-18 14:45:05,814 | INFO     | slob.live.live_trading_engine | 🚀 Initializing Engine for NQ on port 4002
+2025-12-18 14:45:05,814 | INFO     | slob.live.ib_ws_fetcher   | Connecting to IB at 127.0.0.1:4002
+2025-12-18 14:45:05,815 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 2...
+2025-12-18 14:45:05,818 | INFO     | ib_insync.client          | Connected
+2025-12-18 14:45:05,824 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 14:45:05,835 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 14:45:05,837 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 14:45:05,838 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 14:45:05,839 | INFO     | ib_insync.wrapper         | Warning 2107, reqId -1: HMDS data farm connection is inactive but should be available upon demand.ushmds
+2025-12-18 14:45:05,839 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 14:45:06,337 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 14:45:06,337 | INFO     | slob.live.ib_ws_fetcher   | ✅ Successfully connected to IB (clientId=2)
+2025-12-18 14:45:06,544 | INFO     | slob.live.ib_ws_fetcher   | Resolved NQ to NQZ5 (expiry: 20251219, conId: 563947738) [Found 10 contracts]
+2025-12-18 14:45:06,544 | INFO     | slob.live.ib_ws_fetcher   | ✅ Subscribed to: NQ (conId=563947738)
+2025-12-18 14:45:06,545 | INFO     | slob.live.order_executor  | Initializing OrderExecutor...
+2025-12-18 14:45:06,545 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 1...
+2025-12-18 14:45:06,547 | INFO     | ib_insync.client          | Connected
+2025-12-18 14:45:06,554 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 14:45:06,556 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 14:45:06,556 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 14:45:06,556 | INFO     | ib_insync.wrapper         | Warning 2107, reqId -1: HMDS data farm connection is inactive but should be available upon demand.ushmds
+2025-12-18 14:45:06,556 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 14:45:06,557 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 14:45:06,711 | INFO     | ib_insync.wrapper         | Warning 10167, reqId 5: Requested market data is not subscribed. Displaying delayed market data., contract: Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ')
+2025-12-18 14:45:06,711 | ERROR    | slob.live.ib_ws_fetcher   | IB error [10167]: Requested market data is not subscribed. Displaying delayed market data. (reqId=5)
+2025-12-18 14:45:06,971 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 14:45:06,971 | INFO     | slob.live.order_executor  | ✅ Connected to IB: 127.0.0.1:4002
+2025-12-18 14:45:07,139 | INFO     | slob.live.order_executor  | ✅ NQ contract resolved: NQZ5
+2025-12-18 14:45:07,139 | INFO     | slob.live.order_executor  | ✅ OrderExecutor initialized
+2025-12-18 14:45:07,139 | INFO     | __main__                  | ✅ Connected successfully!
+2025-12-18 14:45:07,139 | INFO     | __main__                  | Starting paper trading for 24.0 hours...
+2025-12-18 14:45:07,139 | INFO     | __main__                  | Monitoring for 5/1 SLOB setups...
+2025-12-18 14:45:07,140 | INFO     | __main__                  | Press Ctrl+C to stop
+2025-12-18 14:45:07,140 | INFO     | slob.live.live_trading_engine | 🟢 Engine loop started. Waiting for market data...
+2025-12-18 14:47:00,059 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:45:00 -> 2025-12-18 14:47:00). Filling with flat candles.
+2025-12-18 14:48:04,036 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:46:00 -> 2025-12-18 14:48:00). Filling with flat candles.
+2025-12-18 14:49:04,047 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:47:00 -> 2025-12-18 14:49:00). Filling with flat candles.
+2025-12-18 14:50:00,970 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:48:00 -> 2025-12-18 14:50:00). Filling with flat candles.
+2025-12-18 14:51:00,976 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:49:00 -> 2025-12-18 14:51:00). Filling with flat candles.
+2025-12-18 14:52:04,058 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:50:00 -> 2025-12-18 14:52:00). Filling with flat candles.
+2025-12-18 14:53:03,031 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:51:00 -> 2025-12-18 14:53:00). Filling with flat candles.
+2025-12-18 14:54:02,933 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:52:00 -> 2025-12-18 14:54:00). Filling with flat candles.
+2025-12-18 14:55:04,007 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:53:00 -> 2025-12-18 14:55:00). Filling with flat candles.
+2025-12-18 14:56:03,046 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:54:00 -> 2025-12-18 14:56:00). Filling with flat candles.
+2025-12-18 14:57:00,078 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:55:00 -> 2025-12-18 14:57:00). Filling with flat candles.
+2025-12-18 14:58:01,004 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:56:00 -> 2025-12-18 14:58:00). Filling with flat candles.
+2025-12-18 14:59:01,010 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:57:00 -> 2025-12-18 14:59:00). Filling with flat candles.
+2025-12-18 15:00:03,935 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:58:00 -> 2025-12-18 15:00:00). Filling with flat candles.
+2025-12-18 15:01:03,930 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 14:59:00 -> 2025-12-18 15:01:00). Filling with flat candles.
+2025-12-18 15:02:01,014 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 15:00:00 -> 2025-12-18 15:02:00). Filling with flat candles.
+2025-12-18 15:03:01,931 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 15:01:00 -> 2025-12-18 15:03:00). Filling with flat candles.
+2025-12-18 15:04:03,957 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 15:02:00 -> 2025-12-18 15:04:00). Filling with flat candles.
+2025-12-18 15:05:03,987 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 15:03:00 -> 2025-12-18 15:05:00). Filling with flat candles.
+2025-12-18 15:06:00,940 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 15:04:00 -> 2025-12-18 15:06:00). Filling with flat candles.
+2025-12-18 15:07:03,992 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 15:05:00 -> 2025-12-18 15:07:00). Filling with flat candles.
+2025-12-18 15:08:03,998 | WARNING  | slob.live.candle_aggregator | Gap detected for NQ: 1 minutes (2025-12-18 15:06:00 -> 2025-12-18 15:08:00). Filling with flat candles.
+2025-12-18 15:08:57,394 | INFO     | __main__                  | Shutting down...
+2025-12-18 15:08:57,397 | INFO     | slob.live.live_trading_engine | 🛑 Shutting down Engine...
+2025-12-18 15:08:57,399 | INFO     | slob.live.ib_ws_fetcher   | Disconnecting from IB...
+2025-12-18 15:08:57,426 | INFO     | ib_insync.ib              | Disconnecting from 127.0.0.1:4002, 316 B sent in 13 messages, 50.9 kB received in 1487 messages, session time 1.43 ks.
+2025-12-18 15:08:57,427 | INFO     | ib_insync.client          | Disconnecting
+2025-12-18 15:08:57,432 | INFO     | slob.live.ib_ws_fetcher   | ✅ Disconnected from IB
+2025-12-18 15:08:57,433 | INFO     | ib_insync.ib              | Disconnecting from 127.0.0.1:4002, 225 B sent in 10 messages, 21.0 kB received in 302 messages, session time 1.43 ks.
+2025-12-18 15:08:57,434 | INFO     | ib_insync.client          | Disconnecting
+2025-12-18 15:08:57,437 | INFO     | __main__                  | Paper trading session complete.
+2025-12-18 15:08:57,438 | INFO     | ib_insync.client          | Disconnected.
+2025-12-18 15:08:57,439 | INFO     | ib_insync.client          | Disconnected.

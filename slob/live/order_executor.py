@@ -32,6 +32,7 @@ except ImportError:
     raise ImportError("ib_insync not installed. Install with: pip install ib_insync")
 
 from slob.live.setup_state import SetupCandidate
+from slob.backtest.risk_manager import RiskManager
 
 
 logger = logging.getLogger(__name__)
@@ -136,6 +137,17 @@ class OrderExecutor:
         self.orders_submitted = 0
         self.orders_filled = 0
         self.orders_rejected = 0
+
+        # Risk Management
+        self.risk_manager = RiskManager(
+            initial_capital=50000.0,  # Will be updated from IB
+            max_risk_per_trade=0.01,  # 1% risk per trade (conservative)
+            max_drawdown_stop=0.25,   # Stop trading at 25% DD
+            reduce_size_at_dd=0.15,   # Reduce size at 15% DD
+            use_kelly=False,          # Enable after 50+ trades
+            kelly_fraction=0.5        # Half-Kelly when enabled
+        )
+        self._cached_balance = 50000.0  # Fallback if IB sync fails
 
     async def initialize(self):
         """
@@ -245,6 +257,19 @@ class OrderExecutor:
                 error_message="Setup missing entry/SL/TP prices"
             )
 
+        # Check for duplicate order (idempotency protection)
+        if self._check_duplicate_order(setup.id):
+            logger.warning(f"Skipping duplicate order for setup {setup.id[:8]}")
+            return BracketOrderResult(
+                entry_order=OrderResult(
+                    order_id=0,
+                    status=OrderStatus.REJECTED,
+                    error_message=f"Duplicate order detected - order already placed for setup {setup.id[:8]}"
+                ),
+                success=False,
+                error_message=f"Duplicate order detected - order already placed for setup {setup.id[:8]}"
+            )
+
         # Determine position size
         qty = position_size or self.config.default_position_size
 
@@ -302,6 +327,11 @@ class OrderExecutor:
         IB supports bracket orders natively - all 3 orders are linked
         and automatically manage each other (SL/TP cancel when entry fills, etc.)
         """
+        # Generate orderRef for idempotency protection
+        # Format: SLOB_{setup_id[:8]}_{timestamp}_{order_type}
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        order_ref_base = f"SLOB_{setup.id[:8]}_{timestamp}"
+
         # Create parent order (entry)
         # For SHORT setup: SELL to enter
         parent_order = LimitOrder(
@@ -311,6 +341,7 @@ class OrderExecutor:
             orderId=self.ib.client.getReqId(),
             transmit=False  # Don't transmit yet (wait for children)
         )
+        parent_order.orderRef = f"{order_ref_base}_ENTRY"
 
         # Create stop loss (BUY to close SHORT)
         stop_loss = StopOrder(
@@ -321,6 +352,7 @@ class OrderExecutor:
             parentId=parent_order.orderId,
             transmit=False
         )
+        stop_loss.orderRef = f"{order_ref_base}_SL"
 
         # Create take profit (BUY to close SHORT)
         take_profit = LimitOrder(
@@ -331,6 +363,9 @@ class OrderExecutor:
             parentId=parent_order.orderId,
             transmit=True  # Transmit all orders together
         )
+        take_profit.orderRef = f"{order_ref_base}_TP"
+
+        logger.info(f"Generated orderRef: {order_ref_base}_[ENTRY|SL|TP]")
 
         # Place bracket (all 3 orders)
         try:
@@ -579,50 +614,156 @@ class OrderExecutor:
         return self.ib.positions()
 
     # ─────────────────────────────────────────────────────────────────
+    # IDEMPOTENCY PROTECTION
+    # ─────────────────────────────────────────────────────────────────
+
+    def _check_duplicate_order(self, setup_id: str) -> bool:
+        """
+        Check if order already exists for this setup.
+
+        Uses orderRef field to detect duplicate orders across reconnections.
+        Checks both open trades and recent filled trades.
+
+        Args:
+            setup_id: Setup candidate ID (full UUID)
+
+        Returns:
+            True if duplicate detected, False otherwise
+        """
+        if not self.ib or not self.ib.isConnected():
+            logger.debug("IB not connected - cannot check duplicates (fail-open)")
+            return False
+
+        # Create search pattern: first 8 chars of setup ID
+        setup_prefix = f"SLOB_{setup_id[:8]}"
+
+        # Check all open orders
+        for trade in self.ib.openTrades():
+            order_ref = getattr(trade.order, 'orderRef', None)
+            if order_ref and setup_prefix in order_ref:
+                logger.warning(
+                    f"Duplicate order detected for setup {setup_id[:8]}: "
+                    f"found in openTrades with orderRef={order_ref}"
+                )
+                return True
+
+        # Check recent filled orders (last 24h)
+        for trade in self.ib.trades():
+            if trade.orderStatus.status in ['Filled', 'Submitted', 'PreSubmitted']:
+                order_ref = getattr(trade.order, 'orderRef', None)
+                if order_ref and setup_prefix in order_ref:
+                    logger.warning(
+                        f"Order already exists for setup {setup_id[:8]}: "
+                        f"found in trades with orderRef={order_ref}, status={trade.orderStatus.status}"
+                    )
+                    return True
+
+        logger.debug(f"No duplicate found for setup {setup_id[:8]}")
+        return False
+
+    # ─────────────────────────────────────────────────────────────────
     # POSITION SIZING
     # ─────────────────────────────────────────────────────────────────
 
-    def calculate_position_size(
-        self,
-        account_balance: float,
-        risk_per_trade: float,
-        entry_price: float,
-        stop_loss_price: float
-    ) -> int:
+    def get_account_balance(self) -> float:
         """
-        Calculate position size based on risk management.
+        Retrieve live account balance from IBKR.
 
-        Args:
-            account_balance: Current account balance
-            risk_per_trade: Risk per trade (e.g., 0.01 = 1%)
-            entry_price: Entry price
-            stop_loss_price: Stop loss price
+        Syncs current equity from Interactive Brokers to update RiskManager.
+        Falls back to cached balance if connection fails.
 
         Returns:
-            Number of NQ contracts
+            float: Current account balance (USD)
         """
-        # Risk amount in dollars
-        risk_amount = account_balance * risk_per_trade
+        if not self.ib or not self.ib.isConnected():
+            logger.warning("IB not connected, using cached balance")
+            return self._cached_balance
 
-        # Points at risk per contract
-        points_risk = abs(stop_loss_price - entry_price)
+        try:
+            # Request account values from IB
+            account_values = self.ib.accountValues(account=self.config.account)
 
-        # NQ multiplier = $20 per point
-        nq_multiplier = 20
+            # Find TotalCashValue or NetLiquidation
+            for av in account_values:
+                if av.tag == 'TotalCashValue':
+                    balance = float(av.value)
+                    self._cached_balance = balance
+                    self.risk_manager.current_capital = balance
+                    logger.info(f"Account balance synced from IB: ${balance:,.2f}")
+                    return balance
 
-        # Dollar risk per contract
-        dollar_risk_per_contract = points_risk * nq_multiplier
+            # Fallback to NetLiquidation if TotalCashValue not found
+            for av in account_values:
+                if av.tag == 'NetLiquidation':
+                    balance = float(av.value)
+                    self._cached_balance = balance
+                    self.risk_manager.current_capital = balance
+                    logger.info(f"Account balance synced from IB (NetLiq): ${balance:,.2f}")
+                    return balance
 
-        # Calculate contracts
-        contracts = int(risk_amount / dollar_risk_per_contract)
+            logger.warning("TotalCashValue not found in account values, using cached")
+            return self._cached_balance
 
-        # Clamp to max position size
-        contracts = min(contracts, self.config.max_position_size)
-        contracts = max(contracts, 1)  # At least 1 contract
+        except Exception as e:
+            logger.error(f"Failed to get account balance from IB: {e}")
+            return self._cached_balance
+
+    def calculate_position_size(
+        self,
+        entry_price: float,
+        stop_loss_price: float,
+        atr: Optional[float] = None
+    ) -> int:
+        """
+        Calculate position size using RiskManager.
+
+        Delegates to RiskManager for sophisticated position sizing with:
+        - Fixed % risk (1% default)
+        - ATR-based volatility adjustment (optional)
+        - Kelly Criterion (when enabled after 50+ trades)
+        - Drawdown protection (reduces size at 15% DD, stops at 25%)
+
+        Args:
+            entry_price: Entry price
+            stop_loss_price: SL price
+            atr: Optional ATR for volatility adjustment
+
+        Returns:
+            int: Number of NQ contracts to trade
+        """
+        # Sync account balance from IB
+        account_balance = self.get_account_balance()
+
+        # Delegate to RiskManager
+        result = self.risk_manager.calculate_position_size(
+            entry_price=entry_price,
+            sl_price=stop_loss_price,
+            atr=atr,
+            current_equity=account_balance
+        )
+
+        contracts = result.get('contracts', 0)
+
+        # Apply max position size limit
+        if contracts > self.config.max_position_size:
+            logger.warning(
+                f"RiskManager suggested {contracts} contracts, "
+                f"limiting to max {self.config.max_position_size}"
+            )
+            contracts = self.config.max_position_size
+
+        # Ensure minimum 1 contract if trading is enabled
+        if contracts == 0 and result.get('method') != 'trading_disabled':
+            contracts = 1
+            logger.warning("Position size was 0, setting to minimum 1 contract")
 
         logger.info(
-            f"Position sizing: ${account_balance:,.0f} × {risk_per_trade*100}% / "
-            f"{points_risk} pts = {contracts} contracts"
+            f"Position size calculated: {contracts} contracts\n"
+            f"  Method: {result.get('method')}\n"
+            f"  Account: ${account_balance:,.2f}\n"
+            f"  Risk: ${result.get('risk_amount', 0):.2f} "
+            f"({result.get('risk_pct', 0)*100:.1f}%)\n"
+            f"  SL Distance: {abs(entry_price - stop_loss_price):.2f} points"
         )
 
         return contracts

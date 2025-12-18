@@ -1,0 +1,58 @@
+2025-12-18 14:31:43,850 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:31:43,850 | INFO     | __main__                  | PHASE 1 PAPER TRADING VALIDATION
+2025-12-18 14:31:43,850 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:31:43,850 | INFO     | __main__                  | Account: DU0282477
+2025-12-18 14:31:43,851 | INFO     | __main__                  | Port: 4002
+2025-12-18 14:31:43,851 | INFO     | __main__                  | Duration: 24.0 hours
+2025-12-18 14:31:43,851 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:31:43,851 | INFO     | __main__                  | Using TWS paper trading (port 7497)
+2025-12-18 14:31:43,851 | INFO     | __main__                  | Initializing Live Trading Engine...
+2025-12-18 14:31:43,865 | INFO     | slob.live.candle_store    | Database schema initialized
+2025-12-18 14:31:43,865 | INFO     | slob.live.candle_store    | ✅ CandleStore initialized at data/candles.db
+2025-12-18 14:31:43,865 | INFO     | __main__                  | Connecting to Interactive Brokers...
+2025-12-18 14:31:43,866 | INFO     | slob.live.live_trading_engine | 🚀 Initializing Engine for NQ on port 4002
+2025-12-18 14:31:43,866 | INFO     | slob.live.ib_ws_fetcher   | Connecting to IB at 127.0.0.1:4002
+2025-12-18 14:31:43,866 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 2...
+2025-12-18 14:31:43,867 | INFO     | ib_insync.client          | Connected
+2025-12-18 14:31:43,930 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 14:31:43,945 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 14:31:43,953 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 14:31:43,955 | INFO     | ib_insync.wrapper         | Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2025-12-18 14:31:43,955 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 14:31:44,450 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 14:31:44,451 | INFO     | slob.live.ib_ws_fetcher   | ✅ Successfully connected to IB (clientId=2)
+2025-12-18 14:31:44,982 | INFO     | slob.live.ib_ws_fetcher   | Resolved NQ to NQZ5 (expiry: 20251219, conId: 563947738) [Found 10 contracts]
+2025-12-18 14:31:44,982 | INFO     | slob.live.ib_ws_fetcher   | ✅ Subscribed to: NQ (conId=563947738)
+2025-12-18 14:31:44,982 | INFO     | slob.live.order_executor  | Initializing OrderExecutor...
+2025-12-18 14:31:44,983 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 1...
+2025-12-18 14:31:44,985 | INFO     | ib_insync.client          | Connected
+2025-12-18 14:31:44,994 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 14:31:44,999 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 14:31:44,999 | INFO     | ib_insync.wrapper         | Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2025-12-18 14:31:44,999 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 14:31:45,002 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 14:31:45,345 | INFO     | ib_insync.wrapper         | Warning 2119, reqId -1: Market data farm is connecting:usfuture
+2025-12-18 14:31:45,345 | ERROR    | slob.live.ib_ws_fetcher   | IB error [2119]: Market data farm is connecting:usfuture (reqId=-1)
+2025-12-18 14:31:45,346 | INFO     | ib_insync.wrapper         | Warning 2119, reqId -1: Market data farm is connecting:usfuture
+2025-12-18 14:31:45,410 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 14:31:45,411 | INFO     | slob.live.order_executor  | ✅ Connected to IB: 127.0.0.1:4002
+2025-12-18 14:31:45,559 | INFO     | slob.live.order_executor  | ✅ NQ contract resolved: NQZ5
+2025-12-18 14:31:45,559 | INFO     | slob.live.order_executor  | ✅ OrderExecutor initialized
+2025-12-18 14:31:45,560 | INFO     | __main__                  | ✅ Connected successfully!
+2025-12-18 14:31:45,560 | INFO     | __main__                  | Starting paper trading for 24.0 hours...
+2025-12-18 14:31:45,560 | INFO     | __main__                  | Monitoring for 5/1 SLOB setups...
+2025-12-18 14:31:45,560 | INFO     | __main__                  | Press Ctrl+C to stop
+2025-12-18 14:31:45,560 | INFO     | slob.live.live_trading_engine | 🟢 Engine loop started. Waiting for market data...
+2025-12-18 14:31:46,211 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 14:31:46,211 | ERROR    | slob.live.ib_ws_fetcher   | IB error [2104]: Market data farm connection is OK:usfuture (reqId=-1)
+2025-12-18 14:31:46,212 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 14:31:50,375 | ERROR    | ib_insync.wrapper         | Error 10197, reqId 5: No market data during competing live session, contract: Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ')
+2025-12-18 14:31:50,375 | ERROR    | slob.live.ib_ws_fetcher   | IB error [10197]: No market data during competing live session (reqId=5)
+2025-12-18 14:32:13,032 | ERROR    | ib_insync.wrapper         | Error 10197, reqId 5: No market data during competing live session, contract: Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ')
+2025-12-18 14:32:13,033 | ERROR    | slob.live.ib_ws_fetcher   | IB error [10197]: No market data during competing live session (reqId=5)
+2025-12-18 14:32:52,305 | ERROR    | ib_insync.client          | Peer closed connection.
+2025-12-18 14:32:52,307 | ERROR    | ib_insync.client          | Peer closed connection.
+2025-12-18 14:33:01,973 | INFO     | __main__                  | Shutting down...
+2025-12-18 14:33:01,974 | INFO     | slob.live.live_trading_engine | 🛑 Shutting down Engine...
+2025-12-18 14:33:01,975 | INFO     | __main__                  | Paper trading session complete.
+2025-12-18 14:33:02,111 | INFO     | slob.live.candle_store    | ✅ Database connection closed

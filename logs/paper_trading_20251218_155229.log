@@ -1,0 +1,40 @@
+2025-12-18 15:52:29,935 | INFO     | __main__                  | ================================================================================
+2025-12-18 15:52:29,935 | INFO     | __main__                  | PHASE 1 PAPER TRADING VALIDATION
+2025-12-18 15:52:29,935 | INFO     | __main__                  | ================================================================================
+2025-12-18 15:52:29,935 | INFO     | __main__                  | Account: DU0282477
+2025-12-18 15:52:29,936 | INFO     | __main__                  | Port: 4002
+2025-12-18 15:52:29,936 | INFO     | __main__                  | Duration: 24.0 hours
+2025-12-18 15:52:29,936 | INFO     | __main__                  | ================================================================================
+2025-12-18 15:52:29,936 | INFO     | __main__                  | Using TWS paper trading (port 7497)
+2025-12-18 15:52:29,936 | INFO     | __main__                  | Initializing Live Trading Engine...
+2025-12-18 15:52:29,938 | INFO     | slob.live.candle_store    | ✅ CandleStore initialized at data/candles.db
+2025-12-18 15:52:29,938 | INFO     | __main__                  | Connecting to Interactive Brokers...
+2025-12-18 15:52:29,938 | INFO     | slob.live.live_trading_engine | 🚀 Initializing Engine for NQ on port 4002
+2025-12-18 15:52:29,938 | ERROR    | slob.live.ib_ws_fetcher   | ib_insync not installed.
+2025-12-18 15:52:29,938 | WARNING  | slob.live.ib_ws_fetcher   | Cannot subscribe: Not connected.
+2025-12-18 15:52:29,939 | INFO     | slob.live.order_executor  | Initializing OrderExecutor...
+2025-12-18 15:52:29,940 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 1...
+2025-12-18 15:52:29,941 | INFO     | ib_insync.client          | Connected
+2025-12-18 15:52:30,072 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 15:52:30,221 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 15:52:30,228 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 15:52:30,230 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 15:52:30,231 | INFO     | ib_insync.wrapper         | Warning 2107, reqId -1: HMDS data farm connection is inactive but should be available upon demand.ushmds
+2025-12-18 15:52:30,231 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 15:52:30,682 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 15:52:30,682 | INFO     | slob.live.order_executor  | ✅ Connected to IB: 127.0.0.1:4002
+2025-12-18 15:52:30,934 | INFO     | slob.live.order_executor  | ✅ NQ contract resolved: NQZ5
+2025-12-18 15:52:30,934 | INFO     | slob.live.order_executor  | ✅ OrderExecutor initialized
+2025-12-18 15:52:30,934 | INFO     | __main__                  | ✅ Connected successfully!
+2025-12-18 15:52:30,935 | INFO     | __main__                  | Starting paper trading for 24.0 hours...
+2025-12-18 15:52:30,935 | INFO     | __main__                  | Monitoring for 5/1 SLOB setups...
+2025-12-18 15:52:30,935 | INFO     | __main__                  | Press Ctrl+C to stop
+2025-12-18 15:52:30,935 | INFO     | slob.live.live_trading_engine | 🟢 Engine loop started. Waiting for market data...
+2025-12-18 15:53:36,645 | INFO     | ib_insync.wrapper         | Warning 2108, reqId -1: Market data farm connection is inactive but should be available upon demand.usfuture
+2025-12-18 15:53:36,652 | INFO     | ib_insync.wrapper         | Warning 2108, reqId -1: Market data farm connection is inactive but should be available upon demand.usfuture
+2025-12-18 15:54:21,067 | INFO     | __main__                  | Shutting down...
+2025-12-18 15:54:21,068 | INFO     | slob.live.live_trading_engine | 🛑 Shutting down Engine...
+2025-12-18 15:54:21,070 | INFO     | ib_insync.ib              | Disconnecting from 127.0.0.1:4002, 225 B sent in 10 messages, 20.4 kB received in 272 messages, session time 111 s.
+2025-12-18 15:54:21,072 | INFO     | ib_insync.client          | Disconnecting
+2025-12-18 15:54:21,074 | INFO     | __main__                  | Paper trading session complete.
+2025-12-18 15:54:21,075 | INFO     | ib_insync.client          | Disconnected.

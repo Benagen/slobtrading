@@ -1,0 +1,923 @@
+2025-12-17 18:23:18,036 - __main__ - INFO - ================================================================================
+2025-12-17 18:23:18,036 - __main__ - INFO - IB CHECKPOINT TEST - NQ FUTURES
+2025-12-17 18:23:18,036 - __main__ - INFO - ================================================================================
+2025-12-17 18:23:18,036 - __main__ - INFO - Duration: 60 minutes
+2025-12-17 18:23:18,037 - __main__ - INFO - Start time: 2025-12-17 18:23:18.036998
+2025-12-17 18:23:18,037 - __main__ - INFO - Account: DUO282477
+2025-12-17 18:23:18,037 - __main__ - INFO - ================================================================================
+2025-12-17 18:23:18,037 - __main__ - INFO - Creating LiveTradingEngine with IB...
+2025-12-17 18:23:18,037 - slob.live.live_trading_engine - INFO - LiveTradingEngine initialized (data_source=ib, symbols=['NQ'], paper=True)
+2025-12-17 18:23:18,037 - __main__ - INFO - Starting engine...
+2025-12-17 18:23:18,037 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:23:18,037 - slob.live.live_trading_engine - INFO - STARTING LIVE TRADING ENGINE
+2025-12-17 18:23:18,037 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:23:18,037 - slob.live.live_trading_engine - INFO - Initializing EventBus...
+2025-12-17 18:23:18,037 - slob.live.live_trading_engine - INFO - Initializing CandleStore (db_path=data/ib_checkpoint_20251217_182318.db)...
+2025-12-17 18:23:18,042 - slob.live.candle_store - INFO - Database schema initialized
+2025-12-17 18:23:18,042 - slob.live.candle_store - INFO - ✅ CandleStore initialized at data/ib_checkpoint_20251217_182318.db
+2025-12-17 18:23:18,042 - slob.live.live_trading_engine - INFO - Initializing CandleAggregator...
+2025-12-17 18:23:18,042 - slob.live.live_trading_engine - INFO - Initializing TickBuffer...
+2025-12-17 18:23:18,042 - slob.live.live_trading_engine - INFO - Initializing IBWSFetcher...
+2025-12-17 18:23:18,042 - slob.live.live_trading_engine - INFO - Connecting to IB at 127.0.0.1:4002...
+2025-12-17 18:23:18,042 - slob.live.ib_ws_fetcher - INFO - Connecting to IB at 127.0.0.1:4002
+2025-12-17 18:23:18,043 - ib_insync.client - INFO - Connecting to 127.0.0.1:4002 with clientId 1...
+2025-12-17 18:23:18,043 - slob.live.tick_buffer - INFO - Started auto-flush (interval: 10s, TTL: 60.0s)
+2025-12-17 18:23:18,044 - ib_insync.client - INFO - Connected
+2025-12-17 18:23:18,049 - ib_insync.client - INFO - Logged on to server version 176
+2025-12-17 18:23:18,051 - ib_insync.wrapper - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-17 18:23:18,051 - ib_insync.wrapper - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-17 18:23:18,052 - ib_insync.wrapper - INFO - Warning 2107, reqId -1: HMDS data farm connection is inactive but should be available upon demand.ushmds
+2025-12-17 18:23:18,052 - ib_insync.client - INFO - API connection ready
+2025-12-17 18:23:18,053 - ib_insync.wrapper - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-17 18:23:18,163 - ib_insync.ib - INFO - Synchronization complete
+2025-12-17 18:23:18,164 - slob.live.ib_ws_fetcher - INFO - ✅ Successfully connected to IB (clientId=1)
+2025-12-17 18:23:18,164 - slob.live.live_trading_engine - INFO - Subscribing to symbols: ['NQ']
+2025-12-17 18:23:18,294 - slob.live.ib_ws_fetcher - INFO - Resolved NQ to NQZ5 (expiry: 20251219) [Found 10 contracts]
+2025-12-17 18:23:18,296 - slob.live.ib_ws_fetcher - INFO - ✅ Subscribed to: NQ (conId=563947738)
+2025-12-17 18:23:18,296 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:23:18,296 - slob.live.live_trading_engine - INFO - ✅ LIVE TRADING ENGINE STARTED
+2025-12-17 18:23:18,296 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:23:18,297 - __main__ - INFO - Running for 60 minutes...
+2025-12-17 18:23:18,297 - __main__ - INFO - Press Ctrl+C to stop early
+2025-12-17 18:23:18,297 - slob.live.live_trading_engine - INFO - Starting main run loop...
+2025-12-17 18:23:18,298 - slob.live.live_trading_engine - INFO - Tick processor started
+2025-12-17 18:23:18,298 - slob.live.ib_ws_fetcher - INFO - Started listening for messages
+2025-12-17 18:23:18,298 - slob.live.live_trading_engine - INFO - Health monitor started
+2025-12-17 18:23:18,609 - ib_insync.wrapper - INFO - Warning 10167, reqId 4: Requested market data is not subscribed. Displaying delayed market data., contract: Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ')
+2025-12-17 18:23:18,609 - slob.live.ib_ws_fetcher - ERROR - IB error [10167]: Requested market data is not subscribed. Displaying delayed market data. (reqId=4)
+2025-12-17 18:24:03,954 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:23:00, O:24805.375, H:24810.0, L:24786.5, C:24786.5, V:33)
+2025-12-17 18:24:18,297 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:24:18,299 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:24:18,299 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:24:18,299 - slob.live.live_trading_engine - INFO - Runtime: 0:01:00.262329
+2025-12-17 18:24:18,300 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 42, 'tick_count': 42, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:24:13.968857'}
+2025-12-17 18:24:18,300 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 42, 'dequeued_count': 42, 'dropped_count': 0, 'evicted_count': 0, 'pending': 0}
+2025-12-17 18:24:18,300 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 42, 'candles_completed': 1, 'gaps_filled': 0, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:24:18,301 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 1, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 1, 'queries_executed': 0}
+2025-12-17 18:24:18,302 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 44, 'handler_errors': 0, 'events_by_type': {'tick_received': 42, 'candle_completed': 1, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 44}
+2025-12-17 18:24:18,302 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:25:03,962 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:23:00 -> 2025-12-17 18:25:00). Filling with flat candles.
+2025-12-17 18:25:03,964 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:24:00, O:24772.25, H:24772.25, L:24772.25, C:24772.25, V:0)
+2025-12-17 18:25:03,967 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:24:00, O:24786.5, H:24792.0, L:24772.25, C:24772.25, V:41)
+2025-12-17 18:25:18,301 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:25:18,301 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:25:18,301 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:25:18,301 - slob.live.live_trading_engine - INFO - Runtime: 0:02:00.264434
+2025-12-17 18:25:18,302 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 73, 'tick_count': 73, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:25:13.958759'}
+2025-12-17 18:25:18,302 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 73, 'dequeued_count': 73, 'dropped_count': 0, 'evicted_count': 42, 'pending': 0}
+2025-12-17 18:25:18,302 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 73, 'candles_completed': 2, 'gaps_filled': 1, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:25:18,303 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 2, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 3, 'queries_executed': 0}
+2025-12-17 18:25:18,303 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 77, 'handler_errors': 0, 'events_by_type': {'tick_received': 73, 'candle_completed': 3, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 77}
+2025-12-17 18:25:18,303 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:26:00,176 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:24:00 -> 2025-12-17 18:26:00). Filling with flat candles.
+2025-12-17 18:26:00,177 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:25:00, O:24777.75, H:24777.75, L:24777.75, C:24777.75, V:0)
+2025-12-17 18:26:00,179 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:25:00, O:24772.25, H:24777.75, L:24766.0, C:24777.75, V:44)
+2025-12-17 18:26:18,302 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:26:18,304 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:26:18,305 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:26:18,305 - slob.live.live_trading_engine - INFO - Runtime: 0:03:00.268346
+2025-12-17 18:26:18,306 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 109, 'tick_count': 109, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:26:14.102740'}
+2025-12-17 18:26:18,306 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 109, 'dequeued_count': 109, 'dropped_count': 0, 'evicted_count': 73, 'pending': 0}
+2025-12-17 18:26:18,306 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 109, 'candles_completed': 3, 'gaps_filled': 2, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:26:18,307 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 3, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 5, 'queries_executed': 0}
+2025-12-17 18:26:18,307 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 115, 'handler_errors': 0, 'events_by_type': {'tick_received': 109, 'candle_completed': 5, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 115}
+2025-12-17 18:26:18,307 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:27:03,970 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:25:00 -> 2025-12-17 18:27:00). Filling with flat candles.
+2025-12-17 18:27:03,973 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:26:00, O:24787.25, H:24787.25, L:24787.25, C:24787.25, V:0)
+2025-12-17 18:27:03,974 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:26:00, O:24777.75, H:24787.25, L:24762.5, C:24787.25, V:42)
+2025-12-17 18:27:18,306 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:27:18,306 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:27:18,307 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:27:18,307 - slob.live.live_trading_engine - INFO - Runtime: 0:04:00.270122
+2025-12-17 18:27:18,307 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 148, 'tick_count': 148, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:27:17.994867'}
+2025-12-17 18:27:18,308 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 148, 'dequeued_count': 148, 'dropped_count': 0, 'evicted_count': 109, 'pending': 0}
+2025-12-17 18:27:18,308 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 148, 'candles_completed': 4, 'gaps_filled': 3, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:27:18,309 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 4, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 7, 'queries_executed': 0}
+2025-12-17 18:27:18,309 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 156, 'handler_errors': 0, 'events_by_type': {'tick_received': 148, 'candle_completed': 7, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 156}
+2025-12-17 18:27:18,309 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:28:00,022 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:26:00 -> 2025-12-17 18:28:00). Filling with flat candles.
+2025-12-17 18:28:00,023 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:27:00, O:24789.5, H:24789.5, L:24789.5, C:24789.5, V:0)
+2025-12-17 18:28:00,024 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:27:00, O:24787.25, H:24793.25, L:24783.25, C:24789.5, V:48)
+2025-12-17 18:28:18,307 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:28:18,308 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:28:18,308 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:28:18,308 - slob.live.live_trading_engine - INFO - Runtime: 0:05:00.271073
+2025-12-17 18:28:18,308 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 187, 'tick_count': 187, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:28:16.718658'}
+2025-12-17 18:28:18,309 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 187, 'dequeued_count': 187, 'dropped_count': 0, 'evicted_count': 148, 'pending': 0}
+2025-12-17 18:28:18,309 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 187, 'candles_completed': 5, 'gaps_filled': 4, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:28:18,310 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 5, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 9, 'queries_executed': 0}
+2025-12-17 18:28:18,310 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 197, 'handler_errors': 0, 'events_by_type': {'tick_received': 187, 'candle_completed': 9, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 197}
+2025-12-17 18:28:18,310 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:29:00,084 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:27:00 -> 2025-12-17 18:29:00). Filling with flat candles.
+2025-12-17 18:29:00,087 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:28:00, O:24816.0, H:24816.0, L:24816.0, C:24816.0, V:0)
+2025-12-17 18:29:00,089 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:28:00, O:24789.5, H:24823.5, L:24785.25, C:24816.0, V:51)
+2025-12-17 18:29:18,309 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:29:18,312 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:29:18,312 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:29:18,313 - slob.live.live_trading_engine - INFO - Runtime: 0:06:00.275750
+2025-12-17 18:29:18,313 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 223, 'tick_count': 223, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:29:18.107770'}
+2025-12-17 18:29:18,313 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 223, 'dequeued_count': 223, 'dropped_count': 0, 'evicted_count': 187, 'pending': 0}
+2025-12-17 18:29:18,314 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 223, 'candles_completed': 6, 'gaps_filled': 5, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:29:18,314 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 6, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 11, 'queries_executed': 0}
+2025-12-17 18:29:18,315 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 235, 'handler_errors': 0, 'events_by_type': {'tick_received': 223, 'candle_completed': 11, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 235}
+2025-12-17 18:29:18,315 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:30:00,026 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:28:00 -> 2025-12-17 18:30:00). Filling with flat candles.
+2025-12-17 18:30:00,027 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:29:00, O:24807.5, H:24807.5, L:24807.5, C:24807.5, V:0)
+2025-12-17 18:30:00,029 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:29:00, O:24816.0, H:24816.0, L:24807.0, C:24807.5, V:38)
+2025-12-17 18:30:18,314 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:30:18,316 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:30:18,316 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:30:18,317 - slob.live.live_trading_engine - INFO - Runtime: 0:07:00.279527
+2025-12-17 18:30:18,317 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 261, 'tick_count': 261, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:30:18.005823'}
+2025-12-17 18:30:18,317 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 261, 'dequeued_count': 261, 'dropped_count': 0, 'evicted_count': 222, 'pending': 0}
+2025-12-17 18:30:18,317 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 261, 'candles_completed': 7, 'gaps_filled': 6, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:30:18,318 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 7, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 13, 'queries_executed': 0}
+2025-12-17 18:30:18,319 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 275, 'handler_errors': 0, 'events_by_type': {'tick_received': 261, 'candle_completed': 13, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 275}
+2025-12-17 18:30:18,319 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:31:00,090 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:29:00 -> 2025-12-17 18:31:00). Filling with flat candles.
+2025-12-17 18:31:00,098 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:30:00, O:24819.25, H:24819.25, L:24819.25, C:24819.25, V:0)
+2025-12-17 18:31:00,100 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:30:00, O:24807.5, H:24829.5, L:24807.5, C:24819.25, V:49)
+2025-12-17 18:31:18,318 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:31:18,320 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:31:18,320 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:31:18,321 - slob.live.live_trading_engine - INFO - Runtime: 0:08:00.283491
+2025-12-17 18:31:18,321 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 300, 'tick_count': 300, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:31:16.993865'}
+2025-12-17 18:31:18,321 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 300, 'dequeued_count': 300, 'dropped_count': 0, 'evicted_count': 261, 'pending': 0}
+2025-12-17 18:31:18,321 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 300, 'candles_completed': 8, 'gaps_filled': 7, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:31:18,321 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 8, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 15, 'queries_executed': 0}
+2025-12-17 18:31:18,322 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 316, 'handler_errors': 0, 'events_by_type': {'tick_received': 300, 'candle_completed': 15, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 316}
+2025-12-17 18:31:18,322 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:32:02,004 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:30:00 -> 2025-12-17 18:32:00). Filling with flat candles.
+2025-12-17 18:32:02,005 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:31:00, O:24814.5, H:24814.5, L:24814.5, C:24814.5, V:0)
+2025-12-17 18:32:02,007 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:31:00, O:24819.25, H:24824.0, L:24813.0, C:24813.5, V:45)
+2025-12-17 18:32:18,323 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:32:18,323 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:32:18,324 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:32:18,324 - slob.live.live_trading_engine - INFO - Runtime: 0:09:00.286769
+2025-12-17 18:32:18,324 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 336, 'tick_count': 336, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:32:14.051644'}
+2025-12-17 18:32:18,324 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 336, 'dequeued_count': 336, 'dropped_count': 0, 'evicted_count': 300, 'pending': 0}
+2025-12-17 18:32:18,325 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 336, 'candles_completed': 9, 'gaps_filled': 8, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:32:18,325 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 9, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 17, 'queries_executed': 0}
+2025-12-17 18:32:18,326 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 354, 'handler_errors': 0, 'events_by_type': {'tick_received': 336, 'candle_completed': 17, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 354}
+2025-12-17 18:32:18,326 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:33:03,988 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:31:00 -> 2025-12-17 18:33:00). Filling with flat candles.
+2025-12-17 18:33:03,991 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:32:00, O:24820.5, H:24820.5, L:24820.5, C:24820.5, V:0)
+2025-12-17 18:33:03,992 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:32:00, O:24814.5, H:24823.5, L:24812.25, C:24820.5, V:41)
+2025-12-17 18:33:18,325 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:33:18,327 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:33:18,327 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:33:18,328 - slob.live.live_trading_engine - INFO - Runtime: 0:10:00.290661
+2025-12-17 18:33:18,328 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 375, 'tick_count': 375, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:33:16.147703'}
+2025-12-17 18:33:18,328 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 375, 'dequeued_count': 375, 'dropped_count': 0, 'evicted_count': 336, 'pending': 0}
+2025-12-17 18:33:18,329 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 375, 'candles_completed': 10, 'gaps_filled': 9, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:33:18,329 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 10, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 19, 'queries_executed': 0}
+2025-12-17 18:33:18,330 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 395, 'handler_errors': 0, 'events_by_type': {'tick_received': 375, 'candle_completed': 19, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 395}
+2025-12-17 18:33:18,330 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:34:01,946 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:32:00 -> 2025-12-17 18:34:00). Filling with flat candles.
+2025-12-17 18:34:01,949 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:33:00, O:24834.25, H:24834.25, L:24834.25, C:24834.25, V:0)
+2025-12-17 18:34:01,951 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:33:00, O:24820.5, H:24835.25, L:24816.5, C:24835.25, V:50)
+2025-12-17 18:34:18,329 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:34:18,331 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:34:18,332 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:34:18,332 - slob.live.live_trading_engine - INFO - Runtime: 0:11:00.295141
+2025-12-17 18:34:18,332 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 411, 'tick_count': 411, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:34:14.245786'}
+2025-12-17 18:34:18,333 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 411, 'dequeued_count': 411, 'dropped_count': 0, 'evicted_count': 375, 'pending': 0}
+2025-12-17 18:34:18,333 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 411, 'candles_completed': 11, 'gaps_filled': 10, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:34:18,334 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 11, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 21, 'queries_executed': 0}
+2025-12-17 18:34:18,334 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 433, 'handler_errors': 0, 'events_by_type': {'tick_received': 411, 'candle_completed': 21, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 433}
+2025-12-17 18:34:18,334 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:35:00,010 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:33:00 -> 2025-12-17 18:35:00). Filling with flat candles.
+2025-12-17 18:35:00,012 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:34:00, O:24849.25, H:24849.25, L:24849.25, C:24849.25, V:0)
+2025-12-17 18:35:00,021 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:34:00, O:24834.25, H:24849.25, L:24831.0, C:24849.25, V:36)
+2025-12-17 18:35:18,333 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:35:18,335 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:35:18,335 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:35:18,336 - slob.live.live_trading_engine - INFO - Runtime: 0:12:00.298573
+2025-12-17 18:35:18,336 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 448, 'tick_count': 448, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:35:14.340918'}
+2025-12-17 18:35:18,336 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 448, 'dequeued_count': 448, 'dropped_count': 0, 'evicted_count': 411, 'pending': 0}
+2025-12-17 18:35:18,336 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 448, 'candles_completed': 12, 'gaps_filled': 11, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:35:18,337 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 12, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 23, 'queries_executed': 0}
+2025-12-17 18:35:18,337 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 472, 'handler_errors': 0, 'events_by_type': {'tick_received': 448, 'candle_completed': 23, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 472}
+2025-12-17 18:35:18,338 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:36:00,012 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:34:00 -> 2025-12-17 18:36:00). Filling with flat candles.
+2025-12-17 18:36:00,014 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:35:00, O:24841.0, H:24841.0, L:24841.0, C:24841.0, V:0)
+2025-12-17 18:36:00,020 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:35:00, O:24849.25, H:24849.25, L:24839.0, C:24841.0, V:65)
+2025-12-17 18:36:18,336 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:36:18,337 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:36:18,337 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:36:18,337 - slob.live.live_trading_engine - INFO - Runtime: 0:13:00.300360
+2025-12-17 18:36:18,338 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 486, 'tick_count': 486, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:36:14.424756'}
+2025-12-17 18:36:18,338 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 486, 'dequeued_count': 486, 'dropped_count': 0, 'evicted_count': 448, 'pending': 0}
+2025-12-17 18:36:18,338 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 486, 'candles_completed': 13, 'gaps_filled': 12, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:36:18,339 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 13, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 25, 'queries_executed': 0}
+2025-12-17 18:36:18,339 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 512, 'handler_errors': 0, 'events_by_type': {'tick_received': 486, 'candle_completed': 25, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 512}
+2025-12-17 18:36:18,339 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:37:00,015 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:35:00 -> 2025-12-17 18:37:00). Filling with flat candles.
+2025-12-17 18:37:00,016 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:36:00, O:24826.0, H:24826.0, L:24826.0, C:24826.0, V:0)
+2025-12-17 18:37:00,018 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:36:00, O:24841.0, H:24844.25, L:24822.5, C:24826.0, V:38)
+2025-12-17 18:37:18,339 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:37:18,340 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:37:18,340 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:37:18,341 - slob.live.live_trading_engine - INFO - Runtime: 0:14:00.303634
+2025-12-17 18:37:18,341 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 524, 'tick_count': 524, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:37:14.529238'}
+2025-12-17 18:37:18,341 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 524, 'dequeued_count': 524, 'dropped_count': 0, 'evicted_count': 486, 'pending': 0}
+2025-12-17 18:37:18,341 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 524, 'candles_completed': 14, 'gaps_filled': 13, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:37:18,342 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 14, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 27, 'queries_executed': 0}
+2025-12-17 18:37:18,342 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 552, 'handler_errors': 0, 'events_by_type': {'tick_received': 524, 'candle_completed': 27, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 552}
+2025-12-17 18:37:18,343 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:38:00,013 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:36:00 -> 2025-12-17 18:38:00). Filling with flat candles.
+2025-12-17 18:38:00,016 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:37:00, O:24828.75, H:24828.75, L:24828.75, C:24828.75, V:0)
+2025-12-17 18:38:00,018 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:37:00, O:24826.0, H:24829.25, L:24815.5, C:24828.75, V:41)
+2025-12-17 18:38:18,340 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:38:18,341 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:38:18,341 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:38:18,341 - slob.live.live_trading_engine - INFO - Runtime: 0:15:00.304059
+2025-12-17 18:38:18,341 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 560, 'tick_count': 560, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:38:13.938418'}
+2025-12-17 18:38:18,341 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 560, 'dequeued_count': 560, 'dropped_count': 0, 'evicted_count': 524, 'pending': 0}
+2025-12-17 18:38:18,341 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 560, 'candles_completed': 15, 'gaps_filled': 14, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:38:18,342 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 15, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 29, 'queries_executed': 0}
+2025-12-17 18:38:18,342 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 590, 'handler_errors': 0, 'events_by_type': {'tick_received': 560, 'candle_completed': 29, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 590}
+2025-12-17 18:38:18,342 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:39:02,984 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:37:00 -> 2025-12-17 18:39:00). Filling with flat candles.
+2025-12-17 18:39:02,986 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:38:00, O:24811.25, H:24811.25, L:24811.25, C:24811.25, V:0)
+2025-12-17 18:39:02,987 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:38:00, O:24828.75, H:24830.75, L:24812.0, C:24812.0, V:39)
+2025-12-17 18:39:18,340 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:39:18,343 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:39:18,343 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:39:18,344 - slob.live.live_trading_engine - INFO - Runtime: 0:16:00.306762
+2025-12-17 18:39:18,344 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 598, 'tick_count': 598, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:39:14.753303'}
+2025-12-17 18:39:18,344 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 598, 'dequeued_count': 598, 'dropped_count': 0, 'evicted_count': 560, 'pending': 0}
+2025-12-17 18:39:18,345 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 598, 'candles_completed': 16, 'gaps_filled': 15, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:39:18,345 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 16, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 31, 'queries_executed': 0}
+2025-12-17 18:39:18,346 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 630, 'handler_errors': 0, 'events_by_type': {'tick_received': 598, 'candle_completed': 31, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 630}
+2025-12-17 18:39:18,346 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:40:02,987 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:38:00 -> 2025-12-17 18:40:00). Filling with flat candles.
+2025-12-17 18:40:02,988 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:39:00, O:24818.5, H:24818.5, L:24818.5, C:24818.5, V:0)
+2025-12-17 18:40:02,989 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:39:00, O:24811.25, H:24818.75, L:24808.5, C:24813.75, V:45)
+2025-12-17 18:40:18,347 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:40:18,347 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:40:18,348 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:40:18,348 - slob.live.live_trading_engine - INFO - Runtime: 0:17:00.310863
+2025-12-17 18:40:18,348 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 637, 'tick_count': 637, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:40:17.842252'}
+2025-12-17 18:40:18,348 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 637, 'dequeued_count': 637, 'dropped_count': 0, 'evicted_count': 598, 'pending': 0}
+2025-12-17 18:40:18,349 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 637, 'candles_completed': 17, 'gaps_filled': 16, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:40:18,349 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 17, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 33, 'queries_executed': 0}
+2025-12-17 18:40:18,350 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 671, 'handler_errors': 0, 'events_by_type': {'tick_received': 637, 'candle_completed': 33, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 671}
+2025-12-17 18:40:18,350 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:41:00,020 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:39:00 -> 2025-12-17 18:41:00). Filling with flat candles.
+2025-12-17 18:41:00,021 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:40:00, O:24825.75, H:24825.75, L:24825.75, C:24825.75, V:0)
+2025-12-17 18:41:00,022 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:40:00, O:24818.5, H:24835.5, L:24816.5, C:24825.75, V:36)
+2025-12-17 18:41:18,487 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:41:18,488 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:41:18,488 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:41:18,488 - slob.live.live_trading_engine - INFO - Runtime: 0:18:00.451460
+2025-12-17 18:41:18,489 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 675, 'tick_count': 675, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:41:18.052719'}
+2025-12-17 18:41:18,489 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 675, 'dequeued_count': 675, 'dropped_count': 0, 'evicted_count': 637, 'pending': 0}
+2025-12-17 18:41:18,489 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 675, 'candles_completed': 18, 'gaps_filled': 17, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:41:18,490 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 18, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 35, 'queries_executed': 0}
+2025-12-17 18:41:18,490 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 711, 'handler_errors': 0, 'events_by_type': {'tick_received': 675, 'candle_completed': 35, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 711}
+2025-12-17 18:41:18,490 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:42:00,169 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:40:00 -> 2025-12-17 18:42:00). Filling with flat candles.
+2025-12-17 18:42:00,173 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:41:00, O:24844.25, H:24844.25, L:24844.25, C:24844.25, V:0)
+2025-12-17 18:42:00,175 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:41:00, O:24825.75, H:24849.75, L:24825.75, C:24844.25, V:40)
+2025-12-17 18:42:18,488 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:42:18,489 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:42:18,489 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:42:18,489 - slob.live.live_trading_engine - INFO - Runtime: 0:19:00.452284
+2025-12-17 18:42:18,490 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 709, 'tick_count': 709, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:42:15.115477'}
+2025-12-17 18:42:18,490 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 709, 'dequeued_count': 709, 'dropped_count': 0, 'evicted_count': 675, 'pending': 0}
+2025-12-17 18:42:18,490 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 709, 'candles_completed': 19, 'gaps_filled': 18, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:42:18,491 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 19, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 37, 'queries_executed': 0}
+2025-12-17 18:42:18,491 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 747, 'handler_errors': 0, 'events_by_type': {'tick_received': 709, 'candle_completed': 37, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 747}
+2025-12-17 18:42:18,491 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:43:00,068 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:41:00 -> 2025-12-17 18:43:00). Filling with flat candles.
+2025-12-17 18:43:00,071 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:42:00, O:24839.0, H:24839.0, L:24839.0, C:24839.0, V:0)
+2025-12-17 18:43:00,073 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:42:00, O:24844.25, H:24854.5, L:24838.25, C:24839.0, V:43)
+2025-12-17 18:43:18,490 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:43:18,492 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:43:18,492 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:43:18,492 - slob.live.live_trading_engine - INFO - Runtime: 0:20:00.455459
+2025-12-17 18:43:18,493 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 746, 'tick_count': 746, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:43:14.095670'}
+2025-12-17 18:43:18,494 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 746, 'dequeued_count': 746, 'dropped_count': 0, 'evicted_count': 709, 'pending': 0}
+2025-12-17 18:43:18,494 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 746, 'candles_completed': 20, 'gaps_filled': 19, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:43:18,495 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 20, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 39, 'queries_executed': 0}
+2025-12-17 18:43:18,495 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 786, 'handler_errors': 0, 'events_by_type': {'tick_received': 746, 'candle_completed': 39, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 786}
+2025-12-17 18:43:18,495 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:44:00,041 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:42:00 -> 2025-12-17 18:44:00). Filling with flat candles.
+2025-12-17 18:44:00,047 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:43:00, O:24855.75, H:24855.75, L:24855.75, C:24855.75, V:0)
+2025-12-17 18:44:00,050 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:43:00, O:24839.0, H:24855.75, L:24839.0, C:24855.75, V:40)
+2025-12-17 18:44:18,494 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:44:18,495 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:44:18,495 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:44:18,495 - slob.live.live_trading_engine - INFO - Runtime: 0:21:00.458134
+2025-12-17 18:44:18,496 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 784, 'tick_count': 784, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:44:14.284890'}
+2025-12-17 18:44:18,496 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 784, 'dequeued_count': 784, 'dropped_count': 0, 'evicted_count': 746, 'pending': 0}
+2025-12-17 18:44:18,496 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 784, 'candles_completed': 21, 'gaps_filled': 20, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:44:18,497 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 21, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 41, 'queries_executed': 0}
+2025-12-17 18:44:18,497 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 826, 'handler_errors': 0, 'events_by_type': {'tick_received': 784, 'candle_completed': 41, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 826}
+2025-12-17 18:44:18,497 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:45:00,085 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:43:00 -> 2025-12-17 18:45:00). Filling with flat candles.
+2025-12-17 18:45:00,087 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:44:00, O:24828.25, H:24828.25, L:24828.25, C:24828.25, V:0)
+2025-12-17 18:45:00,088 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:44:00, O:24855.75, H:24855.75, L:24828.25, C:24828.25, V:36)
+2025-12-17 18:45:18,495 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:45:18,497 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:45:18,497 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:45:18,497 - slob.live.live_trading_engine - INFO - Runtime: 0:22:00.460291
+2025-12-17 18:45:18,498 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 822, 'tick_count': 822, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:45:18.377179'}
+2025-12-17 18:45:18,498 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 822, 'dequeued_count': 822, 'dropped_count': 0, 'evicted_count': 784, 'pending': 0}
+2025-12-17 18:45:18,498 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 822, 'candles_completed': 22, 'gaps_filled': 21, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:45:18,499 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 22, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 43, 'queries_executed': 0}
+2025-12-17 18:45:18,499 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 866, 'handler_errors': 0, 'events_by_type': {'tick_received': 822, 'candle_completed': 43, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 866}
+2025-12-17 18:45:18,499 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:46:00,132 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:44:00 -> 2025-12-17 18:46:00). Filling with flat candles.
+2025-12-17 18:46:00,134 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:45:00, O:24823.25, H:24823.25, L:24823.25, C:24823.25, V:0)
+2025-12-17 18:46:00,138 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:45:00, O:24828.25, H:24831.75, L:24817.75, C:24823.25, V:38)
+2025-12-17 18:46:18,498 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:46:18,500 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:46:18,500 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:46:18,501 - slob.live.live_trading_engine - INFO - Runtime: 0:23:00.463511
+2025-12-17 18:46:18,501 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 858, 'tick_count': 858, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:46:14.458663'}
+2025-12-17 18:46:18,501 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 858, 'dequeued_count': 858, 'dropped_count': 0, 'evicted_count': 821, 'pending': 0}
+2025-12-17 18:46:18,501 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 858, 'candles_completed': 23, 'gaps_filled': 22, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:46:18,503 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 23, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 45, 'queries_executed': 0}
+2025-12-17 18:46:18,503 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 904, 'handler_errors': 0, 'events_by_type': {'tick_received': 858, 'candle_completed': 45, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 904}
+2025-12-17 18:46:18,503 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:47:02,542 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:45:00 -> 2025-12-17 18:47:00). Filling with flat candles.
+2025-12-17 18:47:02,547 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:46:00, O:24832.25, H:24832.25, L:24832.25, C:24832.25, V:0)
+2025-12-17 18:47:02,559 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:46:00, O:24823.25, H:24838.75, L:24823.25, C:24832.25, V:42)
+2025-12-17 18:47:18,526 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:47:18,527 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:47:18,528 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:47:18,528 - slob.live.live_trading_engine - INFO - Runtime: 0:24:00.491406
+2025-12-17 18:47:18,529 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 899, 'tick_count': 899, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:47:18.023260'}
+2025-12-17 18:47:18,530 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 899, 'dequeued_count': 899, 'dropped_count': 0, 'evicted_count': 858, 'pending': 0}
+2025-12-17 18:47:18,531 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 899, 'candles_completed': 24, 'gaps_filled': 23, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:47:18,533 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 24, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 47, 'queries_executed': 0}
+2025-12-17 18:47:18,533 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 947, 'handler_errors': 0, 'events_by_type': {'tick_received': 899, 'candle_completed': 47, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 947}
+2025-12-17 18:47:18,534 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:48:01,124 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:46:00 -> 2025-12-17 18:48:00). Filling with flat candles.
+2025-12-17 18:48:01,132 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:47:00, O:24816.75, H:24816.75, L:24816.75, C:24816.75, V:0)
+2025-12-17 18:48:01,139 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:47:00, O:24832.25, H:24839.25, L:24816.75, C:24816.75, V:48)
+2025-12-17 18:48:18,535 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:48:18,536 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:48:18,536 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:48:18,536 - slob.live.live_trading_engine - INFO - Runtime: 0:25:00.499234
+2025-12-17 18:48:18,537 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 933, 'tick_count': 933, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:48:16.781239'}
+2025-12-17 18:48:18,537 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 933, 'dequeued_count': 933, 'dropped_count': 0, 'evicted_count': 899, 'pending': 0}
+2025-12-17 18:48:18,537 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 933, 'candles_completed': 25, 'gaps_filled': 24, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:48:18,538 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 25, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 49, 'queries_executed': 0}
+2025-12-17 18:48:18,538 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 983, 'handler_errors': 0, 'events_by_type': {'tick_received': 933, 'candle_completed': 49, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 983}
+2025-12-17 18:48:18,538 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:49:01,183 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:47:00 -> 2025-12-17 18:49:00). Filling with flat candles.
+2025-12-17 18:49:01,183 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:48:00, O:24813.75, H:24813.75, L:24813.75, C:24813.75, V:0)
+2025-12-17 18:49:01,186 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:48:00, O:24816.75, H:24818.75, L:24811.5, C:24813.75, V:54)
+2025-12-17 18:49:18,539 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:49:18,540 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:49:18,540 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:49:18,540 - slob.live.live_trading_engine - INFO - Runtime: 0:26:00.503110
+2025-12-17 18:49:18,540 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 968, 'tick_count': 968, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:49:16.202447'}
+2025-12-17 18:49:18,541 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 968, 'dequeued_count': 968, 'dropped_count': 0, 'evicted_count': 933, 'pending': 0}
+2025-12-17 18:49:18,541 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 968, 'candles_completed': 26, 'gaps_filled': 25, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:49:18,542 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 26, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 51, 'queries_executed': 0}
+2025-12-17 18:49:18,542 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1020, 'handler_errors': 0, 'events_by_type': {'tick_received': 968, 'candle_completed': 51, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:49:18,542 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:50:00,055 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:48:00 -> 2025-12-17 18:50:00). Filling with flat candles.
+2025-12-17 18:50:00,057 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:49:00, O:24797.25, H:24797.25, L:24797.25, C:24797.25, V:0)
+2025-12-17 18:50:00,059 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:49:00, O:24813.75, H:24818.0, L:24789.75, C:24789.75, V:44)
+2025-12-17 18:50:18,543 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:50:18,544 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:50:18,544 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:50:18,544 - slob.live.live_trading_engine - INFO - Runtime: 0:27:00.507036
+2025-12-17 18:50:18,544 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1005, 'tick_count': 1005, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:50:16.893583'}
+2025-12-17 18:50:18,545 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1005, 'dequeued_count': 1005, 'dropped_count': 0, 'evicted_count': 968, 'pending': 0}
+2025-12-17 18:50:18,545 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1005, 'candles_completed': 27, 'gaps_filled': 26, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:50:18,546 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 27, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 53, 'queries_executed': 0}
+2025-12-17 18:50:18,546 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1059, 'handler_errors': 0, 'events_by_type': {'tick_received': 1005, 'candle_completed': 53, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:50:18,546 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:51:00,070 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:49:00 -> 2025-12-17 18:51:00). Filling with flat candles.
+2025-12-17 18:51:00,075 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:50:00, O:24794.25, H:24794.25, L:24794.25, C:24794.25, V:0)
+2025-12-17 18:51:00,079 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:50:00, O:24797.25, H:24803.75, L:24792.75, C:24796.25, V:37)
+2025-12-17 18:51:18,547 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:51:18,548 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:51:18,549 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:51:18,549 - slob.live.live_trading_engine - INFO - Runtime: 0:28:00.511987
+2025-12-17 18:51:18,549 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1048, 'tick_count': 1048, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:51:17.318586'}
+2025-12-17 18:51:18,550 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1048, 'dequeued_count': 1048, 'dropped_count': 0, 'evicted_count': 1000, 'pending': 0}
+2025-12-17 18:51:18,550 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1048, 'candles_completed': 28, 'gaps_filled': 27, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:51:18,550 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 28, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 55, 'queries_executed': 0}
+2025-12-17 18:51:18,551 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1104, 'handler_errors': 0, 'events_by_type': {'tick_received': 1048, 'candle_completed': 55, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:51:18,551 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:52:00,143 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:50:00 -> 2025-12-17 18:52:00). Filling with flat candles.
+2025-12-17 18:52:00,144 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:51:00, O:24810.0, H:24810.0, L:24810.0, C:24810.0, V:0)
+2025-12-17 18:52:00,145 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:51:00, O:24794.25, H:24811.5, L:24791.75, C:24810.0, V:46)
+2025-12-17 18:52:18,554 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:52:18,557 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:52:18,557 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:52:18,557 - slob.live.live_trading_engine - INFO - Runtime: 0:29:00.520389
+2025-12-17 18:52:18,558 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1084, 'tick_count': 1084, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:52:15.181707'}
+2025-12-17 18:52:18,558 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1084, 'dequeued_count': 1084, 'dropped_count': 0, 'evicted_count': 1036, 'pending': 0}
+2025-12-17 18:52:18,558 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1084, 'candles_completed': 29, 'gaps_filled': 28, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:52:18,559 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 29, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 57, 'queries_executed': 0}
+2025-12-17 18:52:18,559 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1142, 'handler_errors': 0, 'events_by_type': {'tick_received': 1084, 'candle_completed': 57, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:52:18,559 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:53:00,131 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:51:00 -> 2025-12-17 18:53:00). Filling with flat candles.
+2025-12-17 18:53:00,136 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:52:00, O:24811.75, H:24811.75, L:24811.75, C:24811.75, V:0)
+2025-12-17 18:53:00,142 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:52:00, O:24810.0, H:24820.0, L:24808.5, C:24811.75, V:54)
+2025-12-17 18:53:18,562 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:53:18,565 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:53:18,566 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:53:18,566 - slob.live.live_trading_engine - INFO - Runtime: 0:30:00.528839
+2025-12-17 18:53:18,566 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1123, 'tick_count': 1123, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:53:16.927585'}
+2025-12-17 18:53:18,566 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1123, 'dequeued_count': 1123, 'dropped_count': 0, 'evicted_count': 1078, 'pending': 0}
+2025-12-17 18:53:18,567 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1123, 'candles_completed': 30, 'gaps_filled': 29, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:53:18,567 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 30, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 59, 'queries_executed': 0}
+2025-12-17 18:53:18,568 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1183, 'handler_errors': 0, 'events_by_type': {'tick_received': 1123, 'candle_completed': 59, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:53:18,568 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:54:02,910 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:52:00 -> 2025-12-17 18:54:00). Filling with flat candles.
+2025-12-17 18:54:02,915 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:53:00, O:24790.75, H:24790.75, L:24790.75, C:24790.75, V:0)
+2025-12-17 18:54:02,919 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:53:00, O:24811.75, H:24813.5, L:24792.75, C:24792.75, V:49)
+2025-12-17 18:54:18,583 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:54:18,596 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:54:18,597 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:54:18,602 - slob.live.live_trading_engine - INFO - Runtime: 0:31:00.564689
+2025-12-17 18:54:18,606 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1156, 'tick_count': 1156, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:54:15.684685'}
+2025-12-17 18:54:18,607 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1156, 'dequeued_count': 1156, 'dropped_count': 0, 'evicted_count': 1115, 'pending': 0}
+2025-12-17 18:54:18,607 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1156, 'candles_completed': 31, 'gaps_filled': 30, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:54:18,608 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 31, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 61, 'queries_executed': 0}
+2025-12-17 18:54:18,608 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1218, 'handler_errors': 0, 'events_by_type': {'tick_received': 1156, 'candle_completed': 61, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:54:18,608 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:55:00,738 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:53:00 -> 2025-12-17 18:55:00). Filling with flat candles.
+2025-12-17 18:55:00,739 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:54:00, O:24774.5, H:24774.5, L:24774.5, C:24774.5, V:0)
+2025-12-17 18:55:00,741 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:54:00, O:24790.75, H:24790.75, L:24774.5, C:24774.5, V:36)
+2025-12-17 18:55:18,607 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:55:18,607 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:55:18,607 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:55:18,607 - slob.live.live_trading_engine - INFO - Runtime: 0:32:00.570409
+2025-12-17 18:55:18,608 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1192, 'tick_count': 1192, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:55:15.752789'}
+2025-12-17 18:55:18,608 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1192, 'dequeued_count': 1192, 'dropped_count': 0, 'evicted_count': 1152, 'pending': 0}
+2025-12-17 18:55:18,608 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1192, 'candles_completed': 32, 'gaps_filled': 31, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:55:18,608 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 32, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 63, 'queries_executed': 0}
+2025-12-17 18:55:18,608 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1256, 'handler_errors': 0, 'events_by_type': {'tick_received': 1192, 'candle_completed': 63, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:55:18,608 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:56:00,897 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:54:00 -> 2025-12-17 18:56:00). Filling with flat candles.
+2025-12-17 18:56:00,900 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:55:00, O:24768.25, H:24768.25, L:24768.25, C:24768.25, V:0)
+2025-12-17 18:56:00,904 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:55:00, O:24774.5, H:24779.0, L:24762.5, C:24768.25, V:37)
+2025-12-17 18:56:18,608 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:56:18,608 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:56:18,608 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:56:18,608 - slob.live.live_trading_engine - INFO - Runtime: 0:33:00.571239
+2025-12-17 18:56:18,608 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1227, 'tick_count': 1227, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:56:15.132317'}
+2025-12-17 18:56:18,609 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1227, 'dequeued_count': 1227, 'dropped_count': 0, 'evicted_count': 1186, 'pending': 0}
+2025-12-17 18:56:18,609 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1227, 'candles_completed': 33, 'gaps_filled': 32, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:56:18,610 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 33, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 65, 'queries_executed': 0}
+2025-12-17 18:56:18,610 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1293, 'handler_errors': 0, 'events_by_type': {'tick_received': 1227, 'candle_completed': 65, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:56:18,610 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:57:00,185 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:55:00 -> 2025-12-17 18:57:00). Filling with flat candles.
+2025-12-17 18:57:00,185 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:56:00, O:24788.5, H:24788.5, L:24788.5, C:24788.5, V:0)
+2025-12-17 18:57:00,186 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:56:00, O:24768.25, H:24788.5, L:24768.25, C:24788.5, V:38)
+2025-12-17 18:57:18,610 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:57:18,611 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:57:18,611 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:57:18,611 - slob.live.live_trading_engine - INFO - Runtime: 0:34:00.574222
+2025-12-17 18:57:18,611 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1263, 'tick_count': 1263, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:57:15.200031'}
+2025-12-17 18:57:18,612 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1263, 'dequeued_count': 1263, 'dropped_count': 0, 'evicted_count': 1221, 'pending': 0}
+2025-12-17 18:57:18,612 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1263, 'candles_completed': 34, 'gaps_filled': 33, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:57:18,612 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 34, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 67, 'queries_executed': 0}
+2025-12-17 18:57:18,612 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1331, 'handler_errors': 0, 'events_by_type': {'tick_received': 1263, 'candle_completed': 67, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:57:18,613 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:58:00,251 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:56:00 -> 2025-12-17 18:58:00). Filling with flat candles.
+2025-12-17 18:58:00,251 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:57:00, O:24778.75, H:24778.75, L:24778.75, C:24778.75, V:0)
+2025-12-17 18:58:00,252 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:57:00, O:24788.5, H:24788.5, L:24769.5, C:24778.75, V:39)
+2025-12-17 18:58:18,611 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:58:18,612 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:58:18,612 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:58:18,612 - slob.live.live_trading_engine - INFO - Runtime: 0:35:00.575080
+2025-12-17 18:58:18,612 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1299, 'tick_count': 1299, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:58:16.268330'}
+2025-12-17 18:58:18,613 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1299, 'dequeued_count': 1299, 'dropped_count': 0, 'evicted_count': 1257, 'pending': 0}
+2025-12-17 18:58:18,614 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1299, 'candles_completed': 35, 'gaps_filled': 34, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:58:18,614 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 35, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 69, 'queries_executed': 0}
+2025-12-17 18:58:18,614 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1369, 'handler_errors': 0, 'events_by_type': {'tick_received': 1299, 'candle_completed': 69, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:58:18,615 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:59:05,017 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:57:00 -> 2025-12-17 18:59:00). Filling with flat candles.
+2025-12-17 18:59:05,019 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:58:00, O:24776.75, H:24776.75, L:24776.75, C:24776.75, V:0)
+2025-12-17 18:59:05,020 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:58:00, O:24778.75, H:24779.0, L:24769.0, C:24776.75, V:58)
+2025-12-17 18:59:18,613 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:59:18,620 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 18:59:18,621 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 18:59:18,621 - slob.live.live_trading_engine - INFO - Runtime: 0:36:00.583983
+2025-12-17 18:59:18,622 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1333, 'tick_count': 1333, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T18:59:14.938661'}
+2025-12-17 18:59:18,622 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1333, 'dequeued_count': 1333, 'dropped_count': 0, 'evicted_count': 1293, 'pending': 0}
+2025-12-17 18:59:18,622 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1333, 'candles_completed': 36, 'gaps_filled': 35, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 18:59:18,624 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 36, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 71, 'queries_executed': 0}
+2025-12-17 18:59:18,624 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1405, 'handler_errors': 0, 'events_by_type': {'tick_received': 1333, 'candle_completed': 71, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 18:59:18,625 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:00:00,834 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:58:00 -> 2025-12-17 19:00:00). Filling with flat candles.
+2025-12-17 19:00:00,836 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:59:00, O:24794.0, H:24794.0, L:24794.0, C:24794.0, V:0)
+2025-12-17 19:00:00,838 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 18:59:00, O:24776.75, H:24799.5, L:24776.75, C:24799.5, V:40)
+2025-12-17 19:00:18,625 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:00:18,628 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:00:18,628 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:00:18,629 - slob.live.live_trading_engine - INFO - Runtime: 0:37:00.591663
+2025-12-17 19:00:18,629 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1373, 'tick_count': 1373, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:00:17.287483'}
+2025-12-17 19:00:18,629 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1373, 'dequeued_count': 1373, 'dropped_count': 0, 'evicted_count': 1330, 'pending': 0}
+2025-12-17 19:00:18,630 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1373, 'candles_completed': 37, 'gaps_filled': 36, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:00:18,630 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 37, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 73, 'queries_executed': 0}
+2025-12-17 19:00:18,630 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1447, 'handler_errors': 0, 'events_by_type': {'tick_received': 1373, 'candle_completed': 73, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:00:18,631 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:01:05,727 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 18:59:00 -> 2025-12-17 19:01:00). Filling with flat candles.
+2025-12-17 19:01:05,730 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:00:00, O:24792.75, H:24792.75, L:24792.75, C:24792.75, V:0)
+2025-12-17 19:01:05,732 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:00:00, O:24794.0, H:24797.0, L:24782.75, C:24792.75, V:38)
+2025-12-17 19:01:18,630 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:01:18,633 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:01:18,633 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:01:18,633 - slob.live.live_trading_engine - INFO - Runtime: 0:38:00.596379
+2025-12-17 19:01:18,634 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1417, 'tick_count': 1417, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:01:15.956357'}
+2025-12-17 19:01:18,634 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1417, 'dequeued_count': 1417, 'dropped_count': 0, 'evicted_count': 1368, 'pending': 0}
+2025-12-17 19:01:18,634 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1417, 'candles_completed': 38, 'gaps_filled': 37, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:01:18,635 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 38, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 75, 'queries_executed': 0}
+2025-12-17 19:01:18,635 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1493, 'handler_errors': 0, 'events_by_type': {'tick_received': 1417, 'candle_completed': 75, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:01:18,635 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:02:38,110 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:00:00 -> 2025-12-17 19:02:00). Filling with flat candles.
+2025-12-17 19:02:38,111 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:01:00, O:24796.75, H:24796.75, L:24796.75, C:24796.75, V:0)
+2025-12-17 19:02:38,112 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:01:00, O:24792.75, H:24797.5, L:24786.0, C:24787.25, V:37)
+2025-12-17 19:03:00,020 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:01:00 -> 2025-12-17 19:03:00). Filling with flat candles.
+2025-12-17 19:03:00,021 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:02:00, O:24798.0, H:24798.0, L:24798.0, C:24798.0, V:0)
+2025-12-17 19:03:00,022 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:02:00, O:24796.75, H:24799.0, L:24796.25, C:24798.0, V:14)
+2025-12-17 19:03:07,006 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:03:07,007 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:03:07,007 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:03:07,008 - slob.live.live_trading_engine - INFO - Runtime: 0:39:48.970492
+2025-12-17 19:03:07,008 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1457, 'tick_count': 1457, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:03:06.030845'}
+2025-12-17 19:03:07,008 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1457, 'dequeued_count': 1457, 'dropped_count': 0, 'evicted_count': 1436, 'pending': 0}
+2025-12-17 19:03:07,008 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1457, 'candles_completed': 40, 'gaps_filled': 39, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:03:07,009 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 40, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 79, 'queries_executed': 0}
+2025-12-17 19:03:07,009 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1537, 'handler_errors': 0, 'events_by_type': {'tick_received': 1457, 'candle_completed': 79, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:03:07,009 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:04:00,138 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:02:00 -> 2025-12-17 19:04:00). Filling with flat candles.
+2025-12-17 19:04:00,140 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:03:00, O:24791.5, H:24791.5, L:24791.5, C:24791.5, V:0)
+2025-12-17 19:04:00,142 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:03:00, O:24798.0, H:24812.0, L:24790.25, C:24791.5, V:43)
+2025-12-17 19:04:07,007 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:04:07,007 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:04:07,007 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:04:07,008 - slob.live.live_trading_engine - INFO - Runtime: 0:40:48.970478
+2025-12-17 19:04:07,008 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1489, 'tick_count': 1489, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:04:04.131399'}
+2025-12-17 19:04:07,008 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1489, 'dequeued_count': 1489, 'dropped_count': 0, 'evicted_count': 1452, 'pending': 0}
+2025-12-17 19:04:07,009 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1489, 'candles_completed': 41, 'gaps_filled': 40, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:04:07,009 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 41, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 81, 'queries_executed': 0}
+2025-12-17 19:04:07,009 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1571, 'handler_errors': 0, 'events_by_type': {'tick_received': 1489, 'candle_completed': 81, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:04:07,009 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:05:03,913 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:03:00 -> 2025-12-17 19:05:00). Filling with flat candles.
+2025-12-17 19:05:03,915 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:04:00, O:24788.25, H:24788.25, L:24788.25, C:24788.25, V:0)
+2025-12-17 19:05:03,916 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:04:00, O:24791.5, H:24791.5, L:24779.0, C:24788.25, V:41)
+2025-12-17 19:05:07,008 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:05:07,009 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:05:07,009 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:05:07,009 - slob.live.live_trading_engine - INFO - Runtime: 0:41:48.972345
+2025-12-17 19:05:07,010 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1527, 'tick_count': 1527, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:05:03.909597'}
+2025-12-17 19:05:07,010 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1527, 'dequeued_count': 1527, 'dropped_count': 0, 'evicted_count': 1486, 'pending': 0}
+2025-12-17 19:05:07,010 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1527, 'candles_completed': 42, 'gaps_filled': 41, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:05:07,011 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 42, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 83, 'queries_executed': 0}
+2025-12-17 19:05:07,011 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1611, 'handler_errors': 0, 'events_by_type': {'tick_received': 1527, 'candle_completed': 83, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:05:07,011 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:06:01,189 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:04:00 -> 2025-12-17 19:06:00). Filling with flat candles.
+2025-12-17 19:06:01,503 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:05:00, O:24809.75, H:24809.75, L:24809.75, C:24809.75, V:0)
+2025-12-17 19:06:01,505 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:05:00, O:24788.25, H:24810.5, L:24788.25, C:24809.75, V:43)
+2025-12-17 19:06:07,009 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:06:07,010 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:06:07,010 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:06:07,010 - slob.live.live_trading_engine - INFO - Runtime: 0:42:48.973224
+2025-12-17 19:06:07,011 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1571, 'tick_count': 1571, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:06:05.826539'}
+2025-12-17 19:06:07,011 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1571, 'dequeued_count': 1571, 'dropped_count': 0, 'evicted_count': 1526, 'pending': 0}
+2025-12-17 19:06:07,011 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1571, 'candles_completed': 43, 'gaps_filled': 42, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:06:07,011 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 43, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 85, 'queries_executed': 0}
+2025-12-17 19:06:07,012 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1657, 'handler_errors': 0, 'events_by_type': {'tick_received': 1571, 'candle_completed': 85, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:06:07,012 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:07:01,870 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:05:00 -> 2025-12-17 19:07:00). Filling with flat candles.
+2025-12-17 19:07:01,872 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:06:00, O:24793.75, H:24793.75, L:24793.75, C:24793.75, V:0)
+2025-12-17 19:07:01,873 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:06:00, O:24809.75, H:24811.5, L:24791.0, C:24793.25, V:35)
+2025-12-17 19:07:07,009 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:07:07,010 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:07:07,010 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:07:07,010 - slob.live.live_trading_engine - INFO - Runtime: 0:43:48.972967
+2025-12-17 19:07:07,010 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1607, 'tick_count': 1607, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:07:06.874516'}
+2025-12-17 19:07:07,011 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1607, 'dequeued_count': 1607, 'dropped_count': 0, 'evicted_count': 1567, 'pending': 0}
+2025-12-17 19:07:07,011 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1607, 'candles_completed': 44, 'gaps_filled': 43, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:07:07,011 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 44, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 87, 'queries_executed': 0}
+2025-12-17 19:07:07,011 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1695, 'handler_errors': 0, 'events_by_type': {'tick_received': 1607, 'candle_completed': 87, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:07:07,011 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:08:02,765 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:06:00 -> 2025-12-17 19:08:00). Filling with flat candles.
+2025-12-17 19:08:02,768 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:07:00, O:24799.5, H:24799.5, L:24799.5, C:24799.5, V:0)
+2025-12-17 19:08:02,770 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:07:00, O:24793.75, H:24812.5, L:24793.75, C:24802.0, V:73)
+2025-12-17 19:08:07,009 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:08:07,010 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:08:07,010 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:08:07,010 - slob.live.live_trading_engine - INFO - Runtime: 0:44:48.973347
+2025-12-17 19:08:07,011 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1645, 'tick_count': 1645, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:08:03.788559'}
+2025-12-17 19:08:07,011 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1645, 'dequeued_count': 1645, 'dropped_count': 0, 'evicted_count': 1600, 'pending': 0}
+2025-12-17 19:08:07,011 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1645, 'candles_completed': 45, 'gaps_filled': 44, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:08:07,012 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 45, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 89, 'queries_executed': 0}
+2025-12-17 19:08:07,012 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1735, 'handler_errors': 0, 'events_by_type': {'tick_received': 1645, 'candle_completed': 89, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:08:07,013 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:08:56,774 - ib_insync.wrapper - INFO - Warning 2103, reqId -1: Market data farm connection is broken:usfuture
+2025-12-17 19:08:56,776 - slob.live.ib_ws_fetcher - ERROR - IB error [2103]: Market data farm connection is broken:usfuture (reqId=-1)
+2025-12-17 19:08:57,766 - ib_insync.wrapper - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-17 19:08:57,767 - slob.live.ib_ws_fetcher - ERROR - IB error [2104]: Market data farm connection is OK:usfuture (reqId=-1)
+2025-12-17 19:09:01,728 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:07:00 -> 2025-12-17 19:09:00). Filling with flat candles.
+2025-12-17 19:09:01,728 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:08:00, O:24816.75, H:24816.75, L:24816.75, C:24816.75, V:0)
+2025-12-17 19:09:01,730 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:08:00, O:24799.5, H:24815.25, L:24791.75, C:24815.25, V:75)
+2025-12-17 19:09:07,011 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:09:07,013 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:09:07,014 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:09:07,014 - slob.live.live_trading_engine - INFO - Runtime: 0:45:48.976823
+2025-12-17 19:09:07,014 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1693, 'tick_count': 1693, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:09:06.598038'}
+2025-12-17 19:09:07,014 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1693, 'dequeued_count': 1693, 'dropped_count': 0, 'evicted_count': 1644, 'pending': 0}
+2025-12-17 19:09:07,015 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1693, 'candles_completed': 46, 'gaps_filled': 45, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:09:07,016 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 46, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 91, 'queries_executed': 0}
+2025-12-17 19:09:07,016 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1785, 'handler_errors': 0, 'events_by_type': {'tick_received': 1693, 'candle_completed': 91, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:09:07,017 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:09:09,841 - ib_insync.wrapper - INFO - Warning 2103, reqId -1: Market data farm connection is broken:usfarm
+2025-12-17 19:09:09,842 - slob.live.ib_ws_fetcher - ERROR - IB error [2103]: Market data farm connection is broken:usfarm (reqId=-1)
+2025-12-17 19:09:15,469 - ib_insync.wrapper - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-17 19:09:15,471 - slob.live.ib_ws_fetcher - ERROR - IB error [2104]: Market data farm connection is OK:usfarm (reqId=-1)
+2025-12-17 19:10:01,464 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:08:00 -> 2025-12-17 19:10:00). Filling with flat candles.
+2025-12-17 19:10:01,465 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:09:00, O:24811.75, H:24811.75, L:24811.75, C:24811.75, V:0)
+2025-12-17 19:10:01,466 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:09:00, O:24816.75, H:24827.5, L:24813.75, C:24814.75, V:49)
+2025-12-17 19:10:07,017 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:10:07,017 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:10:07,018 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:10:07,018 - slob.live.live_trading_engine - INFO - Runtime: 0:46:48.980765
+2025-12-17 19:10:07,018 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1735, 'tick_count': 1735, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:10:06.530658'}
+2025-12-17 19:10:07,018 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1735, 'dequeued_count': 1735, 'dropped_count': 0, 'evicted_count': 1684, 'pending': 0}
+2025-12-17 19:10:07,019 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1735, 'candles_completed': 47, 'gaps_filled': 46, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:10:07,019 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 47, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 93, 'queries_executed': 0}
+2025-12-17 19:10:07,020 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1829, 'handler_errors': 0, 'events_by_type': {'tick_received': 1735, 'candle_completed': 93, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:10:07,020 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:10:25,481 - ib_insync.wrapper - INFO - Warning 2103, reqId -1: Market data farm connection is broken:usfarm
+2025-12-17 19:10:25,482 - slob.live.ib_ws_fetcher - ERROR - IB error [2103]: Market data farm connection is broken:usfarm (reqId=-1)
+2025-12-17 19:10:26,205 - ib_insync.wrapper - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-17 19:10:26,205 - slob.live.ib_ws_fetcher - ERROR - IB error [2104]: Market data farm connection is OK:usfarm (reqId=-1)
+2025-12-17 19:10:59,127 - ib_insync.wrapper - INFO - Warning 2103, reqId -1: Market data farm connection is broken:usfuture
+2025-12-17 19:10:59,129 - slob.live.ib_ws_fetcher - ERROR - IB error [2103]: Market data farm connection is broken:usfuture (reqId=-1)
+2025-12-17 19:10:59,965 - ib_insync.wrapper - INFO - Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-17 19:10:59,966 - slob.live.ib_ws_fetcher - ERROR - IB error [2104]: Market data farm connection is OK:usfuture (reqId=-1)
+2025-12-17 19:11:00,284 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:09:00 -> 2025-12-17 19:11:00). Filling with flat candles.
+2025-12-17 19:11:00,284 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:10:00, O:24817.0, H:24817.0, L:24817.0, C:24817.0, V:0)
+2025-12-17 19:11:00,286 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:10:00, O:24811.75, H:24817.0, L:24811.75, C:24817.0, V:10)
+2025-12-17 19:11:04,800 - ib_insync.wrapper - INFO - Warning 2157, reqId -1: Sec-def data farm connection is broken:secdefnj
+2025-12-17 19:11:04,800 - slob.live.ib_ws_fetcher - ERROR - IB error [2157]: Sec-def data farm connection is broken:secdefnj (reqId=-1)
+2025-12-17 19:11:05,388 - ib_insync.wrapper - INFO - Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-17 19:11:05,390 - slob.live.ib_ws_fetcher - ERROR - IB error [2158]: Sec-def data farm connection is OK:secdefnj (reqId=-1)
+2025-12-17 19:11:07,020 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:11:07,020 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:11:07,020 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:11:07,021 - slob.live.live_trading_engine - INFO - Runtime: 0:47:48.983575
+2025-12-17 19:11:07,021 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1745, 'tick_count': 1745, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:11:06.414720'}
+2025-12-17 19:11:07,021 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1745, 'dequeued_count': 1745, 'dropped_count': 0, 'evicted_count': 1732, 'pending': 0}
+2025-12-17 19:11:07,021 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1745, 'candles_completed': 48, 'gaps_filled': 47, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:11:07,022 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 48, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 95, 'queries_executed': 0}
+2025-12-17 19:11:07,022 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1841, 'handler_errors': 0, 'events_by_type': {'tick_received': 1745, 'candle_completed': 95, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:11:07,023 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:12:01,099 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:10:00 -> 2025-12-17 19:12:00). Filling with flat candles.
+2025-12-17 19:12:01,105 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:11:00, O:24830.25, H:24830.25, L:24830.25, C:24830.25, V:0)
+2025-12-17 19:12:01,108 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:11:00, O:24817.0, H:24837.0, L:24817.0, C:24830.25, V:47)
+2025-12-17 19:12:07,022 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:12:07,022 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:12:07,023 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:12:07,023 - slob.live.live_trading_engine - INFO - Runtime: 0:48:48.985767
+2025-12-17 19:12:07,023 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1783, 'tick_count': 1783, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:12:06.197877'}
+2025-12-17 19:12:07,024 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1783, 'dequeued_count': 1783, 'dropped_count': 0, 'evicted_count': 1742, 'pending': 0}
+2025-12-17 19:12:07,024 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1783, 'candles_completed': 49, 'gaps_filled': 48, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:12:07,026 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 49, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 97, 'queries_executed': 0}
+2025-12-17 19:12:07,026 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1881, 'handler_errors': 0, 'events_by_type': {'tick_received': 1783, 'candle_completed': 97, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:12:07,026 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:13:03,632 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:11:00 -> 2025-12-17 19:13:00). Filling with flat candles.
+2025-12-17 19:13:03,633 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:12:00, O:24824.0, H:24824.0, L:24824.0, C:24824.0, V:0)
+2025-12-17 19:13:03,637 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:12:00, O:24830.25, H:24832.0, L:24824.0, C:24824.0, V:46)
+2025-12-17 19:13:07,024 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:13:07,025 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:13:07,025 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:13:07,025 - slob.live.live_trading_engine - INFO - Runtime: 0:49:48.988121
+2025-12-17 19:13:07,025 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1822, 'tick_count': 1822, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:13:04.077421'}
+2025-12-17 19:13:07,026 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1822, 'dequeued_count': 1822, 'dropped_count': 0, 'evicted_count': 1780, 'pending': 0}
+2025-12-17 19:13:07,026 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1822, 'candles_completed': 50, 'gaps_filled': 49, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:13:07,027 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 50, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 99, 'queries_executed': 0}
+2025-12-17 19:13:07,027 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1922, 'handler_errors': 0, 'events_by_type': {'tick_received': 1822, 'candle_completed': 99, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:13:07,027 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:14:03,086 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:12:00 -> 2025-12-17 19:14:00). Filling with flat candles.
+2025-12-17 19:14:03,090 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:13:00, O:24845.5, H:24845.5, L:24845.5, C:24845.5, V:0)
+2025-12-17 19:14:03,093 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:13:00, O:24824.0, H:24849.75, L:24824.0, C:24845.5, V:42)
+2025-12-17 19:14:07,027 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:14:07,029 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:14:07,031 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:14:07,033 - slob.live.live_trading_engine - INFO - Runtime: 0:50:48.995247
+2025-12-17 19:14:07,035 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1859, 'tick_count': 1859, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:14:04.113501'}
+2025-12-17 19:14:07,037 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1859, 'dequeued_count': 1859, 'dropped_count': 0, 'evicted_count': 1821, 'pending': 0}
+2025-12-17 19:14:07,039 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1859, 'candles_completed': 51, 'gaps_filled': 50, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:14:07,043 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 51, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 101, 'queries_executed': 0}
+2025-12-17 19:14:07,045 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 1961, 'handler_errors': 0, 'events_by_type': {'tick_received': 1859, 'candle_completed': 101, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:14:07,046 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:15:00,091 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:13:00 -> 2025-12-17 19:15:00). Filling with flat candles.
+2025-12-17 19:15:00,093 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:14:00, O:24831.75, H:24831.75, L:24831.75, C:24831.75, V:0)
+2025-12-17 19:15:00,095 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:14:00, O:24845.5, H:24849.0, L:24829.5, C:24831.75, V:45)
+2025-12-17 19:15:07,046 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:15:07,047 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:15:07,047 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:15:07,047 - slob.live.live_trading_engine - INFO - Runtime: 0:51:49.010129
+2025-12-17 19:15:07,047 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1901, 'tick_count': 1901, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:15:05.697770'}
+2025-12-17 19:15:07,048 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1901, 'dequeued_count': 1901, 'dropped_count': 0, 'evicted_count': 1858, 'pending': 0}
+2025-12-17 19:15:07,048 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1901, 'candles_completed': 52, 'gaps_filled': 51, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:15:07,049 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 52, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 103, 'queries_executed': 0}
+2025-12-17 19:15:07,049 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2005, 'handler_errors': 0, 'events_by_type': {'tick_received': 1901, 'candle_completed': 103, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:15:07,049 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:16:00,028 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:14:00 -> 2025-12-17 19:16:00). Filling with flat candles.
+2025-12-17 19:16:00,029 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:15:00, O:24832.0, H:24832.0, L:24832.0, C:24832.0, V:0)
+2025-12-17 19:16:00,031 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:15:00, O:24831.75, H:24832.0, L:24824.75, C:24832.0, V:41)
+2025-12-17 19:16:07,047 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:16:07,047 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:16:07,048 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:16:07,048 - slob.live.live_trading_engine - INFO - Runtime: 0:52:49.010843
+2025-12-17 19:16:07,048 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1939, 'tick_count': 1939, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:16:05.084481'}
+2025-12-17 19:16:07,048 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1939, 'dequeued_count': 1939, 'dropped_count': 0, 'evicted_count': 1898, 'pending': 0}
+2025-12-17 19:16:07,049 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1939, 'candles_completed': 53, 'gaps_filled': 52, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:16:07,049 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 53, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 105, 'queries_executed': 0}
+2025-12-17 19:16:07,050 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2045, 'handler_errors': 0, 'events_by_type': {'tick_received': 1939, 'candle_completed': 105, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:16:07,050 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:17:02,040 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:15:00 -> 2025-12-17 19:17:00). Filling with flat candles.
+2025-12-17 19:17:02,041 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:16:00, O:24805.0, H:24805.0, L:24805.0, C:24805.0, V:0)
+2025-12-17 19:17:02,044 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:16:00, O:24832.0, H:24832.0, L:24805.0, C:24805.0, V:41)
+2025-12-17 19:17:07,050 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:17:07,050 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:17:07,050 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:17:07,051 - slob.live.live_trading_engine - INFO - Runtime: 0:53:49.013576
+2025-12-17 19:17:07,051 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 1979, 'tick_count': 1979, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:17:06.954582'}
+2025-12-17 19:17:07,051 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 1979, 'dequeued_count': 1979, 'dropped_count': 0, 'evicted_count': 1938, 'pending': 0}
+2025-12-17 19:17:07,051 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 1979, 'candles_completed': 54, 'gaps_filled': 53, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:17:07,052 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 54, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 107, 'queries_executed': 0}
+2025-12-17 19:17:07,052 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2087, 'handler_errors': 0, 'events_by_type': {'tick_received': 1979, 'candle_completed': 107, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:17:07,052 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:21:25,091 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 300s (2025-12-17 19:16:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:25,092 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:17:00, O:24805.0, H:24809.25, L:24801.5, C:24809.0, V:41)
+2025-12-17 19:21:25,094 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:25,094 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:25,094 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:25,095 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:25,095 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:25,715 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:27,160 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:27,230 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:21:27,230 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:21:27,230 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:21:27,231 - slob.live.live_trading_engine - INFO - Runtime: 0:58:09.193616
+2025-12-17 19:21:27,231 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 2017, 'tick_count': 2017, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:21:27.159350'}
+2025-12-17 19:21:27,231 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2017, 'dequeued_count': 2017, 'dropped_count': 0, 'evicted_count': 2009, 'pending': 0}
+2025-12-17 19:21:27,231 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 2017, 'candles_completed': 55, 'gaps_filled': 53, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:21:27,232 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 55, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 108, 'queries_executed': 0}
+2025-12-17 19:21:27,232 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2126, 'handler_errors': 0, 'events_by_type': {'tick_received': 2017, 'candle_completed': 108, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:21:27,233 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:21:27,719 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:29,103 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:30,128 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:34,133 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:34,137 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:34,735 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:39,141 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:39,141 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:39,749 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:43,133 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:43,760 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:44,186 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:46,115 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:46,766 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:49,022 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:54,092 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:59,110 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:21:59,111 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 240s (2025-12-17 19:17:00 -> 2025-12-17 19:21:00). Not filling.
+2025-12-17 19:22:00,132 - slob.live.candle_aggregator - WARNING - Large gap detected for NQ: 300s (2025-12-17 19:17:00 -> 2025-12-17 19:22:00). Not filling.
+2025-12-17 19:22:00,132 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:21:00, O:24809.0, H:24809.0, L:24798.0, C:24800.75, V:27)
+2025-12-17 19:22:27,233 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:22:27,235 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:22:27,235 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:22:27,236 - slob.live.live_trading_engine - INFO - Runtime: 0:59:09.199198
+2025-12-17 19:22:27,238 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 2051, 'tick_count': 2051, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:22:24.167062'}
+2025-12-17 19:22:27,240 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2051, 'dequeued_count': 2051, 'dropped_count': 0, 'evicted_count': 2009, 'pending': 0}
+2025-12-17 19:22:27,243 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 2051, 'candles_completed': 56, 'gaps_filled': 53, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:22:27,246 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 56, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 109, 'queries_executed': 0}
+2025-12-17 19:22:27,249 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2161, 'handler_errors': 0, 'events_by_type': {'tick_received': 2051, 'candle_completed': 109, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:22:27,251 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:23:02,967 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:21:00 -> 2025-12-17 19:23:00). Filling with flat candles.
+2025-12-17 19:23:02,970 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:22:00, O:24796.5, H:24796.5, L:24796.5, C:24796.5, V:0)
+2025-12-17 19:23:02,972 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:22:00, O:24800.75, H:24806.75, L:24795.0, C:24796.5, V:59)
+2025-12-17 19:23:27,250 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:23:27,250 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:23:27,251 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:23:27,251 - slob.live.live_trading_engine - INFO - Runtime: 1:00:09.213988
+2025-12-17 19:23:27,251 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 2089, 'tick_count': 2089, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:23:24.064969'}
+2025-12-17 19:23:27,252 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2089, 'dequeued_count': 2089, 'dropped_count': 0, 'evicted_count': 2051, 'pending': 0}
+2025-12-17 19:23:27,252 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 2089, 'candles_completed': 57, 'gaps_filled': 54, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:23:27,253 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 57, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 111, 'queries_executed': 0}
+2025-12-17 19:23:27,253 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2201, 'handler_errors': 0, 'events_by_type': {'tick_received': 2089, 'candle_completed': 111, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:23:27,253 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:24:00,982 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:22:00 -> 2025-12-17 19:24:00). Filling with flat candles.
+2025-12-17 19:24:00,982 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:23:00, O:24799.5, H:24799.5, L:24799.5, C:24799.5, V:0)
+2025-12-17 19:24:00,984 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:23:00, O:24796.5, H:24805.0, L:24794.5, C:24799.5, V:44)
+2025-12-17 19:24:27,251 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:24:27,252 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:24:27,252 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:24:27,252 - slob.live.live_trading_engine - INFO - Runtime: 1:01:09.215211
+2025-12-17 19:24:27,253 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 2124, 'tick_count': 2124, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:24:26.248933'}
+2025-12-17 19:24:27,253 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2124, 'dequeued_count': 2124, 'dropped_count': 0, 'evicted_count': 2089, 'pending': 0}
+2025-12-17 19:24:27,253 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 2124, 'candles_completed': 58, 'gaps_filled': 55, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:24:27,256 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 58, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 113, 'queries_executed': 0}
+2025-12-17 19:24:27,256 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2238, 'handler_errors': 0, 'events_by_type': {'tick_received': 2124, 'candle_completed': 113, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:24:27,257 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:25:03,019 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:23:00 -> 2025-12-17 19:25:00). Filling with flat candles.
+2025-12-17 19:25:03,019 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:24:00, O:24782.0, H:24782.0, L:24782.0, C:24782.0, V:0)
+2025-12-17 19:25:03,021 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:24:00, O:24799.5, H:24799.5, L:24778.0, C:24782.0, V:35)
+2025-12-17 19:25:27,255 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:25:27,256 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:25:27,256 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:25:27,257 - slob.live.live_trading_engine - INFO - Runtime: 1:02:09.219591
+2025-12-17 19:25:27,257 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 2160, 'tick_count': 2160, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:25:24.053740'}
+2025-12-17 19:25:27,257 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2160, 'dequeued_count': 2160, 'dropped_count': 0, 'evicted_count': 2121, 'pending': 0}
+2025-12-17 19:25:27,258 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 2160, 'candles_completed': 59, 'gaps_filled': 56, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:25:27,259 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 59, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 115, 'queries_executed': 0}
+2025-12-17 19:25:27,259 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2276, 'handler_errors': 0, 'events_by_type': {'tick_received': 2160, 'candle_completed': 115, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:25:27,260 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:26:01,950 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:24:00 -> 2025-12-17 19:26:00). Filling with flat candles.
+2025-12-17 19:26:01,950 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:25:00, O:24777.0, H:24777.0, L:24777.0, C:24777.0, V:0)
+2025-12-17 19:26:01,953 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:25:00, O:24782.0, H:24782.5, L:24772.25, C:24772.25, V:41)
+2025-12-17 19:26:27,259 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:26:27,260 - slob.live.live_trading_engine - INFO - SYSTEM HEALTH CHECK
+2025-12-17 19:26:27,260 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:26:27,260 - slob.live.live_trading_engine - INFO - Runtime: 1:03:09.223156
+2025-12-17 19:26:27,260 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'CONNECTED', 'reconnect_attempts': 0, 'message_count': 2195, 'tick_count': 2195, 'subscribed_symbols': ['NQ'], 'last_message_time': '2025-12-17T19:26:18.042276'}
+2025-12-17 19:26:27,261 - slob.live.live_trading_engine - INFO - TickBuffer: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2195, 'dequeued_count': 2195, 'dropped_count': 0, 'evicted_count': 2160, 'pending': 0}
+2025-12-17 19:26:27,261 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 2195, 'candles_completed': 60, 'gaps_filled': 57, 'active_candles': 1, 'symbols': ['NQ']}
+2025-12-17 19:26:27,262 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.0, 'total_candles': 60, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 117, 'queries_executed': 0}
+2025-12-17 19:26:27,262 - slob.live.live_trading_engine - INFO - EventBus: {'total_events_emitted': 2313, 'handler_errors': 0, 'events_by_type': {'tick_received': 2195, 'candle_completed': 117, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:26:27,262 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:27:00,995 - slob.live.candle_aggregator - WARNING - Gap detected for NQ: 1 minutes (2025-12-17 19:25:00 -> 2025-12-17 19:27:00). Filling with flat candles.
+2025-12-17 19:27:00,995 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:26:00, O:24775.0, H:24775.0, L:24775.0, C:24775.0, V:0)
+2025-12-17 19:27:00,997 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:26:00, O:24777.0, H:24778.25, L:24768.75, C:24775.5, V:43)
+2025-12-17 19:27:26,872 - slob.live.live_trading_engine - INFO - Health monitor stopped
+2025-12-17 19:27:26,882 - slob.live.live_trading_engine - INFO - Tick processor stopped
+2025-12-17 19:27:26,888 - slob.live.live_trading_engine - INFO - Run loop cancelled
+2025-12-17 19:27:26,896 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:27:26,897 - slob.live.live_trading_engine - INFO - SHUTTING DOWN LIVE TRADING ENGINE
+2025-12-17 19:27:26,899 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:27:26,900 - slob.live.live_trading_engine - INFO - Cancelling background tasks...
+2025-12-17 19:27:26,915 - slob.live.live_trading_engine - INFO - Force completing active candles...
+2025-12-17 19:27:26,917 - slob.live.candle_aggregator - INFO - Force completing 1 active candles
+2025-12-17 19:27:26,918 - slob.live.live_trading_engine - INFO - Candle completed: Candle(symbol=NQ, timestamp=2025-12-17 19:27:00, O:24775.0, H:24778.0, L:24771.25, C:24776.75, V:15)
+2025-12-17 19:27:26,923 - slob.live.live_trading_engine - INFO - Shutting down TickBuffer...
+2025-12-17 19:27:26,928 - slob.live.tick_buffer - INFO - Shutting down tick buffer
+2025-12-17 19:27:26,934 - slob.live.tick_buffer - INFO - ✅ Tick buffer shutdown complete. Final stats: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2240, 'dequeued_count': 2240, 'dropped_count': 0, 'evicted_count': 2195, 'pending': 0}
+2025-12-17 19:27:26,953 - slob.live.live_trading_engine - INFO - Disconnecting WebSocket...
+2025-12-17 19:27:26,955 - slob.live.ib_ws_fetcher - INFO - Disconnecting from IB...
+2025-12-17 19:27:27,008 - ib_insync.ib - INFO - Disconnecting from 127.0.0.1:4002, 250 B sent in 12 messages, 103 kB received in 3481 messages, session time 3.85 ks.
+2025-12-17 19:27:27,011 - ib_insync.client - INFO - Disconnecting
+2025-12-17 19:27:27,036 - slob.live.ib_ws_fetcher - INFO - ✅ Disconnected from IB
+2025-12-17 19:27:27,039 - slob.live.live_trading_engine - INFO - Shutting down EventBus...
+2025-12-17 19:27:27,046 - slob.live.event_bus - INFO - Shutting down event bus
+2025-12-17 19:27:27,055 - ib_insync.client - INFO - Disconnected.
+2025-12-17 19:27:27,553 - slob.live.event_bus - INFO - ✅ Event bus shutdown complete. Final stats: {'total_events_emitted': 2361, 'handler_errors': 0, 'events_by_type': {'tick_received': 2240, 'candle_completed': 120, 'websocket_connected': 1}, 'handler_counts': {}, 'history_size': 1000}
+2025-12-17 19:27:27,560 - slob.live.live_trading_engine - INFO - Closing database...
+2025-12-17 19:27:27,674 - slob.live.candle_store - INFO - ✅ Database connection closed
+2025-12-17 19:27:27,675 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:27:27,675 - slob.live.live_trading_engine - INFO - FINAL STATISTICS
+2025-12-17 19:27:27,676 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:27:27,676 - slob.live.live_trading_engine - INFO - Total runtime: 1:04:09.638772
+2025-12-17 19:27:27,677 - slob.live.live_trading_engine - INFO - WebSocket: {'state': 'DISCONNECTED', 'reconnect_attempts': 0, 'message_count': 2240, 'tick_count': 2240, 'subscribed_symbols': [], 'last_message_time': '2025-12-17T19:27:22.617933'}
+2025-12-17 19:27:27,678 - slob.live.live_trading_engine - INFO - CandleAggregator: {'ticks_processed': 2240, 'candles_completed': 62, 'gaps_filled': 58, 'active_candles': 0, 'symbols': []}
+2025-12-17 19:27:27,732 - slob.live.live_trading_engine - INFO - CandleStore: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.03, 'total_candles': 62, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 120, 'queries_executed': 0}
+2025-12-17 19:27:27,733 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:27:27,734 - slob.live.live_trading_engine - INFO - ✅ SHUTDOWN COMPLETE
+2025-12-17 19:27:27,734 - slob.live.live_trading_engine - INFO - ============================================================
+2025-12-17 19:27:27,735 - __main__ - INFO - ✅ Duration of 60 minutes reached
+2025-12-17 19:27:27,735 - __main__ - INFO - Shutting down engine...
+2025-12-17 19:27:27,736 - __main__ - INFO - ================================================================================
+2025-12-17 19:27:27,736 - __main__ - INFO - VALIDATING RESULTS
+2025-12-17 19:27:27,736 - __main__ - INFO - ================================================================================
+2025-12-17 19:27:27,737 - __main__ - INFO - Actual runtime: 1:04:09.698460
+2025-12-17 19:27:27,738 - __main__ - INFO - ✅ Runtime sufficient: 1:04:09.698460
+2025-12-17 19:27:27,738 - __main__ - INFO - IB stats: {'state': 'DISCONNECTED', 'reconnect_attempts': 0, 'message_count': 2240, 'tick_count': 2240, 'subscribed_symbols': [], 'last_message_time': '2025-12-17T19:27:22.617933'}
+2025-12-17 19:27:27,738 - __main__ - INFO - ✅ Ticks received: 2240
+2025-12-17 19:27:27,739 - __main__ - WARNING - ⚠️ IB state: DISCONNECTED
+2025-12-17 19:27:27,740 - __main__ - INFO - Candle aggregator stats: {'ticks_processed': 2240, 'candles_completed': 62, 'gaps_filled': 58, 'active_candles': 0, 'symbols': []}
+2025-12-17 19:27:27,740 - __main__ - INFO - ✅ Candles generated: 62
+2025-12-17 19:27:27,741 - __main__ - INFO - Candle store stats: {'db_path': 'data/ib_checkpoint_20251217_182318.db', 'db_size_mb': 0.03, 'total_candles': 62, 'symbols_count': 1, 'symbols': ['NQ'], 'candles_saved': 120, 'queries_executed': 0}
+2025-12-17 19:27:27,741 - __main__ - INFO - ✅ Candles persisted: 120
+2025-12-17 19:27:27,742 - __main__ - INFO - Tick buffer stats: {'current_size': 0, 'max_size': 10000, 'utilization': '0.0%', 'enqueued_count': 2240, 'dequeued_count': 2240, 'dropped_count': 0, 'evicted_count': 2195, 'pending': 0}
+2025-12-17 19:27:27,743 - __main__ - INFO - ================================================================================
+2025-12-17 19:27:27,743 - __main__ - INFO - IB CHECKPOINT TEST RESULTS
+2025-12-17 19:27:27,744 - __main__ - INFO - ================================================================================
+2025-12-17 19:27:27,744 - __main__ - INFO - ✅ ✅ ✅ ALL CHECKS PASSED ✅ ✅ ✅
+2025-12-17 19:27:27,745 - __main__ - INFO - 
+2025-12-17 19:27:27,745 - __main__ - INFO - IB integration is READY for NQ futures trading!
+2025-12-17 19:27:27,746 - __main__ - INFO - 
+2025-12-17 19:27:27,746 - __main__ - INFO - Next steps:
+2025-12-17 19:27:27,746 - __main__ - INFO -   1. Review NQ candle data in database
+2025-12-17 19:27:27,747 - __main__ - INFO -   2. Run 30-day paper trading validation
+2025-12-17 19:27:27,747 - __main__ - INFO -   3. Proceed with SetupTracker integration
+2025-12-17 19:27:27,748 - __main__ - INFO - ================================================================================
+2025-12-17 19:27:28,201 - slob.live.candle_store - INFO - ✅ Database connection closed

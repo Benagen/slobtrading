@@ -1,0 +1,19 @@
+2025-12-18 14:21:31,631 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:21:31,631 | INFO     | __main__                  | PHASE 1 PAPER TRADING VALIDATION
+2025-12-18 14:21:31,631 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:21:31,631 | INFO     | __main__                  | Account: DU0282477
+2025-12-18 14:21:31,631 | INFO     | __main__                  | Port: 4002
+2025-12-18 14:21:31,631 | INFO     | __main__                  | Duration: 24.0 hours
+2025-12-18 14:21:31,632 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:21:31,632 | INFO     | __main__                  | Using TWS paper trading (port 7497)
+2025-12-18 14:21:31,632 | INFO     | __main__                  | Initializing Live Trading Engine...
+2025-12-18 14:21:31,634 | INFO     | slob.live.candle_store    | Database schema initialized
+2025-12-18 14:21:31,635 | INFO     | slob.live.candle_store    | ✅ CandleStore initialized at data/candles.db
+2025-12-18 14:21:31,635 | INFO     | __main__                  | Connecting to Interactive Brokers...
+2025-12-18 14:21:31,635 | ERROR    | __main__                  | Error during paper trading: 'LiveTradingEngine' object has no attribute 'initialize'
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/scripts/run_paper_trading.py", line 228, in run_paper_trading
+    await engine.initialize()
+AttributeError: 'LiveTradingEngine' object has no attribute 'initialize'
+2025-12-18 14:21:31,635 | INFO     | __main__                  | Shutting down...
+2025-12-18 14:21:31,658 | INFO     | slob.live.candle_store    | ✅ Database connection closed

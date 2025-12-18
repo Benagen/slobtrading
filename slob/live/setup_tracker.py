@@ -552,6 +552,14 @@ class SetupTracker:
             candidate.liq2_time = candle['timestamp']
             candidate.liq2_price = candle['high']
 
+            # Store LIQ #2 candle OHLC for spike rule calculation
+            candidate.liq2_candle = {
+                'open': candle['open'],
+                'high': candle['high'],
+                'low': candle['low'],
+                'close': candle['close']
+            }
+
             # Initialize spike tracking (will be updated in WAITING_ENTRY)
             candidate.spike_high = candle['high']
             candidate.spike_high_time = candle['timestamp']
@@ -618,9 +626,22 @@ class SetupTracker:
             # In real trading, order will be placed at next open
             candidate.entry_price = candle['close']
 
-            # Calculate SL/TP using SPIKE HIGH (not just LIQ #2 price)
-            # This accounts for price spike after breakout
-            candidate.sl_price = candidate.spike_high + self.config.sl_buffer_pips
+            # Calculate SL using spike rule (backtest alignment)
+            liq2_candle = candidate.liq2_candle
+            body = abs(liq2_candle['close'] - liq2_candle['open'])
+            upper_wick = liq2_candle['high'] - max(liq2_candle['close'], liq2_candle['open'])
+
+            # Apply spike rule: if upper wick > 2x body, use body top instead of spike high
+            if upper_wick > 2 * body and body > 0:
+                # Spike detected - use body top + 2 pips (hardcoded, backtest alignment)
+                body_top = max(liq2_candle['close'], liq2_candle['open'])
+                candidate.sl_price = body_top + 2.0  # Hardcoded 2.0 pips for spike rule
+                logger.info(f"Spike rule applied: body_top {body_top:.2f} + 2.0 = {candidate.sl_price:.2f}")
+            else:
+                # Normal candle - use spike high + buffer
+                candidate.sl_price = candidate.spike_high + self.config.sl_buffer_pips
+                logger.info(f"Normal SL: spike_high {candidate.spike_high:.2f} + {self.config.sl_buffer_pips:.1f} = {candidate.sl_price:.2f}")
+
             candidate.tp_price = self.lse_low - self.config.tp_buffer_pips
 
             # Calculate risk/reward

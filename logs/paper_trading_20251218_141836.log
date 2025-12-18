@@ -1,0 +1,12 @@
+2025-12-18 14:18:36,633 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:18:36,633 | INFO     | __main__                  | PHASE 1 PAPER TRADING VALIDATION
+2025-12-18 14:18:36,633 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:18:36,633 | INFO     | __main__                  | Account: DU0282477
+2025-12-18 14:18:36,633 | INFO     | __main__                  | Port: 4002
+2025-12-18 14:18:36,633 | INFO     | __main__                  | Duration: 24.0 hours
+2025-12-18 14:18:36,634 | INFO     | __main__                  | ================================================================================
+2025-12-18 14:18:36,634 | INFO     | __main__                  | Using TWS paper trading (port 7497)
+2025-12-18 14:18:36,634 | INFO     | __main__                  | Initializing Live Trading Engine...
+2025-12-18 14:18:36,636 | INFO     | slob.live.candle_store    | Database schema initialized
+2025-12-18 14:18:36,636 | INFO     | slob.live.candle_store    | ✅ CandleStore initialized at data/candles.db
+2025-12-18 14:18:36,658 | INFO     | slob.live.candle_store    | ✅ Database connection closed

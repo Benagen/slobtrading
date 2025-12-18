@@ -1,0 +1,251 @@
+2025-12-18 16:05:43,950 | INFO     | __main__                  | ================================================================================
+2025-12-18 16:05:43,951 | INFO     | __main__                  | PHASE 1 PAPER TRADING VALIDATION
+2025-12-18 16:05:43,951 | INFO     | __main__                  | ================================================================================
+2025-12-18 16:05:43,951 | INFO     | __main__                  | Account: DU0282477
+2025-12-18 16:05:43,951 | INFO     | __main__                  | Port: 4002
+2025-12-18 16:05:43,951 | INFO     | __main__                  | Duration: 24.0 hours
+2025-12-18 16:05:43,951 | INFO     | __main__                  | ================================================================================
+2025-12-18 16:05:43,951 | INFO     | __main__                  | Using TWS paper trading (port 7497)
+2025-12-18 16:05:43,951 | INFO     | __main__                  | Initializing Live Trading Engine...
+2025-12-18 16:05:43,953 | INFO     | slob.live.candle_store    | ✅ CandleStore initialized at data/candles.db
+2025-12-18 16:05:43,953 | INFO     | __main__                  | Connecting to Interactive Brokers...
+2025-12-18 16:05:43,954 | INFO     | slob.live.live_trading_engine | 🚀 Initializing Engine for NQ on port 4002
+2025-12-18 16:05:43,954 | INFO     | slob.live.ib_ws_fetcher   | Connecting to IB at 127.0.0.1:4002
+2025-12-18 16:05:43,954 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 2...
+2025-12-18 16:05:43,955 | INFO     | ib_insync.client          | Connected
+2025-12-18 16:05:44,005 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 16:05:44,017 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 16:05:44,019 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 16:05:44,019 | INFO     | ib_insync.wrapper         | Warning 2107, reqId -1: HMDS data farm connection is inactive but should be available upon demand.ushmds
+2025-12-18 16:05:44,020 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 16:05:44,517 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 16:05:44,517 | INFO     | slob.live.ib_ws_fetcher   | ✅ Requested Market Data Type 3 (Delayed/Frozen)
+2025-12-18 16:05:44,518 | INFO     | slob.live.ib_ws_fetcher   | ✅ Successfully connected to IB (clientId=2)
+2025-12-18 16:05:45,131 | INFO     | slob.live.ib_ws_fetcher   | Resolved NQ to NQZ5
+2025-12-18 16:05:45,132 | INFO     | slob.live.ib_ws_fetcher   | ✅ Subscribed to: NQ
+2025-12-18 16:05:45,133 | INFO     | slob.live.order_executor  | Initializing OrderExecutor...
+2025-12-18 16:05:45,134 | INFO     | ib_insync.client          | Connecting to 127.0.0.1:4002 with clientId 1...
+2025-12-18 16:05:45,139 | INFO     | ib_insync.client          | Connected
+2025-12-18 16:05:45,151 | INFO     | ib_insync.client          | Logged on to server version 176
+2025-12-18 16:05:45,214 | INFO     | ib_insync.wrapper         | Warning 2119, reqId -1: Market data farm is connecting:usfuture
+2025-12-18 16:05:45,238 | INFO     | ib_insync.wrapper         | Warning 2103, reqId -1: Market data farm connection is broken:usfuture
+2025-12-18 16:05:45,239 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2025-12-18 16:05:45,240 | INFO     | ib_insync.wrapper         | Warning 2107, reqId -1: HMDS data farm connection is inactive but should be available upon demand.ushmds
+2025-12-18 16:05:45,240 | INFO     | ib_insync.wrapper         | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefnj
+2025-12-18 16:05:45,240 | INFO     | ib_insync.client          | API connection ready
+2025-12-18 16:05:45,545 | INFO     | ib_insync.ib              | Synchronization complete
+2025-12-18 16:05:45,545 | INFO     | slob.live.order_executor  | ✅ Connected to IB: 127.0.0.1:4002
+2025-12-18 16:05:45,731 | INFO     | slob.live.order_executor  | ✅ NQ contract resolved: NQZ5
+2025-12-18 16:05:45,732 | INFO     | slob.live.order_executor  | ✅ OrderExecutor initialized
+2025-12-18 16:05:45,732 | INFO     | __main__                  | ✅ Connected successfully!
+2025-12-18 16:05:45,732 | INFO     | __main__                  | Starting paper trading for 24.0 hours...
+2025-12-18 16:05:45,733 | INFO     | __main__                  | Monitoring for 5/1 SLOB setups...
+2025-12-18 16:05:45,733 | INFO     | __main__                  | Press Ctrl+C to stop
+2025-12-18 16:05:45,733 | INFO     | slob.live.live_trading_engine | 🟢 Engine loop started. Waiting for market data...
+2025-12-18 16:05:46,561 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 16:05:46,561 | INFO     | ib_insync.wrapper         | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2025-12-18 16:05:46,773 | INFO     | ib_insync.wrapper         | Warning 10167, reqId 5: Requested market data is not subscribed. Displaying delayed market data., contract: Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ')
+2025-12-18 16:05:47,071 | ERROR    | eventkit.event            | Value ({Ticker(contract=Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ'), time=datetime.datetime(2025, 12, 18, 15, 5, 47, 70263, tzinfo=datetime.timezone.utc), marketDataType=3, minTick=0.25, bid=25010.0, bidSize=2.0, ask=25011.0, askSize=1.0, ticks=[TickData(time=datetime.datetime(2025, 12, 18, 15, 5, 47, 70263, tzinfo=datetime.timezone.utc), tickType=66, price=25010.0, size=2.0), TickData(time=datetime.datetime(2025, 12, 18, 15, 5, 47, 70263, tzinfo=datetime.timezone.utc), tickType=67, price=25011.0, size=1.0)], bboExchange='50006', snapshotPermissions=1)},) caused exception for event Event<pendingTickersEvent, [[None, <weakref at 0x7f894e077ea0; to 'IBWSFetcher' at 0x7f894e06c1c0>, <function IBWSFetcher._on_ib_tick at 0x7f894e05e8b0>]]>
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/eventkit/event.py", line 205, in emit
+    result = func(obj, *args)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/ib_ws_fetcher.py", line 96, in _on_ib_tick
+    volume=int(ticker.volume) if ticker.volume else 0
+ValueError: cannot convert float NaN to integer
+2025-12-18 16:05:47,076 | ERROR    | eventkit.event            | Value ({Ticker(contract=Contract(secType='FUT', conId=563947738, symbol='NQ', lastTradeDateOrContractMonth='20251219', multiplier='20', exchange='CME', currency='USD', localSymbol='NQZ5', tradingClass='NQ'), time=datetime.datetime(2025, 12, 18, 15, 5, 47, 75678, tzinfo=datetime.timezone.utc), marketDataType=3, minTick=0.25, bid=25010.0, bidSize=2.0, ask=25011.0, askSize=1.0, last=25011.25, lastSize=1.0, ticks=[TickData(time=datetime.datetime(2025, 12, 18, 15, 5, 47, 75678, tzinfo=datetime.timezone.utc), tickType=68, price=25011.25, size=1.0)], bboExchange='50006', snapshotPermissions=1)},) caused exception for event Event<pendingTickersEvent, [[None, <weakref at 0x7f894e077ea0; to 'IBWSFetcher' at 0x7f894e06c1c0>, <function IBWSFetcher._on_ib_tick at 0x7f894e05e8b0>]]>
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages/eventkit/event.py", line 205, in emit
+    result = func(obj, *args)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/ib_ws_fetcher.py", line 96, in _on_ib_tick
+    volume=int(ticker.volume) if ticker.volume else 0
+ValueError: cannot convert float NaN to integer
+2025-12-18 16:05:47,078 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-16' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:05:49,227 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-17' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:05:49,229 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-18' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:05:54,245 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-19' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:05:54,245 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-20' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:05:59,263 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-21' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:05:59,265 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-22' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:03,175 | WARNING  | slob.live.candle_aggregator | Incomplete candle for NQ at 2025-12-18 15:05:00+00:00: Candle(symbol=NQ, timestamp=2025-12-18 15:05:00+00:00, O:None, H:None, L:None, C:None, V:0)
+2025-12-18 16:06:03,176 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-23' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:04,280 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-24' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:09,186 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-25' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:13,091 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-26' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:14,227 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-27' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:19,241 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-28' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:19,242 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-29' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:22,099 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-30' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:24,083 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-31' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:28,140 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-32' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:29,094 | ERROR    | asyncio                   | Task exception was never retrieved
+future: <Task finished name='Task-33' coro=<LiveTradingEngine.initialize.<locals>.on_tick_bridge() done, defined at /Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py:125> exception=AttributeError("'Tick' object has no attribute 'size'")>
+Traceback (most recent call last):
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/live_trading_engine.py", line 127, in on_tick_bridge
+    await self.candle_aggregator.process_tick(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 189, in process_tick
+    self.active_candles[symbol].update(tick)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/live/candle_aggregator.py", line 51, in update
+    size = tick.size
+AttributeError: 'Tick' object has no attribute 'size'
+2025-12-18 16:06:30,025 | INFO     | __main__                  | Shutting down...
+2025-12-18 16:06:30,026 | INFO     | slob.live.live_trading_engine | 🛑 Shutting down Engine...
+2025-12-18 16:06:30,026 | INFO     | ib_insync.ib              | Disconnecting from 127.0.0.1:4002, 306 B sent in 12 messages, 21.6 kB received in 319 messages, session time 46.1 s.
+2025-12-18 16:06:30,026 | INFO     | ib_insync.client          | Disconnecting
+2025-12-18 16:06:30,027 | INFO     | ib_insync.ib              | Disconnecting from 127.0.0.1:4002, 225 B sent in 10 messages, 20.3 kB received in 271 messages, session time 44.9 s.
+2025-12-18 16:06:30,027 | INFO     | ib_insync.client          | Disconnecting
+2025-12-18 16:06:30,028 | INFO     | __main__                  | Paper trading session complete.
+2025-12-18 16:06:30,029 | INFO     | ib_insync.client          | Disconnected.
+2025-12-18 16:06:30,029 | INFO     | ib_insync.client          | Disconnected.

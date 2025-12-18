@@ -160,10 +160,11 @@ class SetupCandidate:
     liq2_time: Optional[datetime] = None
     liq2_price: Optional[float] = None  # Initial breakout price
 
-    # Spike high tracking (highest price after LIQ #2 detected)
-    # This is used for SL calculation to account for spike after breakout
-    spike_high: Optional[float] = None
-    spike_high_time: Optional[datetime] = None
+    # LIQ #2 candle OHLC (used for spike rule in SL calculation)
+    # Stores complete candle data to apply backtest logic:
+    # If upper_wick > 2x body: SL = body_top + 2 pips
+    # Else: SL = high + 2 pips
+    liq2_candle: Optional[Dict] = None  # {'open', 'high', 'low', 'close'}
 
     # ─────────────────────────────────────────────────────────────
     # ENTRY TRIGGER (close below no-wick low)
@@ -261,6 +262,7 @@ class SetupCandidate:
             'liq2_detected': self.liq2_detected,
             'liq2_time': self.liq2_time.isoformat() if self.liq2_time else None,
             'liq2_price': self.liq2_price,
+            'liq2_candle': self.liq2_candle,
 
             # Entry
             'entry_triggered': self.entry_triggered,

@@ -227,15 +227,28 @@ class TestCoreStrategyFlow:
                 print(f"   - State: {candidate.state.name}")
 
                 # Q1.7: Verify SL/TP calculation
-                print(f"\n✅ Q1.7: SL/TP calculated:")
+                # Verify spike rule was applied correctly
+                liq2 = candidate.liq2_candle
+                body = abs(liq2['close'] - liq2['open'])
+                upper_wick = liq2['high'] - max(liq2['close'], liq2['open'])
+
+                if upper_wick > 2 * body and body > 0:
+                    # Spike detected - SL at body top + 2
+                    expected_sl = max(liq2['close'], liq2['open']) + 2.0
+                else:
+                    # Normal candle - SL at high + 2
+                    expected_sl = liq2['high'] + 2.0
+
+                print(f"\n✅ Q1.7: SL/TP calculated (Spike Rule Applied):")
                 print(f"   - Entry: {candidate.entry_price}")
-                print(f"   - SL: {candidate.sl_price} (LIQ #2 high + buffer)")
+                print(f"   - LIQ #2 Body: {body:.1f}, Upper Wick: {upper_wick:.1f}, Ratio: {upper_wick/body if body > 0 else 0:.2f}")
+                print(f"   - SL: {candidate.sl_price} (Expected: {expected_sl})")
                 print(f"   - TP: {candidate.tp_price} (LSE Low - buffer)")
                 print(f"   - R:R: {candidate.risk_reward_ratio:.2f}")
 
                 assert candidate.state == SetupState.SETUP_COMPLETE
                 assert candidate.entry_triggered == True
-                assert candidate.sl_price > candidate.liq2_price
+                assert candidate.sl_price == expected_sl, f"SL {candidate.sl_price} != Expected {expected_sl}"
                 assert candidate.tp_price < tracker.lse_low
 
                 # Verify complete flow
@@ -312,20 +325,23 @@ class TestCoreStrategyFlow:
     @pytest.mark.asyncio
     async def test_scenario_1_3_spike_high_tracking(self):
         """
-        Scenario 1.3: Spike High Tracking for SL Calculation
+        Scenario 1.3: Spike Rule for SL Calculation (Backtest Alignment)
 
-        Test that SL uses spike high (highest price after LIQ #2), not just
-        initial LIQ #2 breakout price.
+        Test that SL calculation uses the spike rule from backtest logic:
+        - If LIQ #2 upper_wick > 2x body: SL = body_top + 2 pips
+        - Else: SL = high + 2 pips
+
+        This ensures live trading matches backtest R:R calculations.
         """
         print("\n" + "="*80)
-        print("SCENARIO 1.3: Spike High Tracking (SL Calculation)")
+        print("SCENARIO 1.3: Spike Rule SL Calculation (Backtest Alignment)")
         print("="*80)
 
         config = SetupTrackerConfig(
             consol_min_duration=3,
             consol_max_duration=30,
             consol_min_quality=0.4,
-            sl_buffer_pips=1.0
+            sl_buffer_pips=1.0  # Note: spike rule uses hardcoded 2.0, not this config
         )
         tracker = SetupTracker(config)
 
@@ -340,7 +356,7 @@ class TestCoreStrategyFlow:
             'open': 15290, 'high': 15350, 'low': 15285, 'close': 15320, 'volume': 2000
         })
 
-        # Consolidation (3 candles with varied data to trigger transition)
+        # Consolidation (3 candles)
         consol_candles = [
             {'timestamp': datetime(2024, 1, 15, 15, 36), 'open': 15290, 'high': 15305, 'low': 15275, 'close': 15280, 'volume': 800},
             {'timestamp': datetime(2024, 1, 15, 15, 37), 'open': 15280, 'high': 15300, 'low': 15270, 'close': 15295, 'volume': 750},  # Bullish (no-wick candidate)
@@ -351,74 +367,49 @@ class TestCoreStrategyFlow:
             await tracker.on_candle(candle)
 
         candidate = list(tracker.active_candidates.values())[0]
-        print(f"\n--- LIQ #2 Detection ---")
+        print(f"\n--- LIQ #2 Detection (Spike Candle) ---")
         print(f"  Consolidation High: {candidate.consol_high}")
 
-        # LIQ #2 candle (initial breakout)
-        liq2_candle = {
+        # LIQ #2 candle with SPIKE (upper_wick > 2x body)
+        # open=15290, high=15350, close=15305, low=15285
+        # Body = |15305 - 15290| = 15
+        # Upper wick = 15350 - 15305 = 45
+        # Ratio = 45/15 = 3.0 > 2.0 ✓ (spike detected!)
+        # Expected SL = body_top + 2 = 15305 + 2 = 15307
+        liq2_candle_spike = {
             'timestamp': datetime(2024, 1, 15, 15, 40),
             'open': 15290,
-            'high': 15310,  # Initial breakout
+            'high': 15350,  # Large spike!
             'low': 15285,
             'close': 15305,
             'volume': 1500
         }
 
-        await tracker.on_candle(liq2_candle)
+        await tracker.on_candle(liq2_candle_spike)
         candidate = list(tracker.active_candidates.values())[0]
 
-        print(f"  LIQ #2 Price (initial breakout): {candidate.liq2_price}")
-        print(f"  Spike High (initialized): {candidate.spike_high}")
+        print(f"  LIQ #2 Candle OHLC:")
+        print(f"    Open:  {liq2_candle_spike['open']}")
+        print(f"    High:  {liq2_candle_spike['high']}")
+        print(f"    Close: {liq2_candle_spike['close']}")
+        print(f"    Low:   {liq2_candle_spike['low']}")
 
-        assert candidate.liq2_price == 15310
-        assert candidate.spike_high == 15310
+        body = abs(liq2_candle_spike['close'] - liq2_candle_spike['open'])
+        upper_wick = liq2_candle_spike['high'] - max(liq2_candle_spike['close'], liq2_candle_spike['open'])
+        print(f"  Body: {body}, Upper Wick: {upper_wick}, Ratio: {upper_wick/body if body > 0 else 0:.2f}")
+        print(f"  Spike Rule: {'SPIKE DETECTED (wick > 2x body)' if upper_wick > 2 * body else 'Normal candle'}")
+
+        assert candidate.liq2_price == 15350
+        assert candidate.liq2_candle is not None
         assert candidate.state == SetupState.WAITING_ENTRY
-
-        # Now feed candles with HIGHER spike
-        print(f"\n--- Spike Higher After LIQ #2 ---")
-
-        spike_candle_1 = {
-            'timestamp': datetime(2024, 1, 15, 15, 41),
-            'open': 15305,
-            'high': 15325,  # SPIKE HIGHER!
-            'low': 15300,
-            'close': 15310,
-            'volume': 1800
-        }
-
-        await tracker.on_candle(spike_candle_1)
-        candidate = list(tracker.active_candidates.values())[0]
-
-        print(f"  Candle #1 after LIQ #2: High={spike_candle_1['high']}")
-        print(f"  Spike High updated: {candidate.spike_high}")
-
-        assert candidate.spike_high == 15325, "Spike high should update to 15325"
-
-        # Another spike even higher
-        spike_candle_2 = {
-            'timestamp': datetime(2024, 1, 15, 15, 42),
-            'open': 15310,
-            'high': 15335,  # SPIKE EVEN HIGHER!
-            'low': 15305,
-            'close': 15315,
-            'volume': 2000
-        }
-
-        await tracker.on_candle(spike_candle_2)
-        candidate = list(tracker.active_candidates.values())[0]
-
-        print(f"  Candle #2 after LIQ #2: High={spike_candle_2['high']}")
-        print(f"  Spike High updated: {candidate.spike_high}")
-
-        assert candidate.spike_high == 15335, "Spike high should update to 15335"
 
         # Entry trigger
         print(f"\n--- Entry Trigger ---")
 
         entry_candle = {
             'timestamp': datetime(2024, 1, 15, 15, 43),
-            'open': 15315,
-            'high': 15320,
+            'open': 15305,
+            'high': 15310,
             'low': 15260,
             'close': 15265,  # Below no-wick low
             'volume': 2200
@@ -430,26 +421,24 @@ class TestCoreStrategyFlow:
             candidate = result.candidate
 
             print(f"  ✅ Setup Complete!")
-            print(f"  LIQ #2 Price (initial): {candidate.liq2_price}")
-            print(f"  Spike High (max): {candidate.spike_high}")
             print(f"  Entry Price: {candidate.entry_price}")
             print(f"  SL Price: {candidate.sl_price}")
-            print(f"  Buffer: {config.sl_buffer_pips}")
 
-            # CRITICAL: SL should use SPIKE HIGH, not LIQ #2 price
-            expected_sl = candidate.spike_high + config.sl_buffer_pips
-            print(f"\n  Expected SL: {candidate.spike_high} + {config.sl_buffer_pips} = {expected_sl}")
-            print(f"  Actual SL:   {candidate.sl_price}")
+            # CRITICAL: SL should use spike rule
+            # For this candle: wick (45) > 2x body (30), so SL = body_top + 2
+            body_top = max(liq2_candle_spike['close'], liq2_candle_spike['open'])
+            expected_sl = body_top + 2.0  # Hardcoded 2.0 in backtest logic
+
+            print(f"\n  Spike Rule Calculation:")
+            print(f"    Body top: {body_top}")
+            print(f"    Expected SL: {body_top} + 2.0 = {expected_sl}")
+            print(f"    Actual SL:   {candidate.sl_price}")
 
             assert candidate.sl_price == expected_sl, \
-                f"SL should be {expected_sl} (spike_high + buffer), got {candidate.sl_price}"
+                f"SL should be {expected_sl} (body_top + 2), got {candidate.sl_price}"
 
-            # Verify spike high is HIGHER than initial LIQ #2
-            assert candidate.spike_high > candidate.liq2_price, \
-                "Spike high should be higher than initial LIQ #2 price"
-
-            print(f"\n✅ VERIFIED: SL uses spike high ({candidate.spike_high}), not LIQ #2 price ({candidate.liq2_price})")
-            print(f"   This provides proper risk management for post-breakout spikes")
+            print(f"\n✅ VERIFIED: SL uses spike rule from backtest ({body_top} + 2 = {expected_sl})")
+            print(f"   This ensures live trading R:R matches backtest expectations")
 
         else:
             pytest.fail("Entry trigger not detected")
