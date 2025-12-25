@@ -41,18 +41,26 @@ htmlcov/
 .tox/
 .hypothesis/
 
-# Data cache (kan bli stor)
+# Data & State Files
+data/*.csv
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.sqlite
+data/*.sqlite3
+data/backups/
 data_cache/raw/
 data_cache/processed/
 *.parquet
-*.db
 *.db-journal
 
+# Logs
+logs/
+*.log
+
 # Output files
-outputs/charts/*.html
-outputs/charts/*.png
-outputs/reports/*.html
-outputs/logs/*.log
+outputs/
+reports/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -63,9 +71,13 @@ slob/ml/models/*.pkl
 slob/ml/models/*.joblib
 slob/ml/models/*.h5
 
-# Environment
+# Environment & Secrets
 .env
 .env.local
+*.key
+*.pem
+*.p12
+*.pfx
 
 # macOS
 .DS_Store
@@ -77,3 +89,11 @@ slob/ml/models/*.h5
 *.bak
 *.swp
 *~.nib
+.cache/
+
+# Docker (generated files)
+.dockerignore
+
+# Keep necessary placeholder files
+!data/.gitkeep
+!logs/.gitkeep
