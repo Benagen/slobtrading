@@ -187,8 +187,8 @@ async def run_paper_trading(args):
         consol_min_duration=5,
         consol_max_duration=30,
         consol_min_quality=0.5,
-        consol_max_range_pips=50,
-        nowick_max_wick_ratio=0.3,
+        max_retracement_pips=100.0,  # Updated from consol_max_range_pips
+        nowick_percentile=90,  # Updated from nowick_max_wick_ratio
         sl_buffer_pips=1.0,  # Note: Spike rule uses hardcoded 2.0
         tp_buffer_pips=1.0,
         max_entry_wait_candles=20

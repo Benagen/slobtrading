@@ -37,7 +37,7 @@ class LiveTradingEngineConfig:
         self.symbol = "NQ"
         
         # Strategy Defaults
-        self.consol_max_range_pips = 20.0
+        self.max_retracement_pips = 100.0  # Updated from consol_max_range_pips
         self.consol_min_duration_minutes = 15
         self.sl_buffer_pips = 1.0
         self.tp_risk_reward = 2.0
@@ -65,7 +65,7 @@ class LiveTradingEngine:
         # Setup Tracker
         tracker_config = SetupTrackerConfig(
             symbol=config.symbol,
-            consol_max_range_pips=getattr(config, 'consol_max_range_pips', 20.0),
+            max_retracement_pips=getattr(config, 'max_retracement_pips', 100.0),  # Updated parameter
             consol_min_duration=getattr(config, 'consol_min_duration_minutes', 15),
             sl_buffer_pips=getattr(config, 'sl_buffer_pips', 1.0)
         )
@@ -73,8 +73,8 @@ class LiveTradingEngine:
         
         # Order Executor
         executor_config = OrderExecutorConfig(
-            ib_host=config.ib_host,
-            ib_port=config.ib_port,
+            host=config.ib_host,  # Changed from ib_host
+            port=config.ib_port,  # Changed from ib_port
             client_id=config.client_id,
             account=config.account,
             max_position_size=config.max_position_size

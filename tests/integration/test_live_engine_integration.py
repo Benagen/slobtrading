@@ -171,10 +171,9 @@ async def test_order_placement_dry_run():
     executor = OrderExecutor(config)
 
     position_size = executor.calculate_position_size(
-        account_balance=100000.0,
-        risk_per_trade=0.01,
         entry_price=setup.entry_price,
-        stop_loss_price=setup.sl_price
+        stop_loss_price=setup.sl_price,
+        atr=None
     )
 
     # With 100k account, 1% risk, and 19 points SL:
