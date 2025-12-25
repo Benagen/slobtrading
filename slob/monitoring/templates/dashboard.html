@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLOB Trading Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: transparent;
+            border-bottom: 2px solid #f0f0f0;
+            font-weight: 600;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+        .positive {
+            color: #28a745;
+        }
+        .negative {
+            color: #dc3545;
+        }
+        .table-sm td, .table-sm th {
+            padding: 0.5rem;
+        }
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .refresh-btn:hover {
+            transform: scale(1.1);
+        }
+        .refresh-btn:active {
+            transform: scale(0.95);
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 1s linear;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-bar-chart-fill"></i> SLOB Trading Dashboard
+            </span>
+            <span class="text-white">
+                <i class="bi bi-circle-fill text-success" id="status-indicator"></i>
+                <span id="status-text">Loading...</span>
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <!-- Stats Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Active Setups</div>
+                    <div class="stat-value text-primary" id="active-setups">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Total Trades</div>
+                    <div class="stat-value text-info" id="total-trades">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-value text-success" id="win-rate">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="stat-label">Total P&L</div>
+                    <div class="stat-value" id="total-pnl">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Active Setups -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-eye-fill"></i> Active Setups
+                    </div>
+                    <div class="card-body">
+                        <div id="active-setups-list">
+                            <p class="text-muted text-center">No active setups</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Trades -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-clock-history"></i> Recent Trades
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="trades-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Entry</th>
+                                        <th>Exit</th>
+                                        <th>P&L</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trades-tbody">
+                                    <tr>
+                                        <td colspan="4" class="text-muted text-center">No trades yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up"></i> Performance Metrics
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Wins:</strong> <span id="wins" class="positive">-</span></p>
+                                <p><strong>Losses:</strong> <span id="losses" class="negative">-</span></p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Avg Win:</strong> $<span id="avg-win">-</span></p>
+                                <p><strong>Avg Loss:</strong> $<span id="avg-loss">-</span></p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Last Update:</strong> <span id="last-update">-</span></p>
+                                <p><strong>Total Candles:</strong> <span id="total-candles">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Refresh Button -->
+    <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
+        <i class="bi bi-arrow-clockwise" id="refresh-icon"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-refresh every 30 seconds
+        let autoRefreshInterval;
+
+        function updateDashboard(data) {
+            // System Status
+            const status = data.status || {};
+            document.getElementById('status-text').textContent = status.status || 'Unknown';
+            document.getElementById('last-update').textContent = status.last_update || '-';
+            document.getElementById('total-candles').textContent = status.total_candles || '-';
+
+            // Active Setups Count
+            const setups = data.setups || [];
+            document.getElementById('active-setups').textContent = setups.length;
+
+            // Performance Metrics
+            const metrics = data.metrics || {};
+            document.getElementById('total-trades').textContent = metrics.total_trades || 0;
+            document.getElementById('win-rate').textContent =
+                metrics.win_rate ? (metrics.win_rate * 100).toFixed(1) + '%' : '-';
+            document.getElementById('wins').textContent = metrics.wins || 0;
+            document.getElementById('losses').textContent = metrics.losses || 0;
+            document.getElementById('avg-win').textContent =
+                metrics.avg_win ? metrics.avg_win.toFixed(2) : '-';
+            document.getElementById('avg-loss').textContent =
+                metrics.avg_loss ? Math.abs(metrics.avg_loss).toFixed(2) : '-';
+
+            // Total P&L
+            const pnlElement = document.getElementById('total-pnl');
+            const pnl = metrics.total_pnl || 0;
+            pnlElement.textContent = '$' + pnl.toFixed(2);
+            pnlElement.className = 'stat-value ' + (pnl >= 0 ? 'positive' : 'negative');
+
+            // Active Setups List
+            const setupsList = document.getElementById('active-setups-list');
+            if (setups.length === 0) {
+                setupsList.innerHTML = '<p class="text-muted text-center">No active setups</p>';
+            } else {
+                setupsList.innerHTML = setups.map(setup => `
+                    <div class="alert alert-info">
+                        <strong>Setup ${setup.id ? setup.id.substring(0, 8) : 'Unknown'}</strong><br>
+                        State: ${setup.state || 'Unknown'}<br>
+                        ${setup.liq1_detected ? 'LIQ #1 detected' : ''}<br>
+                        ${setup.liq2_detected ? 'LIQ #2 detected' : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Recent Trades
+            const trades = data.trades || [];
+            const tbody = document.getElementById('trades-tbody');
+            if (trades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted text-center">No trades yet</td></tr>';
+            } else {
+                tbody.innerHTML = trades.slice(0, 10).map(trade => {
+                    const pnl = trade.pnl || 0;
+                    return `
+                        <tr>
+                            <td>${trade.entry_time ? new Date(trade.entry_time).toLocaleString() : '-'}</td>
+                            <td>${trade.entry_price ? trade.entry_price.toFixed(2) : '-'}</td>
+                            <td>${trade.exit_price ? trade.exit_price.toFixed(2) : '-'}</td>
+                            <td class="${pnl >= 0 ? 'positive' : 'negative'}">
+                                $${pnl.toFixed(2)}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function refreshData() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('spinning');
+
+            fetch('/api/all')
+                .then(response => response.json())
+                .then(data => {
+                    updateDashboard(data);
+                    setTimeout(() => icon.classList.remove('spinning'), 1000);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('status-text').textContent = 'Error';
+                    icon.classList.remove('spinning');
+                });
+        }
+
+        // Initial load
+        refreshData();
+
+        // Auto-refresh every 30 seconds
+        autoRefreshInterval = setInterval(refreshData, 30000);
+    </script>
+</body>
+</html>
