@@ -602,6 +602,104 @@ class StateManager:
 
         return trades
 
+    async def get_active_setups(self) -> List[Dict]:
+        """
+        Get all active (not completed) setups from persistence.
+
+        Returns:
+            List of setup dictionaries with state NOT IN ('SETUP_COMPLETE', 'INVALIDATED')
+        """
+        active_setups = []
+
+        # Try Redis first
+        if self.redis_client and not self.using_in_memory:
+            try:
+                keys = self.redis_client.keys(f"{self.redis_prefix}:setup:*")
+                logger.debug(f"Found {len(keys)} setup keys in Redis")
+
+                for key in keys:
+                    data_json = self.redis_client.get(key)
+                    if data_json:
+                        setup_data = json.loads(data_json)
+                        state = setup_data.get('state')
+                        # Filter out completed/invalidated
+                        if state not in ['SETUP_COMPLETE', 'INVALIDATED']:
+                            active_setups.append(setup_data)
+
+                if active_setups:
+                    logger.info(f"✅ Loaded {len(active_setups)} active setups from Redis")
+                    return active_setups
+            except Exception as e:
+                logger.warning(f"Failed to load setups from Redis: {e}")
+
+        # Fallback to SQLite
+        cursor = self.sqlite_conn.cursor()
+        cursor.execute("""
+            SELECT raw_data
+            FROM active_setups
+            WHERE state NOT IN ('SETUP_COMPLETE', 'INVALIDATED')
+            ORDER BY created_at DESC
+        """)
+
+        rows = cursor.fetchall()
+        logger.debug(f"Found {len(rows)} active setups in SQLite")
+
+        for row in rows:
+            try:
+                setup_data = json.loads(row['raw_data'])
+                active_setups.append(setup_data)
+            except Exception as e:
+                logger.error(f"Failed to deserialize setup from SQLite: {e}")
+
+        logger.info(f"✅ Loaded {len(active_setups)} active setups from SQLite")
+        return active_setups
+
+    async def get_open_trades(self) -> List[Dict]:
+        """
+        Get all open (not closed) trades from SQLite.
+
+        Returns:
+            List of trade dictionaries with result = 'OPEN'
+        """
+        cursor = self.sqlite_conn.cursor()
+        cursor.execute("""
+            SELECT *
+            FROM trades
+            WHERE result = 'OPEN'
+            ORDER BY entry_time DESC
+        """)
+
+        trades = []
+        for row in cursor.fetchall():
+            trades.append(dict(row))
+
+        logger.info(f"✅ Found {len(trades)} open trades")
+        return trades
+
+    async def close_trade(self, trade_id: str, exit_price: float, exit_reason: str):
+        """
+        Mark a trade as closed (for reconciliation).
+
+        Args:
+            trade_id: Trade identifier
+            exit_price: Price at which trade was closed
+            exit_reason: Reason for closure (e.g., 'EXTERNAL_CLOSE', 'MANUAL_CLOSE')
+        """
+        cursor = self.sqlite_conn.cursor()
+
+        # Update trade to mark as closed
+        cursor.execute("""
+            UPDATE trades
+            SET result = 'CLOSED',
+                exit_price = ?,
+                exit_time = ?,
+                exit_reason = ?
+            WHERE id = ?
+        """, (exit_price, datetime.now().isoformat(), exit_reason, trade_id))
+
+        self.sqlite_conn.commit()
+        logger.info(f"✅ Trade {trade_id} marked as closed: exit_price={exit_price}, reason={exit_reason}")
+
     # ─────────────────────────────────────────────────────────────────
     # ML SHADOW MODE (SQLite only)
     # ─────────────────────────────────────────────────────────────────

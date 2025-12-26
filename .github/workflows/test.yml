@@ -1,0 +1,181 @@
+name: SLOB Trading System CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+
+    - name: Install TA-Lib
+      run: |
+        wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+        tar -xzf ta-lib-0.4.0-src.tar.gz
+        cd ta-lib/
+        ./configure --prefix=/usr
+        make
+        sudo make install
+        cd ..
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create test directories
+      run: |
+        mkdir -p data
+        mkdir -p logs
+        touch data/.gitkeep
+        touch logs/.gitkeep
+
+    - name: Run unit tests
+      run: |
+        pytest tests/unit/ -v --cov=slob --cov-report=xml --cov-report=term-missing
+      continue-on-error: false
+
+    - name: Run pattern detection tests
+      run: |
+        pytest tests/ -v -k "test_liquidity or test_consolidation or test_nowick" --cov=slob --cov-append
+      continue-on-error: false
+
+    - name: Run state recovery tests
+      run: |
+        pytest tests/test_state_recovery.py -v --cov=slob --cov-append
+      continue-on-error: false
+
+    - name: Run integration tests
+      run: |
+        pytest tests/integration/ -v --cov=slob --cov-append
+      continue-on-error: true
+
+    - name: Run E2E tests (non-IB)
+      run: |
+        pytest tests/e2e/ -v -m "not requires_ib" --cov=slob --cov-append
+      continue-on-error: true
+
+    - name: Run security tests
+      run: |
+        pytest tests/e2e/test_security.py -v --cov=slob --cov-append
+      continue-on-error: true
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Generate coverage report
+      run: |
+        pip install coverage
+        coverage report
+        coverage html
+
+    - name: Upload HTML coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-${{ matrix.python-version }}
+        path: htmlcov/
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install linting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy
+
+    - name: Run flake8
+      run: |
+        flake8 slob/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 slob/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      continue-on-error: true
+
+    - name: Check code formatting with black
+      run: |
+        black --check slob/ tests/
+      continue-on-error: true
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only slob/ tests/
+      continue-on-error: true
+
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install security scanning tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Run Bandit security scan
+      run: |
+        bandit -r slob/ -f json -o bandit-report.json
+      continue-on-error: true
+
+    - name: Upload Bandit report
+      uses: actions/upload-artifact@v4
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+
+    - name: Check dependencies for vulnerabilities
+      run: |
+        safety check --json --output safety-report.json
+      continue-on-error: true
+
+    - name: Upload Safety report
+      uses: actions/upload-artifact@v4
+      with:
+        name: safety-vulnerability-report
+        path: safety-report.json
