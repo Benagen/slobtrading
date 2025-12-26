@@ -119,19 +119,19 @@ class TestFeatureEngineer:
         features = FeatureEngineer._extract_volatility_features(
             sample_ohlcv, sample_setup, lookback=100
         )
-        
-        # Should have 7 volatility features
-        assert 'atr' in features
+
+        # Should have 7 volatility features (using STATIONARY names)
+        assert 'atr_relative' in features  # Changed from 'atr'
         assert 'atr_percentile' in features
         assert 'consol_range_atr_ratio' in features
         assert 'bollinger_bandwidth' in features
         assert 'consol_tightness' in features
-        assert 'price_volatility_std' in features
+        assert 'price_volatility_cv' in features  # Changed from 'price_volatility_std'
         assert 'atr_change_rate' in features
-        
-        # ATR should be positive
-        assert features['atr'] > 0
-        
+
+        # ATR relative should be positive
+        assert features['atr_relative'] > 0
+
         # Percentile should be 0-100
         assert 0 <= features['atr_percentile'] <= 100
 
@@ -165,22 +165,22 @@ class TestFeatureEngineer:
         features = FeatureEngineer._extract_price_action_features(
             sample_ohlcv, sample_setup
         )
-        
-        # Should have 8 price action features
-        assert 'entry_to_lse_high' in features
-        assert 'entry_to_lse_low' in features
+
+        # Should have 8 price action features (using STATIONARY names)
+        assert 'entry_to_lse_high_pct' in features  # Changed from 'entry_to_lse_high'
+        assert 'entry_to_lse_low_pct' in features   # Changed from 'entry_to_lse_low'
         assert 'risk_reward_ratio' in features
-        assert 'nowick_body_size' in features
+        assert 'nowick_body_pct' in features  # Changed from 'nowick_body_size'
         assert 'nowick_wick_ratio' in features
-        assert 'liq2_sweep_distance' in features
+        assert 'liq2_sweep_pct' in features  # Changed from 'liq2_sweep_distance'
         assert 'entry_price_consol_position' in features
-        assert 'lse_range' in features
-        
+        assert 'lse_range_pct' in features  # Changed from 'lse_range'
+
         # Risk:reward should be positive
         assert features['risk_reward_ratio'] > 0
-        
-        # LSE range should be positive
-        assert features['lse_range'] > 0
+
+        # LSE range pct should be positive
+        assert features['lse_range_pct'] > 0
 
     def test_pattern_quality_features(self, sample_setup):
         """Test pattern quality feature extraction"""
@@ -263,16 +263,23 @@ class TestFeatureEngineer:
 
         # Should have 37 features (8 volume + 7 volatility + 10 temporal + 8 price + 4 quality)
         assert len(feature_names) == 37
-        
+
         # Should be strings
         assert all(isinstance(name, str) for name in feature_names)
-        
-        # Should have expected features
+
+        # Should have expected STATIONARY features
         assert 'vol_liq1_ratio' in feature_names
-        assert 'atr' in feature_names
+        assert 'atr_relative' in feature_names  # Changed from 'atr'
         assert 'hour' in feature_names
         assert 'risk_reward_ratio' in feature_names
         assert 'consol_quality_score' in feature_names
+
+        # OLD non-stationary names should NOT exist
+        assert 'atr' not in feature_names
+        assert 'entry_to_lse_high' not in feature_names
+        assert 'lse_range' not in feature_names
+        assert 'nowick_body_size' not in feature_names
+        assert 'price_volatility_std' not in feature_names
 
     def test_missing_data_handling(self, sample_ohlcv):
         """Test handling of missing data in setup"""
@@ -341,23 +348,23 @@ class TestFeatureEngineer:
     def test_feature_ranges(self, sample_ohlcv, sample_setup):
         """Test that features are in reasonable ranges"""
         features = FeatureEngineer.extract_features(sample_ohlcv, sample_setup)
-        
+
         # Volume ratios should be positive
         assert features['vol_liq1_ratio'] > 0
         assert features['vol_liq2_ratio'] > 0
-        
-        # ATR should be positive
-        assert features['atr'] > 0
-        
+
+        # ATR relative should be positive
+        assert features['atr_relative'] > 0
+
         # Percentile should be 0-100
         assert 0 <= features['atr_percentile'] <= 100
-        
+
         # Hour should be 0-23
         assert 0 <= features['hour'] <= 23
-        
+
         # Minute should be 0-59
         assert 0 <= features['minute'] <= 59
-        
+
         # Quality scores should be 0-1
         assert 0 <= features['consol_quality_score'] <= 1
         assert 0 <= features['liq1_confidence'] <= 1

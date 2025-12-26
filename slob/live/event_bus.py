@@ -42,6 +42,9 @@ class EventType(Enum):
     CIRCUIT_BREAKER_TRIGGERED = "circuit_breaker_triggered"
     SAFE_MODE_ENTERED = "safe_mode_entered"
 
+    # ML Shadow Mode events
+    ML_SHADOW_PREDICTION = "ml_shadow_prediction"
+
 
 @dataclass
 class Event:

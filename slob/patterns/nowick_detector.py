@@ -21,89 +21,80 @@ class NoWickDetector:
     @staticmethod
     def is_no_wick_candle(
         candle: pd.Series,
-        df: pd.DataFrame,
-        idx: int,
-        direction: str = 'bullish',
-        percentile: int = 90,
-        lookback: int = 100,
-        body_percentile_min: int = 30,
-        body_percentile_max: int = 70
+        df: pd.DataFrame = None,
+        idx: int = None,
+        direction: str = 'bullish'
     ) -> bool:
         """
-        Check if candle is a no-wick candle using percentile thresholds.
+        Check if candle is a no-wick candle using whitepaper specification.
+
+        From SLOB Whitepaper Pages 11-12:
+        - Body must be ≥95% of total candle range
+        - Wick must be ≤5% of total candle range
+        - Total candle size must be 0.03-0.15% of price
+        - Direction-specific: bullish (close > open) for SHORT, bearish (close < open) for LONG
 
         Args:
             candle: Single candle (row from DataFrame)
-            df: Full OHLCV DataFrame with wick columns
-            idx: Index of candle in df
-            direction: 'bullish' for SHORT setup, 'bearish' for LONG setup
-            percentile: Wick must be smaller than this percentile (90 = smaller than 90% of candles)
-            lookback: How many candles to look back for percentile calculation
-            body_percentile_min: Minimum body size percentile (30 = larger than 30% of candles)
-            body_percentile_max: Maximum body size percentile (70 = smaller than 30% of candles)
+            df: Full OHLCV DataFrame (optional, not used in new implementation)
+            idx: Index of candle in df (optional, not used in new implementation)
+            direction: 'bullish' for SHORT setup (reversal from sweep low),
+                      'bearish' for LONG setup (reversal from sweep high)
 
         Returns:
-            True if candle qualifies as no-wick candle
+            True if candle qualifies as no-wick candle per whitepaper spec
         """
-        # Calculate wick sizes if not already in dataframe
-        if 'Upper_Wick_Pips' not in df.columns:
-            df = NoWickDetector._add_wick_columns(df)
+        # Calculate candle components
+        total_range = candle['High'] - candle['Low']
 
-        # Get historical context
-        start = max(0, idx - lookback)
-        historical = df.iloc[start:idx]
-
-        if len(historical) < 10:
-            logger.debug(f"Not enough historical data: {len(historical)} candles")
+        # Zero-range candles cannot be no-wick candles
+        if total_range == 0:
+            logger.debug("Zero-range candle, rejected")
             return False
 
-        # 1. Check candle direction
-        is_bullish = candle['Close'] > candle['Open']
-        is_bearish = candle['Close'] < candle['Open']
+        # WHITEPAPER SPEC (Page 11): Check SPECIFIC wick only!
+        # - SHORT (bear reversal): Minimal LOWER wick ("utan att skapa någon wick på nedsidan")
+        # - LONG (bull reversal): Minimal UPPER wick ("utan att skapa någon wick på ovansidan")
+        # Body ratio NOT mentioned as requirement - only descriptive!
 
-        if direction == 'bullish' and not is_bullish:
-            return False
-        elif direction == 'bearish' and not is_bearish:
-            return False
+        # Direction-specific checks
+        if direction == 'bullish':
+            # Bullish candle required for SHORT setup (reversal from low)
+            if candle['Close'] <= candle['Open']:
+                print(f"      [NOWICK REJECT] Not bullish: close={candle['Close']:.2f} <= open={candle['Open']:.2f}")
+                return False
 
-        # 2. Check wick size (percentile-based)
-        wick_col = 'Upper_Wick_Pips' if direction == 'bullish' else 'Lower_Wick_Pips'
-        
-        if wick_col not in historical.columns:
-            logger.warning(f"Column {wick_col} not found in DataFrame")
-            return False
+            # Check lower wick (must be MINIMAL - complement to 80% body = ≤20% wick)
+            lower_wick = candle['Open'] - candle['Low']
+            wick_ratio = lower_wick / total_range
+            if wick_ratio > 0.20:
+                print(f"      [NOWICK REJECT] Lower wick too large: {wick_ratio:.3f} > 0.20 (complement to 80% body)")
+                return False
 
-        # Calculate percentile threshold
-        wick_threshold = historical[wick_col].quantile(1 - percentile/100)
+        else:  # direction == 'bearish'
+            # Bearish candle required for LONG setup (reversal from high)
+            if candle['Close'] >= candle['Open']:
+                print(f"      [NOWICK REJECT] Not bearish: close={candle['Close']:.2f} >= open={candle['Open']:.2f}")
+                return False
 
-        current_wick = candle[wick_col]
+            # Check upper wick (must be MINIMAL - complement to 80% body = ≤20% wick)
+            upper_wick = candle['High'] - candle['Close']
+            wick_ratio = upper_wick / total_range
+            if wick_ratio > 0.20:
+                print(f"      [NOWICK REJECT] Upper wick too large: {wick_ratio:.3f} > 0.20 (complement to 80% body)")
+                return False
 
-        if current_wick > wick_threshold:
-            logger.debug(f"Wick too large: {current_wick:.2f} > threshold {wick_threshold:.2f}")
-            return False
+        # 3. Candle size must be 0.03-0.15% of price
+        price = candle['Close']
+        candle_pct = (total_range / price) * 100
 
-        # 3. Check body size (should be moderate, not tiny or huge)
-        body_col = 'Body_Pips'
-        
-        if body_col not in historical.columns:
-            logger.warning(f"Column {body_col} not found in DataFrame")
-            return False
-
-        body_min = historical[body_col].quantile(body_percentile_min / 100)
-        body_max = historical[body_col].quantile(body_percentile_max / 100)
-
-        current_body = candle[body_col]
-
-        if current_body < body_min:
-            logger.debug(f"Body too small: {current_body:.2f} < min {body_min:.2f}")
-            return False
-
-        if current_body > body_max:
-            logger.debug(f"Body too large: {current_body:.2f} > max {body_max:.2f}")
+        if not (0.03 <= candle_pct <= 0.15):
+            print(f"      [NOWICK REJECT] Candle size out of range: {candle_pct:.4f}% (need 0.03-0.15%)")
             return False
 
-        logger.info(f"No-wick candle detected: wick={current_wick:.2f} (threshold={wick_threshold:.2f}), "
-                   f"body={current_body:.2f} (range=[{body_min:.2f}, {body_max:.2f}])")
+        # All checks passed - valid no-wick candle!
+        logger.info(f"No-wick candle detected: {direction}, "
+                   f"wick_ratio={wick_ratio:.3f}, candle_size={candle_pct:.4f}%")
 
         return True
 

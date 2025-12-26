@@ -1,11 +1,18 @@
 """
 Web Dashboard for SLOB Trading System
 
-Simple Flask-based dashboard showing:
+Secure Flask-based dashboard showing:
 - System status
 - Active setups
 - Recent trades
 - Performance metrics
+- ML shadow mode statistics
+
+Features:
+- Password authentication (Flask-Login)
+- Session management (15-minute timeout)
+- Rate limiting (10 login attempts/minute)
+- CSRF protection
 
 Usage:
     python -m slob.monitoring.dashboard
@@ -21,16 +28,132 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_wtf import CSRFProtect
+from werkzeug.security import check_password_hash
 
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('DASHBOARD_SECRET_KEY', 'slob-dashboard-secret-key')
+
+# Configuration
+app.config['SECRET_KEY'] = os.getenv('DASHBOARD_SECRET_KEY', 'slob-dashboard-secret-key-CHANGE-ME')
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15)  # 15-minute timeout
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('DASHBOARD_HTTPS', 'False').lower() == 'true'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['WTF_CSRF_ENABLED'] = True
+app.config['WTF_CSRF_TIME_LIMIT'] = None  # CSRF token doesn't expire
+
+# Initialize extensions
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Please log in to access the dashboard.'
+
+csrf = CSRFProtect(app)
+
+# Rate limiting: 10 login attempts per minute per IP
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 # Database paths
 DB_PATH = Path(os.getenv('DB_PATH', 'data/candles.db'))
 STATE_DB_PATH = Path(os.getenv('STATE_DB_PATH', 'data/slob_state.db'))
+
+
+# ============================================================================
+# User Authentication
+# ============================================================================
+
+class User(UserMixin):
+    """Simple user model for dashboard authentication."""
+
+    def __init__(self, user_id: str, username: str):
+        self.id = user_id
+        self.username = username
+
+
+@login_manager.user_loader
+def load_user(user_id: str):
+    """Load user for session management."""
+    # Simple single-user system (admin only)
+    if user_id == "1":
+        return User("1", "admin")
+    return None
+
+
+def verify_password(password: str) -> bool:
+    """
+    Verify password against stored hash.
+
+    Password hash stored in environment variable:
+    DASHBOARD_PASSWORD_HASH (bcrypt hash)
+
+    Generate hash with:
+    python -c "from werkzeug.security import generate_password_hash;
+               import getpass;
+               print(generate_password_hash(getpass.getpass('Password: ')))"
+    """
+    password_hash = os.getenv('DASHBOARD_PASSWORD_HASH')
+
+    if not password_hash:
+        logger.error("❌ DASHBOARD_PASSWORD_HASH not set - dashboard is INSECURE")
+        # Fallback to plaintext comparison (INSECURE - for development only)
+        fallback_password = os.getenv('DASHBOARD_PASSWORD', 'admin')
+        logger.warning(f"⚠️ Using insecure plaintext password comparison")
+        return password == fallback_password
+
+    return check_password_hash(password_hash, password)
+
+
+# ============================================================================
+# Authentication Routes
+# ============================================================================
+
+@app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")  # Rate limit: 10 attempts per minute
+def login():
+    """Login page and handler."""
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+
+        if verify_password(password):
+            user = User("1", "admin")
+            login_user(user, remember=False)
+            logger.info(f"✅ User logged in from {get_remote_address()}")
+
+            # Redirect to original destination or dashboard
+            next_page = request.args.get('next')
+            if not next_page or not next_page.startswith('/'):
+                next_page = url_for('index')
+
+            return redirect(next_page)
+        else:
+            logger.warning(f"❌ Failed login attempt from {get_remote_address()}")
+            flash('Invalid password', 'error')
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    """Logout handler."""
+    logger.info(f"User logged out from {get_remote_address()}")
+    logout_user()
+    flash('You have been logged out', 'info')
+    return redirect(url_for('login'))
 
 
 def get_system_status() -> Dict[str, Any]:
@@ -185,43 +308,320 @@ def get_performance_metrics() -> Dict[str, Any]:
 
 
 @app.route('/')
+@login_required
 def index():
     """Main dashboard page."""
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=current_user.username)
 
 
 @app.route('/api/status')
+@login_required
 def api_status():
     """Get system status API."""
     return jsonify(get_system_status())
 
 
 @app.route('/api/setups')
+@login_required
 def api_setups():
     """Get active setups API."""
     return jsonify(get_active_setups())
 
 
 @app.route('/api/trades')
+@login_required
 def api_trades():
     """Get recent trades API."""
     return jsonify(get_recent_trades())
 
 
 @app.route('/api/metrics')
+@login_required
 def api_metrics():
     """Get performance metrics API."""
     return jsonify(get_performance_metrics())
 
 
+@app.route('/api/shadow_stats')
+@login_required
+def api_shadow_stats():
+    """Get ML shadow mode statistics."""
+    try:
+        if not STATE_DB_PATH.exists():
+            return jsonify({'enabled': False, 'error': 'Database not found'})
+
+        conn = sqlite3.connect(str(STATE_DB_PATH))
+        cursor = conn.cursor()
+
+        # Check if shadow_predictions table exists
+        cursor.execute("""
+            SELECT name FROM sqlite_master
+            WHERE type='table' AND name='shadow_predictions'
+        """)
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({'enabled': False, 'reason': 'Shadow mode not initialized'})
+
+        # Overall stats
+        cursor.execute("""
+            SELECT
+                COUNT(*) as total_predictions,
+                SUM(CASE WHEN agreement = 1 THEN 1 ELSE 0 END) as agreements,
+                AVG(ml_probability) as avg_ml_prob,
+                SUM(CASE WHEN ml_decision = 'TAKE' THEN 1 ELSE 0 END) as ml_approved,
+                SUM(CASE WHEN ml_decision = 'SKIP' THEN 1 ELSE 0 END) as ml_rejected
+            FROM shadow_predictions
+        """)
+        row = cursor.fetchone()
+        total, agreements, avg_prob, ml_approved, ml_rejected = row
+
+        # Recent predictions (last 10)
+        cursor.execute("""
+            SELECT
+                setup_id, timestamp, ml_probability,
+                ml_decision, rule_decision, agreement
+            FROM shadow_predictions
+            ORDER BY timestamp DESC
+            LIMIT 10
+        """)
+        recent = [
+            {
+                'setup_id': row[0],
+                'timestamp': row[1],
+                'ml_probability': row[2],
+                'ml_decision': row[3],
+                'rule_decision': row[4],
+                'agreement': bool(row[5])
+            }
+            for row in cursor.fetchall()
+        ]
+
+        conn.close()
+
+        if total == 0:
+            agreement_rate = 0.0
+        else:
+            agreement_rate = agreements / total
+
+        return jsonify({
+            'enabled': True,
+            'total_predictions': total or 0,
+            'agreements': agreements or 0,
+            'disagreements': (total or 0) - (agreements or 0),
+            'agreement_rate': agreement_rate,
+            'avg_ml_probability': avg_prob or 0.0,
+            'ml_approved': ml_approved or 0,
+            'ml_rejected': ml_rejected or 0,
+            'recent_predictions': recent
+        })
+    except Exception as e:
+        logger.error(f"Error getting shadow stats: {e}")
+        return jsonify({'enabled': False, 'error': str(e)})
+
+
+@app.route('/api/pnl_chart')
+@login_required
+def api_pnl_chart():
+    """Get P&L data for charting (daily aggregation)."""
+    try:
+        if not STATE_DB_PATH.exists():
+            return jsonify({'labels': [], 'data': []})
+
+        conn = sqlite3.connect(str(STATE_DB_PATH))
+        cursor = conn.cursor()
+
+        # Get daily P&L for last 30 days
+        cursor.execute("""
+            SELECT
+                DATE(entry_time) as trade_date,
+                SUM(pnl) as daily_pnl,
+                COUNT(*) as trades_count
+            FROM trade_history
+            WHERE entry_time >= datetime('now', '-30 days')
+            GROUP BY DATE(entry_time)
+            ORDER BY trade_date ASC
+        """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        if not rows:
+            return jsonify({'labels': [], 'data': [], 'cumulative': []})
+
+        labels = [row[0] for row in rows]
+        daily_pnl = [float(row[1]) for row in rows]
+
+        # Calculate cumulative P&L
+        cumulative_pnl = []
+        running_total = 0
+        for pnl in daily_pnl:
+            running_total += pnl
+            cumulative_pnl.append(running_total)
+
+        return jsonify({
+            'labels': labels,
+            'daily_pnl': daily_pnl,
+            'cumulative_pnl': cumulative_pnl,
+            'trades_count': [row[2] for row in rows]
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting P&L chart data: {e}")
+        return jsonify({'labels': [], 'data': [], 'error': str(e)})
+
+
+@app.route('/api/risk_metrics')
+@login_required
+def api_risk_metrics():
+    """Get risk management metrics."""
+    try:
+        if not STATE_DB_PATH.exists():
+            return jsonify({
+                'current_drawdown': 0.0,
+                'max_drawdown': 0.0,
+                'sharpe_ratio': 0.0,
+                'circuit_breaker_active': False
+            })
+
+        conn = sqlite3.connect(str(STATE_DB_PATH))
+        cursor = conn.cursor()
+
+        # Get all trades ordered by time
+        cursor.execute("""
+            SELECT entry_time, pnl
+            FROM trade_history
+            ORDER BY entry_time ASC
+        """)
+        trades = cursor.fetchall()
+        conn.close()
+
+        if not trades:
+            return jsonify({
+                'current_drawdown': 0.0,
+                'max_drawdown': 0.0,
+                'sharpe_ratio': 0.0,
+                'profit_factor': 0.0,
+                'circuit_breaker_active': False
+            })
+
+        # Calculate metrics
+        pnls = [float(t[1]) for t in trades]
+
+        # Cumulative P&L and drawdown
+        cumulative = []
+        running_total = 0
+        for pnl in pnls:
+            running_total += pnl
+            cumulative.append(running_total)
+
+        # Max drawdown
+        peak = cumulative[0]
+        max_dd = 0
+        current_dd = 0
+
+        for value in cumulative:
+            if value > peak:
+                peak = value
+            dd = peak - value
+            if dd > max_dd:
+                max_dd = dd
+
+        current_dd = peak - cumulative[-1] if cumulative else 0
+
+        # Sharpe Ratio (simplified - daily returns)
+        if len(pnls) > 1:
+            import statistics
+            mean_pnl = statistics.mean(pnls)
+            std_pnl = statistics.stdev(pnls)
+            sharpe = (mean_pnl / std_pnl) if std_pnl > 0 else 0
+        else:
+            sharpe = 0
+
+        # Profit Factor
+        gross_profit = sum(p for p in pnls if p > 0)
+        gross_loss = abs(sum(p for p in pnls if p < 0))
+        profit_factor = gross_profit / gross_loss if gross_loss > 0 else 0
+
+        # Circuit breaker (check if current drawdown > 5% of account)
+        # Assuming starting balance of $100,000 for demo
+        starting_balance = 100000
+        circuit_breaker_threshold = 0.05  # 5%
+        circuit_breaker_active = current_dd > (starting_balance * circuit_breaker_threshold)
+
+        return jsonify({
+            'current_drawdown': round(current_dd, 2),
+            'max_drawdown': round(max_dd, 2),
+            'sharpe_ratio': round(sharpe, 2),
+            'profit_factor': round(profit_factor, 2),
+            'circuit_breaker_active': circuit_breaker_active,
+            'total_trades': len(trades)
+        })
+
+    except Exception as e:
+        logger.error(f"Error calculating risk metrics: {e}")
+        return jsonify({
+            'current_drawdown': 0.0,
+            'max_drawdown': 0.0,
+            'sharpe_ratio': 0.0,
+            'error': str(e)
+        })
+
+
+@app.route('/api/error_logs')
+@login_required
+def api_error_logs():
+    """Get recent error logs."""
+    try:
+        log_dir = Path('logs')
+        if not log_dir.exists():
+            return jsonify({'logs': [], 'message': 'No log directory found'})
+
+        # Find most recent log file
+        log_files = sorted(log_dir.glob('*.log'), key=lambda p: p.stat().st_mtime, reverse=True)
+
+        if not log_files:
+            return jsonify({'logs': [], 'message': 'No log files found'})
+
+        # Read last 50 lines from most recent log file
+        log_file = log_files[0]
+
+        with open(log_file, 'r') as f:
+            lines = f.readlines()
+            recent_lines = lines[-50:] if len(lines) > 50 else lines
+
+        # Filter for ERROR and CRITICAL entries
+        error_logs = []
+        for line in recent_lines:
+            if 'ERROR' in line or 'CRITICAL' in line or '❌' in line:
+                error_logs.append({
+                    'message': line.strip(),
+                    'level': 'CRITICAL' if 'CRITICAL' in line else 'ERROR',
+                    'timestamp': datetime.now().isoformat()  # Extract from log if format is consistent
+                })
+
+        return jsonify({
+            'logs': error_logs[-20:],  # Last 20 errors
+            'log_file': str(log_file),
+            'total_errors': len(error_logs)
+        })
+
+    except Exception as e:
+        logger.error(f"Error reading logs: {e}")
+        return jsonify({'logs': [], 'error': str(e)})
+
+
 @app.route('/api/all')
+@login_required
 def api_all():
     """Get all dashboard data in one call."""
     return jsonify({
         'status': get_system_status(),
         'setups': get_active_setups(),
         'trades': get_recent_trades(),
-        'metrics': get_performance_metrics()
+        'metrics': get_performance_metrics(),
+        'shadow': api_shadow_stats().get_json(),
+        'risk': api_risk_metrics().get_json(),
+        'pnl_chart': api_pnl_chart().get_json()
     })
 
 
@@ -232,7 +632,10 @@ def run_dashboard(host='0.0.0.0', port=5000, debug=False):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    from slob.monitoring.logging_config import setup_logging
+
+    # Setup logging with rotation
+    setup_logging(log_dir='logs/', console_level=logging.INFO, file_level=logging.DEBUG)
 
     port = int(os.getenv('DASHBOARD_PORT', 5000))
     debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'

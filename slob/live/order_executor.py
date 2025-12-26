@@ -151,29 +151,20 @@ class OrderExecutor:
 
     async def initialize(self):
         """
-        Initialize IB connection and resolve NQ contract.
+        Initialize IB connection and resolve NQ contract with retry logic.
 
         Steps:
-        1. Connect to IB TWS/Gateway
+        1. Connect to IB TWS/Gateway (with retry)
         2. Resolve NQ front month contract
         3. Verify account and permissions
         """
         logger.info("Initializing OrderExecutor...")
 
-        # Connect to IB
-        self.ib = IB()
+        # Connect to IB with retry logic
+        success = await self.connect_with_retry()
 
-        try:
-            await self.ib.connectAsync(
-                host=self.config.host,
-                port=self.config.port,
-                clientId=self.config.client_id,
-                readonly=False  # Need write access for orders
-            )
-            logger.info(f"✅ Connected to IB: {self.config.host}:{self.config.port}")
-        except Exception as e:
-            logger.error(f"Failed to connect to IB: {e}")
-            raise
+        if not success:
+            raise ConnectionError("Failed to connect to IB after multiple attempts")
 
         # Resolve NQ contract
         self.nq_contract = await self._resolve_nq_contract()
@@ -185,6 +176,89 @@ class OrderExecutor:
             logger.info(f"Account: {self.config.account} ({len(account_values)} values)")
 
         logger.info("✅ OrderExecutor initialized")
+
+    async def connect_with_retry(self, max_attempts: int = 10) -> bool:
+        """
+        Connect to IB with exponential backoff retry.
+
+        Args:
+            max_attempts: Maximum number of connection attempts
+
+        Returns:
+            True if connected successfully, False otherwise
+        """
+        self.ib = IB()
+        attempt = 0
+
+        while attempt < max_attempts:
+            try:
+                logger.info(
+                    f"Connecting OrderExecutor to IB at {self.config.host}:{self.config.port} "
+                    f"(attempt {attempt + 1}/{max_attempts})"
+                )
+
+                await self.ib.connectAsync(
+                    host=self.config.host,
+                    port=self.config.port,
+                    clientId=self.config.client_id,
+                    readonly=False  # Need write access for orders
+                )
+
+                logger.info(f"✅ OrderExecutor connected to IB: {self.config.host}:{self.config.port}")
+                return True
+
+            except Exception as e:
+                attempt += 1
+
+                if attempt >= max_attempts:
+                    logger.critical(
+                        f"❌ OrderExecutor failed to connect after {max_attempts} attempts: {e}"
+                    )
+                    return False
+
+                # Exponential backoff: 2^attempt seconds, max 60s
+                delay = min(2 ** attempt, 60)
+                logger.warning(
+                    f"OrderExecutor connection failed (attempt {attempt}/{max_attempts}): {e}. "
+                    f"Retrying in {delay}s..."
+                )
+                await asyncio.sleep(delay)
+
+        return False
+
+    async def reconnect(self) -> bool:
+        """
+        Reconnect to IB after connection loss.
+
+        Attempts to restore connection and re-resolve NQ contract.
+
+        Returns:
+            True if reconnected successfully
+        """
+        logger.info("Attempting to reconnect OrderExecutor...")
+
+        # Disconnect cleanly first
+        if self.ib and self.ib.isConnected():
+            self.ib.disconnect()
+
+        # Reconnect
+        success = await self.connect_with_retry(max_attempts=5)
+
+        if success:
+            # Re-resolve NQ contract
+            try:
+                self.nq_contract = await self._resolve_nq_contract()
+                logger.info(f"✅ OrderExecutor reconnected and NQ contract re-resolved")
+                return True
+            except Exception as e:
+                logger.error(f"Failed to re-resolve NQ contract: {e}")
+                return False
+
+        return False
+
+    def is_connected(self) -> bool:
+        """Check if IB connection is active."""
+        return self.ib is not None and self.ib.isConnected()
 
     async def _resolve_nq_contract(self) -> Future:
         """
@@ -246,6 +320,21 @@ class OrderExecutor:
         Returns:
             BracketOrderResult with all order details
         """
+        # Check connection health - reconnect if needed
+        if not self.is_connected():
+            logger.warning("IB connection lost, attempting reconnection...")
+            reconnected = await self.reconnect()
+            if not reconnected:
+                return BracketOrderResult(
+                    entry_order=OrderResult(
+                        order_id=0,
+                        status=OrderStatus.REJECTED,
+                        error_message="IB connection lost and reconnection failed"
+                    ),
+                    success=False,
+                    error_message="IB connection lost and reconnection failed"
+                )
+
         if not setup.entry_price or not setup.sl_price or not setup.tp_price:
             return BracketOrderResult(
                 entry_order=OrderResult(

@@ -132,7 +132,19 @@ class RiskManager:
         if atr is not None and not self.use_kelly:
             # Position size inversely proportional to volatility
             # Higher ATR = smaller position size
-            contracts = base_risk / atr
+
+            # Validate ATR before division
+            if atr == 0 or np.isnan(atr) or np.isinf(atr):
+                logger.warning(f"Invalid ATR value ({atr}), using fallback position size of 1 contract")
+                contracts = 1
+            else:
+                contracts = base_risk / atr
+
+                # Safety check after calculation
+                if np.isinf(contracts) or np.isnan(contracts) or contracts <= 0:
+                    logger.warning(f"Invalid contracts calculation ({contracts}), using fallback of 1 contract")
+                    contracts = 1
+
             position_size = contracts * entry_price
 
             return {
@@ -420,10 +432,19 @@ class PositionSizer:
         """
         risk_amount = capital * risk_pct
 
-        if atr == 0:
-            return 0, 0
+        # Validate ATR
+        if atr == 0 or atr is None or np.isnan(atr) or np.isinf(atr):
+            # Fallback to 1 contract
+            contracts = 1
+            position_size = contracts * entry
+            return position_size, int(contracts)
 
         contracts = risk_amount / atr
+
+        # Safety check after calculation
+        if np.isinf(contracts) or np.isnan(contracts) or contracts <= 0:
+            contracts = 1
+
         position_size = contracts * entry
 
         return position_size, int(contracts)

@@ -1,6 +1,30 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: slob-redis
+    command: >
+      sh -c "sed 's/__REDIS_PASSWORD__/'$$REDIS_PASSWORD'/g' /usr/local/etc/redis/redis.conf > /tmp/redis.conf &&
+             redis-server /tmp/redis.conf"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-slob-redis-password-change-me}
+    volumes:
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./certs:/etc/redis/certs:ro
+      - redis-data:/data
+      - redis-logs:/var/log/redis
+    networks:
+      - trading-net
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--tls", "--cacert", "/etc/redis/certs/ca.crt", "--cert", "/etc/redis/certs/redis.crt", "--key", "/etc/redis/certs/redis.key", "-a", "$$REDIS_PASSWORD", "PING"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   ib-gateway:
     image: ghcr.io/gnzsnz/ib-gateway:stable
     container_name: ib-gateway
@@ -28,6 +52,8 @@ services:
     depends_on:
       ib-gateway:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       IB_GATEWAY_HOST: ib-gateway
       IB_GATEWAY_PORT: 4002
@@ -41,11 +67,20 @@ services:
       SENDER_EMAIL: ${SENDER_EMAIL:-}
       SENDER_PASSWORD: ${SENDER_PASSWORD:-}
       ALERT_EMAILS: ${ALERT_EMAILS:-}
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_TLS_ENABLED: true
+      REDIS_CA_CERT: /app/certs/ca.crt
+      REDIS_CLIENT_CERT: /app/certs/redis.crt
+      REDIS_CLIENT_KEY: /app/certs/redis.key
     env_file:
       - .env
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
+      - ./certs:/app/certs:ro
     networks:
       - trading-net
     restart: unless-stopped
@@ -63,3 +98,5 @@ networks:
 volumes:
   data:
   logs:
+  redis-data:
+  redis-logs:

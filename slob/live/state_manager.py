@@ -45,6 +45,11 @@ class StateManagerConfig:
         sqlite_path: str = 'data/slob_state.db',
         backup_dir: str = 'data/backups',
         enable_redis: bool = True,
+        # TLS/SSL configuration
+        redis_tls_enabled: bool = False,
+        redis_ca_cert: Optional[str] = None,
+        redis_client_cert: Optional[str] = None,
+        redis_client_key: Optional[str] = None,
     ):
         self.redis_host = redis_host
         self.redis_port = redis_port
@@ -53,6 +58,11 @@ class StateManagerConfig:
         self.sqlite_path = sqlite_path
         self.backup_dir = backup_dir
         self.enable_redis = enable_redis and REDIS_AVAILABLE
+        # TLS settings
+        self.redis_tls_enabled = redis_tls_enabled
+        self.redis_ca_cert = redis_ca_cert
+        self.redis_client_cert = redis_client_cert
+        self.redis_client_key = redis_client_key
 
 
 class StateManager:
@@ -100,15 +110,34 @@ class StateManager:
         # Redis connection
         if self.config.enable_redis:
             try:
-                self.redis_client = redis.Redis(
-                    host=self.config.redis_host,
-                    port=self.config.redis_port,
-                    db=self.config.redis_db,
-                    password=self.config.redis_password,
-                    decode_responses=True
-                )
+                # Build Redis connection parameters
+                redis_params = {
+                    'host': self.config.redis_host,
+                    'port': self.config.redis_port,
+                    'db': self.config.redis_db,
+                    'password': self.config.redis_password,
+                    'decode_responses': True
+                }
+
+                # Add TLS/SSL parameters if enabled
+                if self.config.redis_tls_enabled:
+                    redis_params['ssl'] = True
+                    redis_params['ssl_cert_reqs'] = 'required'
+
+                    if self.config.redis_ca_cert:
+                        redis_params['ssl_ca_certs'] = self.config.redis_ca_cert
+                    if self.config.redis_client_cert:
+                        redis_params['ssl_certfile'] = self.config.redis_client_cert
+                    if self.config.redis_client_key:
+                        redis_params['ssl_keyfile'] = self.config.redis_client_key
+
+                    logger.info(f"Connecting to Redis with TLS enabled...")
+
+                self.redis_client = redis.Redis(**redis_params)
                 await self.redis_client.ping()
-                logger.info(f"✅ Redis connected: {self.config.redis_host}:{self.config.redis_port}")
+
+                tls_status = "with TLS" if self.config.redis_tls_enabled else "without TLS"
+                logger.info(f"✅ Redis connected ({tls_status}): {self.config.redis_host}:{self.config.redis_port}")
             except Exception as e:
                 logger.warning(f"Redis connection failed: {e}. Using in-memory fallback.")
                 self.redis_client = None
@@ -247,12 +276,38 @@ class StateManager:
             )
         """)
 
+        # Table: shadow_predictions (ML shadow mode predictions)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS shadow_predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                setup_id TEXT NOT NULL,
+                timestamp TIMESTAMP NOT NULL,
+                ml_probability REAL NOT NULL,
+                ml_decision TEXT NOT NULL,
+                ml_threshold REAL NOT NULL,
+                rule_decision TEXT NOT NULL,
+                agreement BOOLEAN NOT NULL,
+                features TEXT,
+                model_version TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                -- Link to actual trade outcome (filled later)
+                actual_outcome TEXT,
+                actual_pnl REAL,
+
+                FOREIGN KEY (setup_id) REFERENCES setups(id)
+            )
+        """)
+
         # Indexes for performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_setups_state ON setups(state)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_setups_created ON setups(created_at)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_trades_setup ON trades(setup_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_trades_entry_time ON trades(entry_time)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_session_date ON session_state(date)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_timestamp ON shadow_predictions(timestamp)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_agreement ON shadow_predictions(agreement)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_setup ON shadow_predictions(setup_id)")
 
         self.sqlite_conn.commit()
         logger.info(f"✅ SQLite initialized: {self.config.sqlite_path}")
@@ -546,6 +601,140 @@ class StateManager:
             trades.append(dict(row))
 
         return trades
+
+    # ─────────────────────────────────────────────────────────────────
+    # ML SHADOW MODE (SQLite only)
+    # ─────────────────────────────────────────────────────────────────
+
+    async def save_shadow_result(self, shadow_result: Dict):
+        """
+        Save ML shadow prediction to database.
+
+        Stores:
+        - Setup ID
+        - ML probability and decision
+        - Rule-based decision
+        - Agreement/disagreement
+        - Feature values (as JSON)
+        - Model version
+
+        Args:
+            shadow_result: Dict with shadow prediction details
+                - setup_id
+                - timestamp
+                - ml_probability
+                - ml_decision ('TAKE' or 'SKIP')
+                - ml_threshold
+                - rule_decision ('TAKE')
+                - agreement (bool)
+                - features (dict or DataFrame)
+                - model_version
+        """
+        cursor = self.sqlite_conn.cursor()
+
+        # Convert features to JSON if it's a DataFrame or dict
+        features_json = shadow_result.get('features')
+        if hasattr(features_json, 'to_dict'):  # DataFrame
+            features_json = json.dumps(features_json.to_dict('records')[0])
+        elif isinstance(features_json, dict):
+            features_json = json.dumps(features_json)
+        elif isinstance(features_json, str):
+            pass  # Already JSON
+        else:
+            features_json = None
+
+        cursor.execute("""
+            INSERT INTO shadow_predictions (
+                setup_id, timestamp, ml_probability, ml_decision,
+                ml_threshold, rule_decision, agreement,
+                features, model_version
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            shadow_result['setup_id'],
+            shadow_result['timestamp'],
+            shadow_result['ml_probability'],
+            shadow_result['ml_decision'],
+            shadow_result['ml_threshold'],
+            shadow_result['rule_decision'],
+            shadow_result['agreement'],
+            features_json,
+            shadow_result.get('model_version', 'unknown')
+        ))
+
+        self.sqlite_conn.commit()
+        logger.debug(f"✅ Shadow result saved: {shadow_result['setup_id'][:8]} "
+                    f"(ML={shadow_result['ml_probability']:.1%}, agree={shadow_result['agreement']})")
+
+    async def update_shadow_outcome(self, setup_id: str, outcome: str, pnl: float):
+        """
+        Update shadow prediction with actual trade outcome.
+
+        Called when trade completes to backfill actual results.
+
+        Args:
+            setup_id: Setup ID to update
+            outcome: 'WIN' or 'LOSS'
+            pnl: Actual P&L in dollars
+        """
+        cursor = self.sqlite_conn.cursor()
+
+        cursor.execute("""
+            UPDATE shadow_predictions
+            SET actual_outcome = ?, actual_pnl = ?
+            WHERE setup_id = ?
+        """, (outcome, pnl, setup_id))
+
+        self.sqlite_conn.commit()
+        logger.debug(f"✅ Shadow outcome updated: {setup_id[:8]} ({outcome}, ${pnl:.2f})")
+
+    async def get_shadow_statistics(self, days: int = 30) -> Dict[str, Any]:
+        """
+        Get shadow mode statistics for analysis.
+
+        Args:
+            days: Number of days to look back
+
+        Returns:
+            Dict with statistics:
+                - total_predictions
+                - agreements
+                - disagreements
+                - agreement_rate
+                - avg_ml_probability
+                - predictions_by_decision
+        """
+        cursor = self.sqlite_conn.cursor()
+
+        # Overall stats
+        cursor.execute(f"""
+            SELECT
+                COUNT(*) as total,
+                SUM(CASE WHEN agreement = 1 THEN 1 ELSE 0 END) as agreements,
+                AVG(ml_probability) as avg_prob,
+                SUM(CASE WHEN ml_decision = 'TAKE' THEN 1 ELSE 0 END) as ml_approved,
+                SUM(CASE WHEN ml_decision = 'SKIP' THEN 1 ELSE 0 END) as ml_rejected
+            FROM shadow_predictions
+            WHERE timestamp > datetime('now', '-{days} days')
+        """)
+
+        row = cursor.fetchone()
+        total = row['total'] or 0
+        agreements = row['agreements'] or 0
+        avg_prob = row['avg_prob'] or 0.0
+        ml_approved = row['ml_approved'] or 0
+        ml_rejected = row['ml_rejected'] or 0
+
+        agreement_rate = agreements / total if total > 0 else 0.0
+
+        return {
+            'total_predictions': total,
+            'agreements': agreements,
+            'disagreements': total - agreements,
+            'agreement_rate': agreement_rate,
+            'avg_ml_probability': avg_prob,
+            'ml_approved': ml_approved,
+            'ml_rejected': ml_rejected
+        }
 
     # ─────────────────────────────────────────────────────────────────
     # SESSION STATE MANAGEMENT

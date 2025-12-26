@@ -49,8 +49,7 @@ data/*.db-wal
 data/*.sqlite
 data/*.sqlite3
 data/backups/
-data_cache/raw/
-data_cache/processed/
+data_cache/
 *.parquet
 *.db-journal
 
@@ -61,6 +60,7 @@ logs/
 # Output files
 outputs/
 reports/
+*.pdf
 
 # Jupyter
 .ipynb_checkpoints/
@@ -78,6 +78,15 @@ slob/ml/models/*.h5
 *.pem
 *.p12
 *.pfx
+secrets/
+secrets_backup_*.tar.gz
+docs/credential_rotation_log.txt
+
+# TLS Certificates
+certs/
+certs_backup_*.tar.gz
+*.crt
+*.csr
 
 # macOS
 .DS_Store
@@ -87,8 +96,10 @@ slob/ml/models/*.h5
 # Temporary files
 *.tmp
 *.bak
+*.backup
 *.swp
 *~.nib
+*~
 .cache/
 
 # Docker (generated files)

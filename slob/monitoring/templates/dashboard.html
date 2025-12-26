@@ -6,6 +6,7 @@
     <title>SLOB Trading Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -90,10 +91,18 @@
             <span class="navbar-brand mb-0 h1">
                 <i class="bi bi-bar-chart-fill"></i> SLOB Trading Dashboard
             </span>
-            <span class="text-white">
-                <i class="bi bi-circle-fill text-success" id="status-indicator"></i>
-                <span id="status-text">Loading...</span>
-            </span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white">
+                    <i class="bi bi-circle-fill text-success" id="status-indicator"></i>
+                    <span id="status-text">Loading...</span>
+                </span>
+                <span class="text-white">
+                    <i class="bi bi-person-circle"></i> {{ username }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -173,25 +182,131 @@
 
         <!-- Performance Metrics -->
         <div class="row">
-            <div class="col-12">
+            <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
                         <i class="bi bi-graph-up"></i> Performance Metrics
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <p><strong>Wins:</strong> <span id="wins" class="positive">-</span></p>
                                 <p><strong>Losses:</strong> <span id="losses" class="negative">-</span></p>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <p><strong>Avg Win:</strong> $<span id="avg-win">-</span></p>
                                 <p><strong>Avg Loss:</strong> $<span id="avg-loss">-</span></p>
                             </div>
-                            <div class="col-md-4">
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <p><strong>Last Update:</strong> <span id="last-update">-</span></p>
+                            </div>
+                            <div class="col-md-6">
                                 <p><strong>Total Candles:</strong> <span id="total-candles">-</span></p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ML Shadow Mode Stats -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-robot"></i> ML Shadow Mode
+                    </div>
+                    <div class="card-body">
+                        <div id="shadow-disabled" style="display: none;">
+                            <p class="text-muted">Shadow mode not enabled</p>
+                        </div>
+                        <div id="shadow-enabled" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Predictions:</strong> <span id="shadow-total">-</span></p>
+                                    <p><strong>Agreement:</strong> <span id="shadow-agreement">-</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>ML Approved:</strong> <span id="shadow-approved" class="positive">-</span></p>
+                                    <p><strong>ML Rejected:</strong> <span id="shadow-rejected" class="negative">-</span></p>
+                                </div>
+                            </div>
+                            <hr>
+                            <p><strong>Avg ML Probability:</strong> <span id="shadow-avg-prob">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P&L Chart -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up-arrow"></i> P&L Chart (Last 30 Days)
+                    </div>
+                    <div class="card-body">
+                        <canvas id="pnlChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Metrics -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-shield-check"></i> Risk Management
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p><strong>Current Drawdown:</strong></p>
+                                <h4 class="negative">$<span id="current-dd">-</span></h4>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Max Drawdown:</strong></p>
+                                <h4 class="negative">$<span id="max-dd">-</span></h4>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Sharpe Ratio:</strong></p>
+                                <h4 id="sharpe-ratio">-</h4>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Profit Factor:</strong></p>
+                                <h4 id="profit-factor">-</h4>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="alert alert-warning" id="circuit-breaker-warning" style="display: none;">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <strong>CIRCUIT BREAKER ACTIVE</strong> - Trading may be paused due to maximum drawdown
+                        </div>
+                        <div class="alert alert-success" id="circuit-breaker-ok" style="display: none;">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Circuit breaker: Normal (no risk threshold exceeded)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Logs -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-exclamation-circle"></i> Recent Errors
+                        <button class="btn btn-sm btn-outline-secondary float-end" onclick="refreshErrorLogs()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="error-logs-container" style="max-height: 300px; overflow-y: auto;">
+                            <p class="text-muted text-center">Loading error logs...</p>
                         </div>
                     </div>
                 </div>
@@ -208,6 +323,7 @@
     <script>
         // Auto-refresh every 30 seconds
         let autoRefreshInterval;
+        let pnlChart = null;
 
         function updateDashboard(data) {
             // System Status
@@ -237,6 +353,23 @@
             const pnl = metrics.total_pnl || 0;
             pnlElement.textContent = '$' + pnl.toFixed(2);
             pnlElement.className = 'stat-value ' + (pnl >= 0 ? 'positive' : 'negative');
+
+            // ML Shadow Mode
+            const shadow = data.shadow || {};
+            if (shadow.enabled) {
+                document.getElementById('shadow-disabled').style.display = 'none';
+                document.getElementById('shadow-enabled').style.display = 'block';
+                document.getElementById('shadow-total').textContent = shadow.total_predictions || 0;
+                document.getElementById('shadow-agreement').textContent =
+                    shadow.agreement_rate ? (shadow.agreement_rate * 100).toFixed(1) + '%' : '-';
+                document.getElementById('shadow-approved').textContent = shadow.ml_approved || 0;
+                document.getElementById('shadow-rejected').textContent = shadow.ml_rejected || 0;
+                document.getElementById('shadow-avg-prob').textContent =
+                    shadow.avg_ml_probability ? (shadow.avg_ml_probability * 100).toFixed(1) + '%' : '-';
+            } else {
+                document.getElementById('shadow-disabled').style.display = 'block';
+                document.getElementById('shadow-enabled').style.display = 'none';
+            }
 
             // Active Setups List
             const setupsList = document.getElementById('active-setups-list');
@@ -273,6 +406,157 @@
                     `;
                 }).join('');
             }
+
+            // Risk Metrics
+            const risk = data.risk || {};
+            document.getElementById('current-dd').textContent = risk.current_drawdown || '0.00';
+            document.getElementById('max-dd').textContent = risk.max_drawdown || '0.00';
+            document.getElementById('sharpe-ratio').textContent = risk.sharpe_ratio || '0.00';
+            document.getElementById('profit-factor').textContent = risk.profit_factor || '0.00';
+
+            // Circuit Breaker Status
+            if (risk.circuit_breaker_active) {
+                document.getElementById('circuit-breaker-warning').style.display = 'block';
+                document.getElementById('circuit-breaker-ok').style.display = 'none';
+            } else {
+                document.getElementById('circuit-breaker-warning').style.display = 'none';
+                document.getElementById('circuit-breaker-ok').style.display = 'block';
+            }
+
+            // P&L Chart
+            const chartData = data.pnl_chart || {};
+            updatePnLChart(chartData);
+        }
+
+        function updatePnLChart(chartData) {
+            const ctx = document.getElementById('pnlChart');
+            if (!ctx) return;
+
+            const labels = chartData.labels || [];
+            const dailyPnL = chartData.daily_pnl || [];
+            const cumulativePnL = chartData.cumulative_pnl || [];
+
+            if (pnlChart) {
+                // Update existing chart
+                pnlChart.data.labels = labels;
+                pnlChart.data.datasets[0].data = dailyPnL;
+                pnlChart.data.datasets[1].data = cumulativePnL;
+                pnlChart.update();
+            } else {
+                // Create new chart
+                pnlChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Daily P&L',
+                                data: dailyPnL,
+                                backgroundColor: function(context) {
+                                    const value = context.raw;
+                                    return value >= 0 ? 'rgba(40, 167, 69, 0.6)' : 'rgba(220, 53, 69, 0.6)';
+                                },
+                                borderColor: function(context) {
+                                    const value = context.raw;
+                                    return value >= 0 ? 'rgba(40, 167, 69, 1)' : 'rgba(220, 53, 69, 1)';
+                                },
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Cumulative P&L',
+                                data: cumulativePnL,
+                                type: 'line',
+                                borderColor: 'rgba(102, 126, 234, 1)',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                yAxisID: 'y1',
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += '$' + context.parsed.y.toFixed(2);
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Daily P&L ($)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Cumulative P&L ($)'
+                                },
+                                grid: {
+                                    drawOnChartArea: true
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function refreshErrorLogs() {
+            fetch('/api/error_logs')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('error-logs-container');
+                    const logs = data.logs || [];
+
+                    if (logs.length === 0) {
+                        container.innerHTML = '<p class="text-success text-center"><i class="bi bi-check-circle"></i> No errors found - system running smoothly!</p>';
+                    } else {
+                        container.innerHTML = logs.map(log => `
+                            <div class="alert alert-${log.level === 'CRITICAL' ? 'danger' : 'warning'} py-2 mb-2">
+                                <small>
+                                    <strong>[${log.level}]</strong>
+                                    ${log.message}
+                                </small>
+                            </div>
+                        `).join('');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                    document.getElementById('error-logs-container').innerHTML =
+                        '<p class="text-danger text-center">Error loading logs</p>';
+                });
         }
 
         function refreshData() {
@@ -294,9 +578,13 @@
 
         // Initial load
         refreshData();
+        refreshErrorLogs();
 
         // Auto-refresh every 30 seconds
-        autoRefreshInterval = setInterval(refreshData, 30000);
+        autoRefreshInterval = setInterval(function() {
+            refreshData();
+            refreshErrorLogs();
+        }, 30000);
     </script>
 </body>
 </html>

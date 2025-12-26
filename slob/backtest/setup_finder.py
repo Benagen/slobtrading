@@ -1,21 +1,23 @@
 """
-5/1 SLOB Setup Finder - Orchestration Layer
+5/1 SLOB Setup Finder - Orchestration Layer (WHITEPAPER-COMPLIANT)
 
-Implements the EXACT 5/1 SLOB strategy flow:
+Implements the EXACT 5/1 SLOB strategy flow per whitepaper:
 1. LSE Session (09:00-15:30) → Establish LSE High/Low
-2. LIQ #1 (NYSE session, >15:30) → Break LSE High with volume
-3. Consolidation (15-30 min) → SIDEWAYS oscillation (NOT diagonal trend)
-4. No-Wick Candle → Bullish (for SHORT) with minimal upper wick
-5. LIQ #2 → Break consolidation high
-6. Entry Trigger → Candle closes below no-wick low
-7. Entry Execution → Next candle's OPEN price
-8. SL/TP → LIQ #2 high / LSE Low
+2. LIQ #1 (NYSE session, >15:30) → Break LSE High/Low with volume
+3. Consolidation (3-25 min FLEXIBLE) → Clear High/Low formation (2+ touches)
+4. Sweep + No-Wick (COMBINED) → Same candle sweeps level AND is no-wick
+   - No-wick: Body ≥95% of range, Wick ≤5%, Size 0.03-0.15% of price
+   - SHORT: Sweep consol HIGH with bullish no-wick
+   - LONG: Sweep consol LOW with bearish no-wick
+5. Entry Trigger → Candle closes below/above no-wick OPEN (+ direction check)
+6. Entry Execution → Next candle's OPEN price
+7. SL/TP → Sweep high/low / LSE Low/High
 
 Critical considerations:
+- Bidirectional: SHORT and LONG setups
 - No look-ahead bias (incremental discovery)
 - NYSE session timing (AFTER 15:30 for LIQ #1)
-- Proper indexing (global vs relative)
-- Edge case handling (missing data, spikes, invalidations)
+- Whitepaper-compliant ratios and timing
 """
 
 import pandas as pd
@@ -35,8 +37,8 @@ class SetupFinder:
     def __init__(
         self,
         atr_period: int = 14,
-        consol_min_duration: int = 15,
-        consol_max_duration: int = 30,
+        consol_min_duration: int = 3,
+        consol_max_duration: int = 25,
         atr_multiplier_min: float = 0.5,
         atr_multiplier_max: float = 3.0,
         nowick_percentile: int = 90,
@@ -104,15 +106,16 @@ class SetupFinder:
 
         setups = []
 
-        # Group by date
-        df['date'] = df.index.date
-        dates = df['date'].unique()
+        # Group by date using groupby to preserve DatetimeIndex
+        # Convert to UTC first to handle DST transitions
+        df_work = df.copy()
+        if hasattr(df_work.index, 'tz') and df_work.index.tz is not None:
+            df_work.index = df_work.index.tz_convert('UTC')
 
-        for date in dates:
+        # Group by date (floor to day)
+        for date, day_df in df_work.groupby(df_work.index.floor('D')):
             if verbose:
-                print(f"\nProcessing {date}...")
-
-            day_df = df[df['date'] == date].copy()
+                print(f"\nProcessing {date.date()}...")
 
             # Find setups for this day
             day_setups = self._find_setups_for_day(day_df, verbose=verbose)
@@ -149,12 +152,12 @@ class SetupFinder:
         if verbose:
             print(f"  LSE High: {lse_high:.2f}, LSE Low: {lse_low:.2f}")
 
-        # STEP 2: Find LIQ #1 (NYSE breaks LSE High)
-        liq1_results = self._find_liq1_candidates(df, lse_high, lse_end_idx)
+        # STEP 2: Find LIQ #1 (NYSE breaks LSE High OR LSE Low - BIDIRECTIONAL)
+        liq1_results = self._find_liq1_candidates(df, lse_high, lse_low, lse_end_idx)
 
         if len(liq1_results) == 0:
             if verbose:
-                print(f"  ✗ No LIQ #1 found")
+                print(f"  ✗ No LIQ #1 found (checked both up and down)")
             return []
 
         # For each LIQ #1, try to find complete setup
@@ -176,6 +179,7 @@ class SetupFinder:
             (lse_high, lse_low, lse_end_idx)
         """
         # Filter LSE session (09:00-15:30)
+        # Index should already be DatetimeIndex from data loading
         lse_mask = (df.index.time >= self.lse_open) & (df.index.time < self.lse_close)
         lse_data = df[lse_mask]
 
@@ -194,18 +198,19 @@ class SetupFinder:
         self,
         df: pd.DataFrame,
         lse_high: float,
+        lse_low: float,
         lse_end_idx: int
     ) -> List[Dict]:
         """
-        Find LIQ #1 candidates (NYSE breaks LSE High).
+        Find LIQ #1 candidates (NYSE breaks LSE High OR LSE Low) - BIDIRECTIONAL.
 
         Critical rules:
         - MUST be in NYSE session (>= 15:30)
-        - Price breaks ABOVE LSE High
-        - Volume confirmation
+        - Price breaks ABOVE LSE High (SHORT setup) OR BELOW LSE Low (LONG setup)
+        - Rejection preferred
 
         Returns:
-            List of LIQ #1 dicts with {idx, price, level, confidence}
+            List of LIQ #1 dicts with {idx, price, level, confidence, direction}
         """
         candidates = []
 
@@ -215,7 +220,7 @@ class SetupFinder:
         if nyse_start_idx >= len(df):
             return []
 
-        # Search for breaks above LSE High
+        # Search for breaks in BOTH directions
         for i in range(nyse_start_idx, len(df)):
             candle = df.iloc[i]
 
@@ -223,24 +228,40 @@ class SetupFinder:
             if candle.name.time() < self.nyse_open:
                 continue
 
-            # Check if breaks LSE High
+            # Check UPWARD break (SHORT setup)
             if candle['High'] > lse_high:
-                # Detect liquidity grab using liquidity detector
                 liq_result = LiquidityDetector.detect_liquidity_grab(
                     df, i, lse_high, direction='up'
                 )
 
-                if liq_result['detected']:
+                if liq_result and liq_result['detected']:
                     candidates.append({
-                        'idx': i,  # GLOBAL index
+                        'idx': i,
                         'price': candle['High'],
                         'level': lse_high,
                         'confidence': liq_result['score'],
-                        'time': candle.name
+                        'time': candle.name,
+                        'direction': 'short'  # Break above = SHORT setup
                     })
+                    # Take first valid LIQ #1 (in either direction)
+                    break
 
-                    # Take first valid LIQ #1
-                    # (Could also take highest confidence, but first is simpler)
+            # Check DOWNWARD break (LONG setup)
+            if candle['Low'] < lse_low:
+                liq_result = LiquidityDetector.detect_liquidity_grab(
+                    df, i, lse_low, direction='down'
+                )
+
+                if liq_result and liq_result['detected']:
+                    candidates.append({
+                        'idx': i,
+                        'price': candle['Low'],
+                        'level': lse_low,
+                        'confidence': liq_result['score'],
+                        'time': candle.name,
+                        'direction': 'long'  # Break below = LONG setup
+                    })
+                    # Take first valid LIQ #1 (in either direction)
                     break
 
         return candidates
@@ -254,22 +275,22 @@ class SetupFinder:
         verbose: bool = False
     ) -> Optional[Dict]:
         """
-        Try to build complete setup from LIQ #1.
+        Try to build complete setup from LIQ #1 - BIDIRECTIONAL (WHITEPAPER-COMPLIANT).
 
-        Flow:
+        Flow (UPDATED per whitepaper):
         1. Find consolidation after LIQ #1
-        2. Find no-wick candle in consolidation
-        3. Find LIQ #2 (break consolidation high)
-        4. Find entry trigger (close below no-wick low)
-        5. Calculate entry, SL, TP
+        2. Detect sweep + no-wick (COMBINED - same candle sweeps AND is no-wick)
+        3. Find entry trigger (close below/above no-wick OPEN)
+        4. Calculate entry, SL, TP (direction-aware)
 
         Returns:
             Complete setup dict or None if setup invalid
         """
         liq1_idx = liq1['idx']
+        direction = liq1['direction']  # 'short' or 'long'
 
         # STEP 3: Find consolidation after LIQ #1
-        consol = self._find_consolidation_after_liq1(df, liq1_idx)
+        consol = self._find_consolidation_after_liq1(df, liq1_idx, direction)
 
         if consol is None:
             if verbose:
@@ -279,43 +300,56 @@ class SetupFinder:
         if verbose:
             print(f"    ✓ Consolidation found: {consol['start_idx']} to {consol['end_idx']}")
 
-        # STEP 4: Find no-wick candle in consolidation
-        nowick = self._find_nowick_in_consolidation(df, consol)
+        # STEP 4: Detect sweep + no-wick (COMBINED - whitepaper spec)
+        # The no-wick appears AT the sweep, not before or after
+        sweep_nowick = self._detect_liq_sweep_with_nowick(df, consol, direction)
 
-        if nowick is None:
+        if sweep_nowick is None:
             if verbose:
-                print(f"      ✗ No valid no-wick candle")
+                print(f"      ✗ No valid sweep+no-wick for {direction} setup")
             return None
 
         if verbose:
-            print(f"      ✓ No-wick @ {nowick['idx']}: High={nowick['high']:.2f}, Low={nowick['low']:.2f}")
+            print(f"      ✓ Sweep+No-wick @ {sweep_nowick['idx']}: Level={sweep_nowick['sweep_level']:.2f}")
 
-        # STEP 5: Find LIQ #2 (break consolidation high)
-        liq2 = self._find_liq2_after_nowick(df, consol, nowick)
+        # Extract data for backward compatibility
+        liq2 = {
+            'idx': sweep_nowick['sweep_idx'],
+            'price': sweep_nowick['sweep_price'],
+            'level': sweep_nowick['sweep_level'],
+            'time': sweep_nowick['time']
+        }
 
-        if liq2 is None:
-            if verbose:
-                print(f"        ✗ No LIQ #2 found")
-            return None
+        nowick = {
+            'idx': sweep_nowick['nowick_idx'],
+            'open': sweep_nowick['nowick_open'],
+            'high': sweep_nowick['nowick_high'],
+            'low': sweep_nowick['nowick_low'],
+            'time': sweep_nowick['time']
+        }
 
-        if verbose:
-            print(f"        ✓ LIQ #2 @ {liq2['idx']}: {liq2['price']:.2f}")
-
-        # STEP 6: Find entry trigger (close below no-wick low)
-        entry_trigger = self._find_entry_trigger(df, liq2, nowick)
+        # STEP 5: Find entry trigger (direction-aware: close below/above no-wick OPEN)
+        entry_trigger = self._find_entry_trigger(df, liq2, nowick, direction)
 
         if entry_trigger is None:
             if verbose:
-                print(f"          ✗ No entry trigger")
+                print(f"          ✗ No entry trigger for {direction} setup")
             return None
 
         if verbose:
             print(f"          ✓ Entry trigger @ {entry_trigger['trigger_idx']}")
 
-        # STEP 7: Calculate entry, SL, TP
+        # STEP 7: Calculate entry, SL, TP (direction-aware)
         entry_price = entry_trigger['entry_price']
-        sl_price = self._calculate_sl(df, liq2)
-        tp_price = lse_low
+
+        if direction == 'short':
+            # SHORT: SL above (at LIQ #2 high + buffer), TP below (at LSE Low)
+            sl_price = self._calculate_sl(df, liq2, direction)
+            tp_price = lse_low
+        else:  # direction == 'long'
+            # LONG: SL below (at LIQ #2 low - buffer), TP above (at LSE High)
+            sl_price = self._calculate_sl(df, liq2, direction)
+            tp_price = lse_high
 
         # Build complete setup
         setup = {
@@ -363,7 +397,7 @@ class SetupFinder:
             'risk_reward_ratio': abs(entry_price - tp_price) / abs(entry_price - sl_price) if abs(entry_price - sl_price) > 0 else 0,
 
             # Direction
-            'direction': 'SHORT'
+            'direction': direction.upper()  # 'SHORT' or 'LONG'
         }
 
         return setup
@@ -371,12 +405,14 @@ class SetupFinder:
     def _find_consolidation_after_liq1(
         self,
         df: pd.DataFrame,
-        liq1_idx: int
+        liq1_idx: int,
+        direction: str
     ) -> Optional[Dict]:
         """
         Find consolidation after LIQ #1.
 
         Must be SIDEWAYS oscillation (not diagonal trend).
+        Consolidation detection logic is same for both SHORT and LONG.
         """
         # Start searching 1 candle after LIQ #1
         search_start = liq1_idx + 1
@@ -384,7 +420,7 @@ class SetupFinder:
         if search_start >= len(df):
             return None
 
-        # Use ConsolidationDetector
+        # Use ConsolidationDetector (same logic for both directions)
         consol = ConsolidationDetector.detect_consolidation(
             df,
             start_idx=search_start,
@@ -392,112 +428,146 @@ class SetupFinder:
             atr_multiplier_min=self.atr_multiplier_min,
             atr_multiplier_max=self.atr_multiplier_max,
             min_duration=self.consol_min_duration,
-            max_duration=self.consol_max_duration
+            max_duration=self.consol_max_duration,
+            lookback_for_atr=30  # FIX: Reduce from default 100 to work with day-level data
             # Note: ConsolidationDetector already does trend rejection via slope/R² checks
         )
 
         return consol
 
-    def _find_nowick_in_consolidation(
-        self,
-        df: pd.DataFrame,
-        consol: Dict
-    ) -> Optional[Dict]:
-        """
-        Find no-wick candle in consolidation.
-
-        Rules:
-        - Must be BULLISH (Close > Open) for SHORT setup
-        - Upper wick < threshold (percentile-based)
-        - Timing: Prefer LAST valid candidate (closest to LIQ #2)
-
-        Returns:
-            Dict with {idx, high, low, time} or None
-        """
-        consol_start = consol['start_idx']
-        consol_end = consol['end_idx']
-
-        candidates = []
-
-        for i in range(consol_start, consol_end + 1):
-            candle = df.iloc[i]
-
-            # Check if bullish (for SHORT setup)
-            if candle['Close'] <= candle['Open']:
-                continue
-
-            # Use NoWickDetector
-            is_nowick = NoWickDetector.is_no_wick_candle(
-                candle, df, i,
-                direction='bullish',
-                percentile=self.nowick_percentile
-            )
-
-            if is_nowick:
-                candidates.append({
-                    'idx': i,
-                    'high': candle['High'],
-                    'low': candle['Low'],
-                    'time': candle.name
-                })
-
-        if len(candidates) == 0:
-            return None
-
-        # Return LAST candidate (closest to LIQ #2)
-        return candidates[-1]
-
-    def _find_liq2_after_nowick(
+    def _detect_liq_sweep_with_nowick(
         self,
         df: pd.DataFrame,
         consol: Dict,
-        nowick: Dict
+        direction: str
     ) -> Optional[Dict]:
         """
-        Find LIQ #2 (break consolidation high) after no-wick.
+        Detect liquidity sweep WITH no-wick candle - WHITEPAPER COMBINED STAGE.
 
-        Must occur AFTER no-wick candle.
+        From whitepaper: No-wick appears AT the sweep, not before or after.
+        The sweep and no-wick are the SAME EVENT, not sequential.
+
+        SHORT setup:
+            - Sweep consolidation HIGH (final push up)
+            - The sweeping candle must be a bullish no-wick (close > open, 95%/5% ratios)
+
+        LONG setup:
+            - Sweep consolidation LOW (final push down)
+            - The sweeping candle must be a bearish no-wick (close < open, 95%/5% ratios)
+
+        Search window: Consolidation end + 40-50 candles (total trade ~60 min)
+
+        Returns:
+            Combined dict with sweep and no-wick info, or None
         """
-        nowick_idx = nowick['idx']
+        consol_start = consol['start_idx']
+        consol_end = consol['end_idx']
         consol_high = consol['high']
+        consol_low = consol['low']
 
-        # Search from nowick+1 to end of consolidation + some buffer
-        search_start = nowick_idx + 1
-        search_end = min(consol['end_idx'] + 10, len(df) - 1)
+        # FINAL INTERPRETATION: No-wick candle IS the breakout/sweep candle
+        # Whitepaper: "no-wick appears AT the sweep" = they're the SAME candle
+        # Search AFTER consolidation ends for breakout candle that is ALSO a no-wick
 
+        search_start = consol_end  # Start right after consolidation
+        search_end = min(consol_end + 40, len(df) - 1)
+
+        print(f"    [SWEEP+NOWICK] Searching for breakout no-wick from idx {search_start} to {search_end}")
+
+        sweep_count = 0
         for i in range(search_start, search_end + 1):
             candle = df.iloc[i]
 
-            if candle['High'] > consol_high:
-                # Detect liquidity grab
-                liq_result = LiquidityDetector.detect_liquidity_grab(
-                    df, i, consol_high, direction='up'
-                )
+            if direction == 'short':
+                # SHORT: Break ABOVE consolidation HIGH with bullish no-wick
+                if candle['High'] > consol_high:
+                    sweep_count += 1
+                    print(f"    [SWEEP] Candle {i} breaks HIGH: {candle['High']:.2f} > {consol_high:.2f}, bullish={candle['Close']>candle['Open']}")
 
-                if liq_result['detected']:
-                    return {
-                        'idx': i,
-                        'price': candle['High'],
-                        'level': consol_high,
-                        'time': candle.name
-                    }
+                    # Check if THIS breakout candle is ALSO a bullish no-wick
+                    if candle['Close'] > candle['Open']:
+                        is_nowick = NoWickDetector.is_no_wick_candle(
+                            candle, df, i,
+                            direction='bullish'
+                        )
 
+                        if is_nowick:
+                            # Verify with LiquidityDetector for quality score
+                            liq_result = LiquidityDetector.detect_liquidity_grab(
+                                df, i, consol_high, direction='up'
+                            )
+
+                            if liq_result and liq_result['detected']:
+                                print(f"    [SWEEP+NOWICK] ✅ Breakout candle IS no-wick at idx {i}")
+                                # Return combined result (same candle is both sweep and no-wick)
+                                return {
+                                    'idx': i,
+                                    'sweep_idx': i,
+                                    'sweep_level': consol_high,
+                                    'sweep_price': candle['High'],
+                                    'nowick_idx': i,  # SAME candle
+                                    'nowick_open': candle['Open'],
+                                    'nowick_high': candle['High'],
+                                    'nowick_low': candle['Low'],
+                                    'time': candle.name,
+                                    'liq_score': liq_result['score']
+                                }
+
+            else:  # direction == 'long'
+                # LONG: Break BELOW consolidation LOW with bearish no-wick
+                if candle['Low'] < consol_low:
+                    sweep_count += 1
+                    print(f"    [SWEEP] Candle {i} breaks LOW: {candle['Low']:.2f} < {consol_low:.2f}, bearish={candle['Close']<candle['Open']}")
+
+                    # Check if THIS breakout candle is ALSO a bearish no-wick
+                    if candle['Close'] < candle['Open']:
+                        is_nowick = NoWickDetector.is_no_wick_candle(
+                            candle, df, i,
+                            direction='bearish'
+                        )
+
+                        if is_nowick:
+                            # Verify with LiquidityDetector for quality score
+                            liq_result = LiquidityDetector.detect_liquidity_grab(
+                                df, i, consol_low, direction='down'
+                            )
+
+                            if liq_result and liq_result['detected']:
+                                print(f"    [SWEEP+NOWICK] ✅ Breakout candle IS no-wick at idx {i}")
+                                # Return combined result (same candle is both sweep and no-wick)
+                                return {
+                                    'idx': i,
+                                    'sweep_idx': i,
+                                    'sweep_level': consol_low,
+                                    'sweep_price': candle['Low'],
+                                    'nowick_idx': i,  # SAME candle
+                                    'nowick_open': candle['Open'],
+                                    'nowick_high': candle['High'],
+                                    'nowick_low': candle['Low'],
+                                    'time': candle.name,
+                                    'liq_score': liq_result['score']
+                                }
+
+        print(f"    [SWEEP+NOWICK] No breakout no-wick found (breakouts checked={sweep_count})")
         return None
 
     def _find_entry_trigger(
         self,
         df: pd.DataFrame,
         liq2: Dict,
-        nowick: Dict
+        nowick: Dict,
+        direction: str
     ) -> Optional[Dict]:
         """
-        Find entry trigger: candle that CLOSES below no-wick low.
+        Find entry trigger - BIDIRECTIONAL.
+
+        SHORT: Candle that CLOSES below no-wick low
+        LONG: Candle that CLOSES above no-wick high
 
         Critical rules:
         - Search AFTER LIQ #2
-        - Trigger = candle that CLOSES below no-wick low
         - Entry = NEXT candle's OPEN
-        - Invalidation: If price goes >100 pips above no-wick high
+        - Invalidation: If price moves too far against direction
         - Max wait: 20 candles
 
         Returns:
@@ -506,6 +576,7 @@ class SetupFinder:
         liq2_idx = liq2['idx']
         nowick_low = nowick['low']
         nowick_high = nowick['high']
+        nowick_open = nowick['open']  # WHITEPAPER FIX: Use OPEN for entry trigger
 
         search_start = liq2_idx
         search_end = min(liq2_idx + self.max_entry_wait_candles, len(df) - 2)
@@ -513,41 +584,70 @@ class SetupFinder:
         for i in range(search_start, search_end + 1):
             candle = df.iloc[i]
 
-            # Check invalidation: price > nowick_high + 100 pips
-            if candle['High'] > nowick_high + self.max_retracement_pips:
-                logger.debug(f"Setup invalidated: price {candle['High']} > nowick_high {nowick_high} + {self.max_retracement_pips}")
-                return None
-
-            # Check if closes below no-wick low
-            if candle['Close'] < nowick_low:
-                # TRIGGER found!
-                trigger_idx = i
-
-                # Entry = NEXT candle's OPEN
-                entry_idx = i + 1
-
-                if entry_idx >= len(df):
+            if direction == 'short':
+                # SHORT: Check invalidation (price goes too high)
+                if candle['High'] > nowick_high + self.max_retracement_pips:
+                    logger.debug(f"SHORT setup invalidated: price {candle['High']} > nowick_high {nowick_high} + {self.max_retracement_pips}")
                     return None
 
-                entry_candle = df.iloc[entry_idx]
-                entry_price = entry_candle['Open']
+                # SHORT: Trigger = close below no-wick OPEN + bearish candle (whitepaper spec)
+                if candle['Close'] < nowick_open:
+                    # Also verify BEARISH movement (genuine reversal)
+                    if candle['Close'] < candle['Open']:  # Bearish candle
+                        trigger_idx = i
+                        entry_idx = i + 1
 
-                return {
-                    'trigger_idx': trigger_idx,
-                    'entry_idx': entry_idx,
-                    'entry_price': entry_price,
-                    'entry_time': entry_candle.name
-                }
+                        if entry_idx >= len(df):
+                            return None
+
+                        entry_candle = df.iloc[entry_idx]
+                        entry_price = entry_candle['Open']
+
+                        return {
+                            'trigger_idx': trigger_idx,
+                            'entry_idx': entry_idx,
+                            'entry_price': entry_price,
+                            'entry_time': entry_candle.name
+                        }
+
+            else:  # direction == 'long'
+                # LONG: Check invalidation (price goes too low)
+                if candle['Low'] < nowick_low - self.max_retracement_pips:
+                    logger.debug(f"LONG setup invalidated: price {candle['Low']} < nowick_low {nowick_low} - {self.max_retracement_pips}")
+                    return None
+
+                # LONG: Trigger = close above no-wick OPEN + bullish candle (whitepaper spec)
+                if candle['Close'] > nowick_open:
+                    # Also verify BULLISH movement (genuine reversal)
+                    if candle['Close'] > candle['Open']:  # Bullish candle
+                        trigger_idx = i
+                        entry_idx = i + 1
+
+                        if entry_idx >= len(df):
+                            return None
+
+                        entry_candle = df.iloc[entry_idx]
+                        entry_price = entry_candle['Open']
+
+                        return {
+                            'trigger_idx': trigger_idx,
+                            'entry_idx': entry_idx,
+                            'entry_price': entry_price,
+                            'entry_time': entry_candle.name
+                        }
 
         return None
 
-    def _calculate_sl(self, df: pd.DataFrame, liq2: Dict) -> float:
+    def _calculate_sl(self, df: pd.DataFrame, liq2: Dict, direction: str) -> float:
         """
-        Calculate stop loss.
+        Calculate stop loss - BIDIRECTIONAL.
+
+        SHORT: SL above LIQ #2 high + buffer
+        LONG: SL below LIQ #2 low - buffer
 
         Rules:
-        - Base: LIQ #2 high + 1-2 pip buffer
-        - If LIQ #2 has spike (wick > 2x body): Use body top instead
+        - If spike detected (wick > 2x body): Use body extreme instead
+        - Buffer: 1-2 pips
 
         Returns:
             SL price
@@ -556,20 +656,37 @@ class SetupFinder:
         candle = df.iloc[liq2_idx]
 
         high = candle['High']
+        low = candle['Low']
         close = candle['Close']
         open_price = candle['Open']
 
         body = abs(close - open_price)
-        upper_wick = high - max(close, open_price)
 
-        # Check for spike
-        if upper_wick > 2 * body and body > 0:
-            # Spike detected - use body top
-            sl_price = max(close, open_price) + 2  # +2 pips buffer
-            logger.debug(f"LIQ #2 spike detected (wick {upper_wick:.1f} > 2*body {body:.1f}), using body top SL")
-        else:
-            # Normal - use actual high
-            sl_price = high + 2  # +2 pips buffer
+        if direction == 'short':
+            # SHORT: SL above LIQ #2
+            upper_wick = high - max(close, open_price)
+
+            # Check for spike
+            if upper_wick > 2 * body and body > 0:
+                # Spike detected - use body top
+                sl_price = max(close, open_price) + 2  # +2 pips buffer
+                logger.debug(f"SHORT LIQ #2 spike detected (wick {upper_wick:.1f} > 2*body {body:.1f}), using body top SL")
+            else:
+                # Normal - use actual high
+                sl_price = high + 2  # +2 pips buffer
+
+        else:  # direction == 'long'
+            # LONG: SL below LIQ #2
+            lower_wick = min(close, open_price) - low
+
+            # Check for spike
+            if lower_wick > 2 * body and body > 0:
+                # Spike detected - use body bottom
+                sl_price = min(close, open_price) - 2  # -2 pips buffer
+                logger.debug(f"LONG LIQ #2 spike detected (wick {lower_wick:.1f} > 2*body {body:.1f}), using body bottom SL")
+            else:
+                # Normal - use actual low
+                sl_price = low - 2  # -2 pips buffer
 
         return sl_price
 

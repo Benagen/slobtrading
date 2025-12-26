@@ -285,11 +285,14 @@ class Backtester:
 
         # Calculate P&L
         if direction == 'SHORT':
-            pnl_pips = entry_price - exit_price
+            pnl_points = entry_price - exit_price
         else:
-            pnl_pips = exit_price - entry_price
+            pnl_points = exit_price - entry_price
 
-        pnl_sek = pnl_pips * sizing['contracts']
+        # NQ futures: $20 per point, convert to SEK (assuming ~10 SEK/USD)
+        # For simplicity, use 1:1 ratio (or adjust based on actual FX rate)
+        point_value_sek = 20.0  # Each NQ point = $20 = ~200 SEK (use 20 for conservative estimate)
+        pnl_sek = pnl_points * sizing['contracts'] * point_value_sek
 
         # Result
         result = 'WIN' if exit_type == 'TP' else 'LOSS'
@@ -326,8 +329,9 @@ class Backtester:
 
             # Results
             'result': result,
-            'pnl_pips': pnl_pips,
+            'pnl_points': pnl_points,
             'pnl': pnl_sek,
+            'rr': rr_achieved,
             'rr_achieved': rr_achieved,
 
             # Risk metrics
@@ -380,18 +384,35 @@ class Backtester:
     def _calculate_atr(self, idx: int, period: int = 14) -> float:
         """Calculate ATR at given index"""
         if idx < period:
-            return 10.0  # Default fallback
+            # Return reasonable default based on NQ price level
+            # NQ trades around 20000-25000, typical ATR is ~50-150 points
+            return 100.0  # Default fallback
 
-        window = self.df.iloc[max(0, idx - period):idx]
+        # Get window data - use iloc for position-based indexing
+        start_idx = max(0, idx - period)
+        window = self.df.iloc[start_idx:idx].copy()
+
+        if len(window) < 2:
+            return 100.0
+
+        # Calculate true range components
+        # Use shift on the original dataframe to avoid index issues
+        prev_close = self.df.iloc[start_idx - 1:idx - 1]['Close'].values
 
         high_low = window['High'] - window['Low']
-        high_close = np.abs(window['High'] - window['Close'].shift())
-        low_close = np.abs(window['Low'] - window['Close'].shift())
+        high_close = np.abs(window['High'].values - prev_close)
+        low_close = np.abs(window['Low'].values - prev_close)
 
-        true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
-        atr = true_range.mean()
+        # True range is max of the three
+        true_ranges = np.maximum(high_low.values, np.maximum(high_close, low_close))
+        atr = np.mean(true_ranges)
 
-        return atr
+        # Validation: ATR should be reasonable for NQ (typically 30-200 points)
+        if pd.isna(atr) or np.isinf(atr) or atr == 0 or atr < 1:
+            logger.warning(f"Invalid ATR ({atr}) at index {idx}, using default 100.0")
+            return 100.0
+
+        return float(atr)
 
     def _calculate_metrics(self) -> Dict:
         """Calculate performance metrics"""

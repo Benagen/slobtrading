@@ -31,15 +31,11 @@ from slob.live.setup_tracker import SetupTrackerConfig
 from slob.live.order_executor import OrderExecutorConfig
 
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)-8s | %(name)-25s | %(message)s',
-    handlers=[
-        logging.FileHandler(f'logs/paper_trading_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
-        logging.StreamHandler()
-    ]
-)
+# Import logging configuration
+from slob.monitoring.logging_config import setup_logging
+
+# Setup logging with rotation (daily rotation, 30-day retention)
+setup_logging(log_dir='logs/', console_level=logging.INFO, file_level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 

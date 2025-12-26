@@ -1,0 +1,204 @@
+version: '3.8'
+
+#############################################################################
+# SLOB Trading System - Test Environment Configuration
+#
+# Purpose: Isolated test environment for E2E and integration testing
+#
+# Usage:
+#   docker-compose -f docker-compose.test.yml up -d
+#   docker-compose -f docker-compose.test.yml down
+#
+# Features:
+#   - Isolated test database
+#   - Test-specific environment variables
+#   - Fast startup (minimal services)
+#   - No volume persistence (clean state each run)
+#############################################################################
+
+services:
+  # Main trading bot (test mode)
+  slob-bot-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: slob-bot-test
+    environment:
+      # Test mode flag
+      - TEST_MODE=true
+
+      # IB Configuration (test/paper trading)
+      - IB_ACCOUNT=DU123456
+      - IB_HOST=host.docker.internal
+      - IB_PORT=4002
+      - IB_CLIENT_ID=999
+
+      # Database (test database)
+      - DB_PATH=/app/data/test_slob_state.db
+      - CANDLES_DB_PATH=/app/data/test_candles.db
+
+      # Redis (optional for tests)
+      - REDIS_ENABLED=false
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
+
+      # Dashboard (test credentials)
+      - DASHBOARD_USERNAME=test_admin
+      - DASHBOARD_PASSWORD=test_password_123
+      - FLASK_ENV=testing
+      - FLASK_DEBUG=false
+
+      # Logging (verbose for debugging)
+      - LOG_LEVEL=DEBUG
+      - LOG_TO_CONSOLE=true
+
+      # Trading configuration (conservative for tests)
+      - MAX_POSITION_SIZE=1
+      - ENABLE_TRADING=false
+
+      # ML Configuration (disabled for basic tests)
+      - ML_SHADOW_MODE_ENABLED=false
+
+      # Alert notifications (disabled for tests)
+      - TELEGRAM_ENABLED=false
+      - EMAIL_ENABLED=false
+
+    volumes:
+      # Mount source code for development testing
+      - ./slob:/app/slob:ro
+      - ./tests:/app/tests:ro
+
+      # Test data (temporary, not persisted)
+      - test-data:/app/data
+      - test-logs:/app/logs
+
+      # Config files
+      - ./.env.test:/app/.env:ro
+
+    networks:
+      - slob-test-network
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import sqlite3; sqlite3.connect('/app/data/test_slob_state.db')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits (prevent test runaway)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Redis (optional, for testing cache functionality)
+  redis-test:
+    image: redis:7-alpine
+    container_name: redis-test
+    command: redis-server --appendonly no --save ""
+    networks:
+      - slob-test-network
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # Dashboard (test mode)
+  dashboard-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dashboard-test
+    command: python -m slob.monitoring.dashboard
+    environment:
+      - TEST_MODE=true
+      - DASHBOARD_USERNAME=test_admin
+      - DASHBOARD_PASSWORD=test_password_123
+      - FLASK_ENV=testing
+      - DB_PATH=/app/data/test_slob_state.db
+      - SECRET_KEY=test_secret_key_not_for_production
+
+    volumes:
+      - ./slob:/app/slob:ro
+      - test-data:/app/data
+      - test-logs:/app/logs
+
+    ports:
+      - "5001:5000"  # Use 5001 to avoid conflict with dev dashboard
+
+    networks:
+      - slob-test-network
+
+    depends_on:
+      slob-bot-test:
+        condition: service_healthy
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  slob-test-network:
+    driver: bridge
+    name: slob-test-network
+
+volumes:
+  # Temporary volumes (not persisted between test runs)
+  test-data:
+    driver: local
+    name: slob-test-data
+
+  test-logs:
+    driver: local
+    name: slob-test-logs
+
+#############################################################################
+# Test Environment Commands
+#############################################################################
+#
+# Start test environment:
+#   docker-compose -f docker-compose.test.yml up -d
+#
+# View logs:
+#   docker-compose -f docker-compose.test.yml logs -f
+#
+# Run tests inside container:
+#   docker-compose -f docker-compose.test.yml exec slob-bot-test pytest tests/e2e/ -v
+#
+# Stop and remove everything:
+#   docker-compose -f docker-compose.test.yml down -v
+#
+# Rebuild after code changes:
+#   docker-compose -f docker-compose.test.yml up -d --build
+#
+# Access test dashboard:
+#   http://localhost:5001
+#   Username: test_admin
+#   Password: test_password_123
+#
+# Check container health:
+#   docker-compose -f docker-compose.test.yml ps
+#
+# Execute shell in test container:
+#   docker-compose -f docker-compose.test.yml exec slob-bot-test /bin/bash
+#
+#############################################################################

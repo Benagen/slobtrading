@@ -29,29 +29,32 @@ class LiquidityDetector:
         direction: str = 'up',
         lookback: int = 50,
         volume_threshold: float = 1.5,
-        min_score: float = 0.6
+        min_score: float = 0.6  # DEPRECATED: No longer used for filtering
     ) -> Optional[Dict]:
         """
-        Detect liquidity grab at specific candle using multi-factor confirmation.
+        Detect level break with quality scoring (RELAXED VERSION).
+
+        Philosophy: Accept ALL breaks, use quality score for ML filtering later.
+        Better to have more candidates and filter with ML than miss valid setups.
 
         Args:
             df: OHLCV DataFrame
-            idx: Index to check for liquidity grab
+            idx: Index to check for level break
             level: Price level that should be broken (e.g., LSE High for upward break)
             direction: 'up' for break above level, 'down' for break below
             lookback: Candles to look back for volume comparison
             volume_threshold: Volume spike multiplier (1.5 = 150% of average)
-            min_score: Minimum composite score to confirm (0-1)
+            min_score: DEPRECATED - no longer used for hard filtering
 
         Returns:
-            Dict with liquidity grab details or None:
-                - detected: bool
-                - score: Composite score (0-1)
+            Dict with break details or None:
+                - detected: bool (True if level broken, regardless of quality)
+                - score: Quality score (0-1) for ML filtering
                 - volume_spike: bool
                 - has_rejection: bool
                 - wick_reversal: bool
                 - break_distance: How far past level
-                - signals: Dict of individual signal values
+                - signals: Dict of individual signal values for ML
         """
         if idx < lookback:
             logger.debug(f"Not enough data for lookback: idx={idx}, need={lookback}")
@@ -102,26 +105,28 @@ class LiquidityDetector:
             wick_ratio = 0
             has_wick_reversal = False
 
-        # Calculate composite score
-        score = 0.0
-        
-        # Volume spike (40% weight)
+        # Calculate quality score (NOT used for filtering, only for ML)
+        # Base score: 0.4 for breaking level (all breaks get this)
+        score = 0.4
+
+        # Volume spike bonus (30% weight)
         if volume_spike:
-            score += 0.4
+            score += 0.3
 
-        # Price rejection (30% weight)
+        # Price rejection bonus (20% weight)
         if has_rejection:
-            score += 0.3
+            score += 0.2
 
-        # Wick reversal (30% weight)
+        # Wick reversal bonus (10% weight)
         if has_wick_reversal:
-            score += 0.3
+            score += 0.1
 
-        detected = score >= min_score
+        # RELAXED: Always detect if level broken (no min_score filtering)
+        detected = True  # Always True if we got here (level_broken check at line 75)
 
         result = {
-            'detected': detected,
-            'score': score,
+            'detected': detected,  # Always True for breaks
+            'score': score,  # Quality score for ML (0.4-1.0 range)
             'volume_spike': volume_spike,
             'has_rejection': has_rejection,
             'wick_reversal': has_wick_reversal,
@@ -134,10 +139,13 @@ class LiquidityDetector:
             }
         }
 
-        if detected:
-            logger.info(f"Liquidity grab detected: score={score:.2f}, "
-                       f"volume_spike={volume_spike}, rejection={has_rejection}, "
-                       f"wick_reversal={has_wick_reversal}")
+        # Log all detections (not just high-quality ones)
+        dir_symbol = "↑" if direction == 'up' else "↓"
+        print(f"    [LIQ DETECTED {dir_symbol}] idx={idx}, time={df.index[idx].time()}, dir={direction}, "
+              f"score={score:.2f}, vol={volume_spike}, rej={has_rejection}, wick={has_wick_reversal}")
+        logger.info(f"Level break detected: direction={direction}, score={score:.2f}, "
+                   f"volume_spike={volume_spike}, rejection={has_rejection}, "
+                   f"wick_reversal={has_wick_reversal}")
 
         return result
 

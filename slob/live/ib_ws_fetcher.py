@@ -22,9 +22,16 @@ class Tick:
 
 class IBWSFetcher:
     """
-    Hämtar data från Interactive Brokers.
+    Hämtar data från Interactive Brokers med reconnection support.
+
+    Features:
+    - Exponential backoff reconnection (max 10 attempts)
+    - Heartbeat monitoring (every 30s)
+    - Auto-reconnection on connection loss
+    - Safe mode on persistent failures
     """
-    def __init__(self, host='127.0.0.1', port=4002, client_id=1, account=''):
+    def __init__(self, host='127.0.0.1', port=4002, client_id=1, account='',
+                 max_reconnect_attempts=10, heartbeat_interval=30):
         self.host = host
         self.port = port
         self.client_id = client_id
@@ -35,22 +42,81 @@ class IBWSFetcher:
         self.on_tick: Optional[Callable[[Tick], Any]] = None
         self.logger = logging.getLogger(__name__)
 
+        # Reconnection configuration
+        self.max_reconnect_attempts = max_reconnect_attempts
+        self.heartbeat_interval = heartbeat_interval
+        self.reconnect_count = 0
+        self.safe_mode = False
+        self.running = False
+
+        # Background tasks
+        self._heartbeat_task: Optional[asyncio.Task] = None
+
     async def connect(self):
-        """Connect to IB Gateway/TWS."""
+        """
+        Connect to IB Gateway/TWS with retry logic.
+
+        Wrapper for connect_with_retry() for backward compatibility.
+        """
+        return await self.connect_with_retry()
+
+    async def connect_with_retry(self, max_attempts: Optional[int] = None) -> bool:
+        """
+        Connect to IB with exponential backoff retry.
+
+        Args:
+            max_attempts: Override default max_reconnect_attempts
+
+        Returns:
+            True if connected successfully, False otherwise
+        """
+        if max_attempts is None:
+            max_attempts = self.max_reconnect_attempts
+
         self.ib = IB()
-        try:
-            self.logger.info(f"Connecting to IB at {self.host}:{self.port}")
-            await self.ib.connectAsync(self.host, self.port, self.client_id)
-            self.connected = True
-            
-            # Request Delayed Data (Type 3)
-            self.ib.reqMarketDataType(3) 
-            self.logger.info("✅ Requested Market Data Type 3 (Delayed/Frozen)")
-            
-            self.logger.info(f"✅ Successfully connected to IB (clientId={self.client_id})")
-        except Exception as e:
-            self.logger.error(f"Failed to connect to IB: {e}")
-            self.connected = False
+        attempt = 0
+
+        while attempt < max_attempts:
+            try:
+                self.logger.info(f"Connecting to IB at {self.host}:{self.port} (attempt {attempt + 1}/{max_attempts})")
+                await self.ib.connectAsync(self.host, self.port, self.client_id)
+                self.connected = True
+                self.reconnect_count = 0  # Reset on successful connection
+
+                # Request Delayed Data (Type 3)
+                self.ib.reqMarketDataType(3)
+                self.logger.info("✅ Requested Market Data Type 3 (Delayed/Frozen)")
+
+                self.logger.info(f"✅ Successfully connected to IB (clientId={self.client_id})")
+
+                # Start heartbeat monitoring
+                if not self._heartbeat_task or self._heartbeat_task.done():
+                    self.running = True
+                    self._heartbeat_task = asyncio.create_task(self._heartbeat_monitor())
+                    self.logger.info("Started heartbeat monitoring")
+
+                return True
+
+            except Exception as e:
+                attempt += 1
+                self.connected = False
+
+                if attempt >= max_attempts:
+                    self.logger.critical(
+                        f"❌ IB connection failed after {max_attempts} attempts: {e}"
+                    )
+                    await self._enter_safe_mode()
+                    return False
+
+                # Exponential backoff: 2^attempt seconds, max 60s
+                delay = min(2 ** attempt, 60)
+                self.logger.warning(
+                    f"IB connection failed (attempt {attempt}/{max_attempts}): {e}. "
+                    f"Retrying in {delay}s..."
+                )
+                await asyncio.sleep(delay)
+
+        return False
 
     async def subscribe(self, symbols: List[str]):
         if not self.connected:
@@ -113,6 +179,112 @@ class IBWSFetcher:
                 self.logger.error(f"Error processing tick: {e}")
 
     async def disconnect(self):
+        """Disconnect from IB and stop monitoring."""
+        self.running = False
+
+        # Stop heartbeat monitoring
+        if self._heartbeat_task and not self._heartbeat_task.done():
+            self._heartbeat_task.cancel()
+            try:
+                await self._heartbeat_task
+            except asyncio.CancelledError:
+                pass
+            self.logger.info("Stopped heartbeat monitoring")
+
+        # Disconnect from IB
         if self.ib:
             self.ib.disconnect()
             self.connected = False
+            self.logger.info("Disconnected from IB")
+
+    async def _heartbeat_monitor(self):
+        """
+        Monitor connection health with periodic heartbeat.
+
+        Checks every heartbeat_interval seconds if connection is alive.
+        Auto-reconnects on connection loss.
+        """
+        self.logger.info(f"Heartbeat monitoring started (interval: {self.heartbeat_interval}s)")
+
+        while self.running:
+            await asyncio.sleep(self.heartbeat_interval)
+
+            if not self.running:
+                break
+
+            # Check if connection is alive
+            if self.ib and not self.ib.isConnected():
+                self.connected = False
+                self.reconnect_count += 1
+
+                self.logger.error(
+                    f"❌ IB connection lost (reconnect #{self.reconnect_count}), attempting reconnection..."
+                )
+
+                # Try to reconnect
+                success = await self.connect_with_retry(max_attempts=5)
+
+                if success:
+                    self.logger.info("✅ IB reconnected successfully")
+
+                    # Re-subscribe to symbols
+                    if self.subscriptions:
+                        self.logger.info("Re-subscribing to market data...")
+                        symbols = [s.symbol if hasattr(s, 'symbol') else 'NQ' for s in self.subscriptions]
+                        self.subscriptions = []  # Clear old subscriptions
+                        await self.subscribe(symbols)
+                else:
+                    self.logger.critical("Failed to reconnect to IB - entering safe mode")
+                    await self._enter_safe_mode()
+                    break
+            elif self.ib and self.ib.isConnected():
+                # Connection healthy
+                self.logger.debug("Heartbeat: IB connection healthy")
+
+        self.logger.info("Heartbeat monitoring stopped")
+
+    async def _enter_safe_mode(self):
+        """
+        Enter safe mode on persistent connection failures.
+
+        Safe mode:
+        - Stops new data processing
+        - Logs critical alert
+        - Requires manual intervention
+        """
+        self.safe_mode = True
+        self.connected = False
+        self.running = False
+
+        self.logger.critical(
+            "🚨 ENTERING SAFE MODE 🚨\n"
+            f"Reason: IB connection failed after {self.reconnect_count} reconnection attempts\n"
+            "Action Required: Manual intervention needed\n"
+            "- Check IB Gateway/TWS is running\n"
+            "- Verify network connectivity\n"
+            "- Check credentials and account status\n"
+            "- Review IB logs for errors\n"
+            "System will NOT auto-restart until safe mode is cleared"
+        )
+
+        # TODO: Send alert via Telegram/Email
+        # TODO: Update dashboard status to SAFE_MODE
+
+    def is_healthy(self) -> bool:
+        """
+        Check if connection is healthy.
+
+        Returns:
+            True if connected and not in safe mode
+        """
+        return self.connected and not self.safe_mode and self.ib and self.ib.isConnected()
+
+    def clear_safe_mode(self):
+        """
+        Clear safe mode (manual recovery).
+
+        Should only be called after resolving underlying connection issues.
+        """
+        self.logger.info("Clearing safe mode - manual recovery")
+        self.safe_mode = False
+        self.reconnect_count = 0

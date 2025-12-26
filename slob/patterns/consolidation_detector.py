@@ -26,8 +26,8 @@ class ConsolidationDetector:
         atr_period: int = 14,
         atr_multiplier_min: float = 0.5,
         atr_multiplier_max: float = 2.0,
-        min_duration: int = 15,
-        max_duration: int = 30,
+        min_duration: int = 3,
+        max_duration: int = 25,
         lookback_for_atr: int = 100
     ) -> Optional[Dict]:
         """
@@ -66,8 +66,12 @@ class ConsolidationDetector:
             return None
 
         # 1. Calculate ATR at start_idx
-        atr = ConsolidationDetector._calculate_atr(df, start_idx, atr_period, lookback_for_atr)
-        
+        try:
+            atr = ConsolidationDetector._calculate_atr(df, start_idx, atr_period, lookback_for_atr)
+        except KeyError as e:
+            logger.error(f"Column not found in ConsolidationDetector: {e}")
+            return None
+
         if atr <= 0:
             logger.debug(f"Invalid ATR: {atr}")
             return None
@@ -78,9 +82,15 @@ class ConsolidationDetector:
 
         logger.debug(f"ATR={atr:.2f}, range thresholds: [{min_range:.2f}, {max_range:.2f}]")
 
-        # 3. Search for consolidation of varying durations
-        best_consolidation = None
-        best_score = 0
+        # 3. Search for consolidation - WHITEPAPER SIMPLIFIED LOGIC
+        # "Wait for clear NYSE High or Low to form on M5"
+        # - Duration: FLEXIBLE 3-25 candles (no strict upper limit per whitepaper)
+        # - Quality: Simple "touched 2+ times" check
+        # - Return FIRST valid consolidation found (not "best")
+
+        tolerance = 2.0  # points - price must be within 2 points to count as "touch"
+
+        print(f"    [CONSOL] Testing durations {min_duration} to {min(max_duration, len(df) - start_idx - 1)}")
 
         for duration in range(min_duration, min(max_duration + 1, len(df) - start_idx)):
             end_idx = start_idx + duration
@@ -89,47 +99,55 @@ class ConsolidationDetector:
             if len(window) < min_duration:
                 continue
 
-            # Calculate range
+            # Calculate High and Low
             consol_high = window['High'].max()
             consol_low = window['Low'].min()
             consol_range = consol_high - consol_low
 
-            # Check if range is within ATR bounds
-            if consol_range < min_range or consol_range > max_range:
+            # Check if range is zero (invalid)
+            if consol_range == 0:
+                print(f"    [CONSOL] Duration {duration}: Zero range")
                 continue
 
-            # 4. Assess quality
-            quality = ConsolidationDetector._assess_quality(window, atr)
-
-            # Check for trend (reject if trending)
+            # Check for trend (reject if trending - valid rejection criterion)
             if ConsolidationDetector._is_trending(window, atr):
                 logger.debug(f"Duration {duration}: Rejected (trending)")
+                print(f"    [CONSOL] Duration {duration}: Trending")
                 continue
 
-            # Keep best scoring consolidation
-            if quality['score'] > best_score:
-                best_score = quality['score']
-                best_consolidation = {
+            # Count touches of High level (within tolerance)
+            high_touches = (window['High'] >= consol_high - tolerance).sum()
+
+            # Count touches of Low level (within tolerance)
+            low_touches = (window['Low'] <= consol_low + tolerance).sum()
+
+            # If either level touched 2+ times, consolidation detected!
+            if high_touches >= 2 or low_touches >= 2:
+                print(f"    [CONSOL] Duration {duration}: ✅ VALID (range={consol_range:.2f}, high_touches={high_touches}, low_touches={low_touches})")
+
+                logger.info(f"Consolidation found: duration={duration}, "
+                           f"range={consol_range:.2f}, "
+                           f"high_touches={high_touches}, low_touches={low_touches}")
+
+                # Return FIRST valid consolidation (whitepaper doesn't specify "best")
+                return {
                     'start_idx': start_idx,
                     'end_idx': end_idx,
                     'high': consol_high,
                     'low': consol_low,
                     'range': consol_range,
                     'atr': atr,
-                    'quality_score': quality['score'],
-                    'tightness': quality['tightness'],
-                    'volume_compression': quality['volume_compression'],
-                    'breakout_ready': quality['breakout_ready'],
+                    'quality_score': 1.0,  # All valid consolidations score 1.0
                     'duration': duration,
-                    'midpoint_crosses': quality.get('midpoint_crosses', 0)
+                    'high_touches': high_touches,
+                    'low_touches': low_touches
                 }
+            else:
+                logger.debug(f"Duration {duration}: Not enough touches (high={high_touches}, low={low_touches})")
 
-        if best_consolidation:
-            logger.info(f"Consolidation found: duration={best_consolidation['duration']}, "
-                       f"quality={best_consolidation['quality_score']:.2f}, "
-                       f"range={best_consolidation['range']:.2f}")
-
-        return best_consolidation
+        # No valid consolidation found
+        print(f"    [CONSOL] No valid consolidation found in range {min_duration}-{max_duration}")
+        return None
 
     @staticmethod
     def _calculate_atr(
