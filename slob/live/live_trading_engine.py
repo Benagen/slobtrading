@@ -33,6 +33,9 @@ IB_AVAILABLE = True
 from slob.monitoring.telegram_notifier import TelegramNotifier
 from slob.monitoring.email_notifier import EmailNotifier
 
+# Secrets management
+from slob.config.secrets import get_secret
+
 class LiveTradingEngineConfig:
     """Configuration that accepts ANYTHING via kwargs."""
     def __init__(self, **kwargs):
@@ -60,6 +63,22 @@ class LiveTradingEngineConfig:
         # Apply overrides
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+        # Load account from secrets if not provided
+        if not self.account:
+            try:
+                self.account = get_secret('ib_account')
+                logging.getLogger(__name__).info(f"✅ Loaded IB Account from secrets: {self.account}")
+            except Exception as e:
+                logging.getLogger(__name__).warning(f"Could not load IB account from secrets: {e}")
+                logging.getLogger(__name__).warning("Account will need to be provided via config or environment")
+
+        # Validate account format
+        if self.account and not (self.account.startswith('DU') or self.account.startswith('U')):
+            raise ValueError(
+                f"Invalid IB account: '{self.account}'. "
+                f"Expected format: DU123456 (paper) or U123456 (live)"
+            )
 
 class LiveTradingEngine:
     def __init__(self, config: LiveTradingEngineConfig):
@@ -247,7 +266,7 @@ class LiveTradingEngine:
         self.ws_fetcher = IBWSFetcher(
             host=self.config.ib_host,
             port=self.config.ib_port,
-            client_id=self.config.client_id + 1,
+            client_id=10,  # Unique ID for data fetcher (different from executor client_id=2)
             account=self.config.account
         )
 

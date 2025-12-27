@@ -318,9 +318,9 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate account format
-    if not args.account.startswith('DU'):
-        print(f"❌ Error: Paper trading account must start with 'DU', got: {args.account}")
+    # Validate account format (DU or DUO for paper trading)
+    if not (args.account.startswith('DU') or args.account.startswith('U')):
+        print(f"❌ Error: Paper trading account must start with 'DU' or 'DUO' (paper) or 'U' (live), got: {args.account}")
         sys.exit(1)
 
     # Run paper trading

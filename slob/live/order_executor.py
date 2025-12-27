@@ -86,7 +86,7 @@ class OrderExecutorConfig:
     def __init__(
         self,
         host: str = '127.0.0.1',
-        port: int = 7497,
+        port: int = 4002,  # IB Gateway default port (match fetcher)
         client_id: int = 2,  # Different from data fetcher
         account: Optional[str] = None,
         paper_trading: bool = True,
@@ -320,6 +320,28 @@ class OrderExecutor:
         Returns:
             BracketOrderResult with all order details
         """
+        # CRITICAL: Paper trading mode check - prevent live orders
+        if self.config.paper_trading:
+            logger.critical(
+                f"🛑 PAPER TRADING MODE: Orders NOT sent to IB\n"
+                f"Setup: {setup.id}\n"
+                f"Entry: ${setup.entry_price:.2f}\n"
+                f"SL: ${setup.sl_price:.2f}\n"
+                f"TP: ${setup.tp_price:.2f}\n"
+                f"Quantity: {position_size or self.config.default_position_size}"
+            )
+
+            # Return simulated failure (orders not actually placed)
+            return BracketOrderResult(
+                entry_order=OrderResult(
+                    order_id=0,
+                    status=OrderStatus.REJECTED,
+                    error_message="Paper trading mode - orders not sent to IB"
+                ),
+                success=False,
+                error_message="Paper trading mode - orders not sent to IB"
+            )
+
         # Check connection health - reconnect if needed
         if not self.is_connected():
             logger.warning("IB connection lost, attempting reconnection...")
@@ -432,6 +454,9 @@ class OrderExecutor:
         )
         parent_order.orderRef = f"{order_ref_base}_ENTRY"
 
+        # Create OCA group for one-cancels-all behavior
+        oca_group = f"OCA_{setup.id[:8]}"
+
         # Create stop loss (BUY to close SHORT)
         stop_loss = StopOrder(
             action='BUY',
@@ -439,7 +464,9 @@ class OrderExecutor:
             stopPrice=setup.sl_price,
             orderId=self.ib.client.getReqId(),
             parentId=parent_order.orderId,
-            transmit=False
+            transmit=False,
+            ocaGroup=oca_group,  # One-cancels-all group
+            ocaType=1  # 1 = Cancel all remaining on fill
         )
         stop_loss.orderRef = f"{order_ref_base}_SL"
 
@@ -450,7 +477,9 @@ class OrderExecutor:
             lmtPrice=setup.tp_price,
             orderId=self.ib.client.getReqId(),
             parentId=parent_order.orderId,
-            transmit=True  # Transmit all orders together
+            transmit=True,  # Transmit all orders together
+            ocaGroup=oca_group,  # One-cancels-all group
+            ocaType=1  # 1 = Cancel all remaining on fill
         )
         take_profit.orderRef = f"{order_ref_base}_TP"
 
@@ -767,6 +796,12 @@ class OrderExecutor:
         if not self.ib or not self.ib.isConnected():
             logger.warning("IB not connected, using cached balance")
             return self._cached_balance
+
+        # CRITICAL: Verify account is configured
+        if not self.config.account:
+            logger.critical("❌ Account not configured! Cannot get balance.")
+            logger.critical("Returning 0.0 to prevent trades with incorrect balance.")
+            return 0.0  # Fail-safe: no balance = no trades
 
         try:
             # Request account values from IB
