@@ -65,6 +65,15 @@ class LiveTradingEngineConfig:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+        # Extract host/port from ib_config if provided
+        if hasattr(self, 'ib_config') and self.ib_config:
+            self.ib_host = self.ib_config.host
+            self.ib_port = self.ib_config.port
+            if hasattr(self.ib_config, 'client_id'):
+                self.client_id = self.ib_config.client_id
+            if hasattr(self.ib_config, 'account') and self.ib_config.account:
+                self.account = self.ib_config.account
+
         # Load account from secrets if not provided
         if not self.account:
             try:
