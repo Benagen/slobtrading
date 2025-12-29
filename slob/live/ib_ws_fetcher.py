@@ -83,17 +83,18 @@ class IBWSFetcher:
                 self.connected = True
                 self.reconnect_count = 0  # Reset on successful connection
 
-                # Request Real-time Market Data (Type 1)
+                # Request Delayed Market Data (Type 3)
                 # Market Data Types:
                 # 1 = Live (real-time, free for paper accounts, requires subscription for live)
                 # 2 = Frozen (last available, free)
                 # 3 = Delayed (15-20 min delay, free)
                 # 4 = Delayed frozen (frozen delayed, free)
-                market_data_type = 1  # Real-time
+                market_data_type = 3  # Delayed (no subscription needed)
 
                 try:
                     self.ib.reqMarketDataType(market_data_type)
-                    self.logger.info(f"✅ Requested Market Data Type {market_data_type} (Real-time)")
+                    data_type_name = "Delayed" if market_data_type == 3 else "Real-time"
+                    self.logger.info(f"✅ Requested Market Data Type {market_data_type} ({data_type_name})")
                 except Exception as mdt_error:
                     self.logger.error(f"Failed to set market data type to real-time: {mdt_error}")
                     # Fall back to delayed if real-time not available
