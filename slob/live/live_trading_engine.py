@@ -2,6 +2,7 @@
 """
 Live Trading Engine
 """
+import os
 import asyncio
 import logging
 import signal
@@ -93,7 +94,20 @@ class LiveTradingEngine:
         self.tick_buffer = TickBuffer()
         self.candle_aggregator = CandleAggregator(on_candle_complete=self._on_candle_complete)
         self.candle_store = CandleStore()
-        self.state_manager = StateManager(StateManagerConfig(sqlite_path="data/trading_state.db"))
+
+        # StateManager configuration with Redis support
+        state_config = StateManagerConfig(
+            sqlite_path="data/trading_state.db",
+            redis_host=os.getenv('REDIS_HOST', 'localhost'),
+            redis_port=int(os.getenv('REDIS_PORT', '6379')),
+            redis_password=os.getenv('REDIS_PASSWORD'),
+            redis_tls_enabled=os.getenv('REDIS_TLS_ENABLED', 'false').lower() == 'true',
+            redis_ca_cert=os.getenv('REDIS_CA_CERT'),
+            redis_client_cert=os.getenv('REDIS_CLIENT_CERT'),
+            redis_client_key=os.getenv('REDIS_CLIENT_KEY'),
+            enable_redis=os.getenv('REDIS_HOST') is not None  # Enable if REDIS_HOST is set
+        )
+        self.state_manager = StateManager(state_config)
         
         # Setup Tracker
         tracker_config = SetupTrackerConfig(

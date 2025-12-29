@@ -4,6 +4,7 @@ Interactive Brokers Configuration
 Configuration for IB paper/live trading connection.
 """
 
+import os
 from dataclasses import dataclass
 from typing import Optional
 
@@ -102,8 +103,8 @@ class IBConfig:
             IBConfig for IB Gateway paper trading
         """
         return cls(
-            host='127.0.0.1',
-            port=4002,  # Gateway paper
+            host=os.getenv('IB_GATEWAY_HOST', '127.0.0.1'),
+            port=int(os.getenv('IB_GATEWAY_PORT', '4002')),  # Gateway paper
             client_id=client_id,
             account=account,
             paper_trading=True,
