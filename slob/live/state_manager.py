@@ -91,6 +91,7 @@ class StateManager:
         self.config = config
         self.redis_client: Optional[redis.Redis] = None
         self.sqlite_conn: Optional[sqlite3.Connection] = None
+        self.using_in_memory = False  # Track if using in-memory fallback
 
         # In-memory fallback if Redis unavailable
         self._memory_store: Dict[str, str] = {}
@@ -138,11 +139,14 @@ class StateManager:
 
                 tls_status = "with TLS" if self.config.redis_tls_enabled else "without TLS"
                 logger.info(f"✅ Redis connected ({tls_status}): {self.config.redis_host}:{self.config.redis_port}")
+                self.using_in_memory = False
             except Exception as e:
                 logger.warning(f"Redis connection failed: {e}. Using in-memory fallback.")
                 self.redis_client = None
+                self.using_in_memory = True
         else:
             logger.info("Redis disabled - using in-memory fallback")
+            self.using_in_memory = True
 
         # SQLite connection
         self._init_sqlite()
