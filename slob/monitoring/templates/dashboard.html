@@ -363,6 +363,21 @@
             </div>
         </div>
 
+        <!-- Setup Pipeline -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-funnel"></i> Setup Pipeline - Live State Breakdown
+                        <span class="badge bg-primary ms-2" id="pipeline-total">0 Total</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="pipelineChart" style="height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Candlestick Chart and Candles Table -->
         <div class="row mb-4">
             <div class="col-lg-8">
@@ -935,6 +950,88 @@
                 });
         }
 
+        function updatePipeline() {
+            fetch('/api/setup_pipeline')
+                .then(response => response.json())
+                .then(data => {
+                    const pipeline = data.pipeline || [];
+                    const total = data.total || 0;
+
+                    // Update total badge
+                    document.getElementById('pipeline-total').textContent = `${total} Total`;
+
+                    if (pipeline.length === 0) {
+                        document.getElementById('pipelineChart').innerHTML =
+                            '<p class="text-muted text-center">No setup data available</p>';
+                        return;
+                    }
+
+                    // Prepare data for Plotly bar chart
+                    const labels = pipeline.map(p => p.label);
+                    const values = pipeline.map(p => p.count);
+                    const colors = pipeline.map(p => p.color);
+
+                    const trace = {
+                        x: labels,
+                        y: values,
+                        type: 'bar',
+                        marker: {
+                            color: colors,
+                            line: {
+                                color: '#30363d',
+                                width: 1
+                            }
+                        },
+                        text: values.map(v => v > 0 ? v.toString() : ''),
+                        textposition: 'outside',
+                        textfont: {
+                            color: '#c9d1d9',
+                            size: 14
+                        },
+                        hovertemplate: '<b>%{x}</b><br>Count: %{y}<extra></extra>'
+                    };
+
+                    const layout = {
+                        xaxis: {
+                            title: 'Setup State',
+                            gridcolor: '#30363d',
+                            color: '#8b949e',
+                            tickangle: -20
+                        },
+                        yaxis: {
+                            title: 'Count',
+                            gridcolor: '#30363d',
+                            color: '#8b949e'
+                        },
+                        paper_bgcolor: '#161b22',
+                        plot_bgcolor: '#0d1117',
+                        font: {
+                            family: 'Segoe UI, system-ui, sans-serif',
+                            color: '#c9d1d9'
+                        },
+                        margin: {
+                            l: 50,
+                            r: 20,
+                            t: 20,
+                            b: 100
+                        },
+                        showlegend: false
+                    };
+
+                    const config = {
+                        responsive: true,
+                        displayModeBar: false
+                    };
+
+                    Plotly.newPlot('pipelineChart', [trace], layout, config);
+                })
+                .catch(error => {
+                    console.error('Error fetching pipeline data:', error);
+                    document.getElementById('pipelineChart').innerHTML =
+                        '<p class="text-danger text-center">Error loading pipeline data</p>';
+                });
+        }
+
         function refreshData() {
             const icon = document.getElementById('refresh-icon');
             icon.classList.add('spinning');
@@ -943,7 +1040,8 @@
             Promise.all([
                 fetch('/api/all').then(r => r.json()),
                 updateLivePrice(),
-                updateCandlesAndChart()
+                updateCandlesAndChart(),
+                updatePipeline()
             ])
                 .then(([data]) => {
                     updateDashboard(data);

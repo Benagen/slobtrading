@@ -578,6 +578,96 @@ def api_pnl_chart():
         return jsonify({'labels': [], 'data': [], 'error': str(e)})
 
 
+@app.route('/api/setup_pipeline')
+@login_required
+def api_setup_pipeline():
+    """Get setup pipeline data - breakdown of setups by state."""
+    try:
+        if not STATE_DB_PATH.exists():
+            return jsonify({'pipeline': [], 'total': 0})
+
+        conn = sqlite3.connect(str(STATE_DB_PATH))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Check if setups table exists
+        cursor.execute("""
+            SELECT name FROM sqlite_master
+            WHERE type='table' AND name='setups'
+        """)
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({'pipeline': [], 'total': 0, 'error': 'Setups table not found'})
+
+        # Get count of setups by state (only active ones, not invalidated/completed from old days)
+        # Focus on today's setups or recent active ones
+        cursor.execute("""
+            SELECT
+                state,
+                COUNT(*) as count
+            FROM setups
+            WHERE created_at >= datetime('now', '-24 hours')
+            GROUP BY state
+            ORDER BY state ASC
+        """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        # State mapping with friendly names and colors
+        state_map = {
+            1: {'name': 'WATCHING_LIQ1', 'label': 'Watching LIQ #1', 'color': '#8b949e'},
+            2: {'name': 'WATCHING_CONSOL', 'label': 'Watching Consolidation', 'color': '#58a6ff'},
+            3: {'name': 'WATCHING_LIQ2', 'label': 'Watching LIQ #2', 'color': '#1f6feb'},
+            4: {'name': 'WAITING_ENTRY', 'label': 'Waiting Entry', 'color': '#f0883e'},
+            5: {'name': 'SETUP_COMPLETE', 'label': 'Setup Complete', 'color': '#3fb950'},
+            6: {'name': 'INVALIDATED', 'label': 'Invalidated', 'color': '#f85149'}
+        }
+
+        # Build pipeline data
+        pipeline = []
+        total_setups = 0
+
+        for row in rows:
+            state = row['state']
+            count = row['count']
+            total_setups += count
+
+            if state in state_map:
+                pipeline.append({
+                    'state': state,
+                    'name': state_map[state]['name'],
+                    'label': state_map[state]['label'],
+                    'count': count,
+                    'color': state_map[state]['color']
+                })
+
+        # Fill in missing states with 0 count (for consistent chart)
+        existing_states = {item['state'] for item in pipeline}
+        for state, info in state_map.items():
+            if state not in existing_states:
+                pipeline.append({
+                    'state': state,
+                    'name': info['name'],
+                    'label': info['label'],
+                    'count': 0,
+                    'color': info['color']
+                })
+
+        # Sort by state order
+        pipeline.sort(key=lambda x: x['state'])
+
+        return jsonify({
+            'pipeline': pipeline,
+            'total': total_setups,
+            'timestamp': datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting setup pipeline: {e}")
+        return jsonify({'pipeline': [], 'total': 0, 'error': str(e)}), 500
+
+
 @app.route('/api/risk_metrics')
 @login_required
 def api_risk_metrics():
