@@ -57,10 +57,11 @@ login_manager.login_message = 'Please log in to access the dashboard.'
 csrf = CSRFProtect(app)
 
 # Rate limiting: 30 login attempts per minute per IP (allows multiple users from same IP)
+# Dashboard auto-refresh does 5+ API calls every 5 seconds = 60+ requests/min/user
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=["2000 per day", "1000 per hour"],  # Increased for dashboard auto-refresh
+    default_limits=["50000 per day", "10000 per hour"],  # Very high limits for authenticated dashboard usage
     storage_uri="memory://"
 )
 
