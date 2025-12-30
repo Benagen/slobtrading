@@ -256,6 +256,16 @@
             font-size: 1.2rem;
             font-weight: bold;
         }
+        /* Profile Picture */
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #58a6ff;
+            margin-right: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -270,8 +280,9 @@
                     <i class="bi bi-circle-fill text-success" id="status-indicator"></i>
                     <span id="status-text">Loading...</span>
                 </span>
-                <span class="text-white">
-                    <i class="bi bi-person-circle"></i> {{ username }}
+                <span class="text-white d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Profile" class="profile-pic">
+                    {{ username }}
                 </span>
                 <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-box-arrow-right"></i> Logout
