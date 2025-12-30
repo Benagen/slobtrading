@@ -60,13 +60,13 @@ csrf = CSRFProtect(app)
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=["2000 per day", "1000 per hour"],  # Increased for dashboard auto-refresh
     storage_uri="memory://"
 )
 
 # Database paths
-DB_PATH = Path(os.getenv('DB_PATH', 'data/candles.db'))
-STATE_DB_PATH = Path(os.getenv('STATE_DB_PATH', 'data/slob_state.db'))
+DB_PATH = Path(os.getenv('DB_PATH', 'data/trading_state.db'))  # Fixed: use trading_state.db
+STATE_DB_PATH = Path(os.getenv('STATE_DB_PATH', 'data/trading_state.db'))  # Fixed: use trading_state.db
 
 
 # ============================================================================
@@ -623,6 +623,21 @@ def api_all():
         'risk': api_risk_metrics().get_json(),
         'pnl_chart': api_pnl_chart().get_json()
     })
+
+
+@app.route('/health')
+def health():
+    """Health check endpoint for Docker."""
+    try:
+        # Check if app is running
+        status = {
+            'status': 'healthy',
+            'service': 'slob-dashboard',
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({'status': 'unhealthy', 'error': str(e)}), 503
 
 
 def run_dashboard(host='0.0.0.0', port=5000, debug=False):
