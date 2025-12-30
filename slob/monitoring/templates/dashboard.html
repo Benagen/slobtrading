@@ -10,34 +10,40 @@
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #0d1117;
+            color: #c9d1d9;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            border-bottom: 1px solid #30363d;
         }
         .card {
-            border: none;
+            background-color: #161b22;
+            border: 1px solid #30363d;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             margin-bottom: 20px;
         }
         .card-header {
-            background-color: transparent;
-            border-bottom: 2px solid #f0f0f0;
+            background-color: #1f2937;
+            border-bottom: 1px solid #30363d;
             font-weight: 600;
+            color: #58a6ff;
         }
         .stat-card {
             text-align: center;
             padding: 20px;
+            background: linear-gradient(135deg, #1f2937 0%, #161b22 100%);
         }
         .stat-value {
             font-size: 2.5rem;
             font-weight: bold;
             margin: 10px 0;
+            color: #58a6ff;
         }
         .stat-label {
-            color: #6c757d;
+            color: #8b949e;
             font-size: 0.9rem;
             text-transform: uppercase;
         }
@@ -47,13 +53,47 @@
             border-radius: 20px;
         }
         .positive {
-            color: #28a745;
+            color: #3fb950;
         }
         .negative {
-            color: #dc3545;
+            color: #f85149;
         }
         .table-sm td, .table-sm th {
             padding: 0.5rem;
+            color: #c9d1d9;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(110, 118, 129, 0.05);
+        }
+        .table {
+            color: #c9d1d9;
+        }
+        .table thead th {
+            border-bottom: 1px solid #30363d;
+            background-color: #161b22;
+        }
+        .alert-info {
+            background-color: #1f6feb;
+            border-color: #58a6ff;
+            color: #ffffff;
+        }
+        .alert-warning {
+            background-color: #9e6a03;
+            border-color: #d29922;
+            color: #ffffff;
+        }
+        .alert-danger {
+            background-color: #da3633;
+            border-color: #f85149;
+            color: #ffffff;
+        }
+        .alert-success {
+            background-color: #2ea043;
+            border-color: #3fb950;
+            color: #ffffff;
+        }
+        .text-muted {
+            color: #8b949e !important;
         }
         .refresh-btn {
             position: fixed;
@@ -84,12 +124,13 @@
             animation: spin 1s linear;
         }
         .live-price-widget {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
             color: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             margin-bottom: 20px;
+            border: 1px solid #30363d;
         }
         .live-price {
             font-size: 3.5rem;
@@ -151,25 +192,39 @@
     <div class="container-fluid">
         <!-- Stats Row -->
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <div class="stat-label"><i class="bi bi-clock"></i> New York</div>
+                    <div class="stat-value" id="ny-time" style="font-size: 1.8rem;">--:--:--</div>
+                    <div class="stat-label" style="font-size: 0.75rem;" id="ny-date">---</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <div class="stat-label"><i class="bi bi-clock"></i> Stockholm</div>
+                    <div class="stat-value" id="sthlm-time" style="font-size: 1.8rem;">--:--:--</div>
+                    <div class="stat-label" style="font-size: 0.75rem;" id="sthlm-date">---</div>
+                </div>
+            </div>
+            <div class="col-md-2">
                 <div class="card stat-card">
                     <div class="stat-label">Active Setups</div>
-                    <div class="stat-value text-primary" id="active-setups">-</div>
+                    <div class="stat-value" id="active-setups">-</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card stat-card">
                     <div class="stat-label">Total Trades</div>
-                    <div class="stat-value text-info" id="total-trades">-</div>
+                    <div class="stat-value" id="total-trades">-</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card stat-card">
                     <div class="stat-label">Win Rate</div>
-                    <div class="stat-value text-success" id="win-rate">-</div>
+                    <div class="stat-value" id="win-rate">-</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="card stat-card">
                     <div class="stat-label">Total P&L</div>
                     <div class="stat-value" id="total-pnl">-</div>
@@ -728,16 +783,23 @@
                             title: '',
                             xaxis: {
                                 type: 'date',
-                                rangeslider: {visible: false}
+                                rangeslider: {visible: false},
+                                gridcolor: '#30363d',
+                                color: '#8b949e'
                             },
                             yaxis: {
                                 title: 'Price',
-                                autorange: true
+                                autorange: true,
+                                gridcolor: '#30363d',
+                                color: '#8b949e'
                             },
                             margin: {l: 50, r: 50, t: 20, b: 50},
-                            paper_bgcolor: '#f8f9fa',
-                            plot_bgcolor: 'white',
-                            font: {family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'}
+                            paper_bgcolor: '#161b22',
+                            plot_bgcolor: '#0d1117',
+                            font: {
+                                family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+                                color: '#c9d1d9'
+                            }
                         };
 
                         const config = {
@@ -803,9 +865,50 @@
                 });
         }
 
+        // Update clocks
+        function updateClocks() {
+            const now = new Date();
+
+            // New York time (EST/EDT)
+            const nyTime = now.toLocaleTimeString('en-US', {
+                timeZone: 'America/New_York',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            const nyDate = now.toLocaleDateString('en-US', {
+                timeZone: 'America/New_York',
+                month: 'short',
+                day: 'numeric'
+            });
+            document.getElementById('ny-time').textContent = nyTime;
+            document.getElementById('ny-date').textContent = nyDate;
+
+            // Stockholm time (CET/CEST)
+            const sthlmTime = now.toLocaleTimeString('sv-SE', {
+                timeZone: 'Europe/Stockholm',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            const sthlmDate = now.toLocaleDateString('sv-SE', {
+                timeZone: 'Europe/Stockholm',
+                month: 'short',
+                day: 'numeric'
+            });
+            document.getElementById('sthlm-time').textContent = sthlmTime;
+            document.getElementById('sthlm-date').textContent = sthlmDate;
+        }
+
         // Initial load
+        updateClocks();
         refreshData();
         refreshErrorLogs();
+
+        // Update clocks every second
+        setInterval(updateClocks, 1000);
 
         // Auto-refresh every 5 seconds for live updates
         autoRefreshInterval = setInterval(function() {
