@@ -342,6 +342,114 @@ def api_metrics():
     return jsonify(get_performance_metrics())
 
 
+@app.route('/api/live_price')
+@login_required
+def api_live_price():
+    """Get current live price and market data."""
+    try:
+        if not DB_PATH.exists():
+            return jsonify({'error': 'Database not found'}), 404
+
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Get latest candle
+        cursor.execute("""
+            SELECT timestamp, open, high, low, close, volume
+            FROM candles
+            ORDER BY timestamp DESC
+            LIMIT 1
+        """)
+
+        latest = cursor.fetchone()
+        conn.close()
+
+        if not latest:
+            return jsonify({'error': 'No data available'}), 404
+
+        # Get previous candle for change calculation
+        conn = sqlite3.connect(str(DB_PATH))
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT close
+            FROM candles
+            ORDER BY timestamp DESC
+            LIMIT 2
+        """)
+        candles = cursor.fetchall()
+        conn.close()
+
+        prev_close = candles[1][0] if len(candles) > 1 else latest['close']
+        change = latest['close'] - prev_close
+        change_pct = (change / prev_close * 100) if prev_close else 0
+
+        return jsonify({
+            'symbol': 'NQ',
+            'price': round(latest['close'], 2),
+            'open': round(latest['open'], 2),
+            'high': round(latest['high'], 2),
+            'low': round(latest['low'], 2),
+            'volume': latest['volume'],
+            'change': round(change, 2),
+            'change_pct': round(change_pct, 2),
+            'timestamp': latest['timestamp'],
+            'direction': 'up' if change >= 0 else 'down'
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting live price: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/candles')
+@login_required
+def api_candles():
+    """Get recent candles for table and chart."""
+    try:
+        limit = request.args.get('limit', 50, type=int)
+        limit = min(limit, 200)  # Max 200 candles
+
+        if not DB_PATH.exists():
+            return jsonify({'error': 'Database not found'}), 404
+
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT timestamp, open, high, low, close, volume
+            FROM candles
+            ORDER BY timestamp DESC
+            LIMIT ?
+        """, (limit,))
+
+        candles = []
+        for row in cursor.fetchall():
+            candles.append({
+                'timestamp': row['timestamp'],
+                'open': round(row['open'], 2),
+                'high': round(row['high'], 2),
+                'low': round(row['low'], 2),
+                'close': round(row['close'], 2),
+                'volume': row['volume']
+            })
+
+        conn.close()
+
+        # Reverse so oldest first (for chart)
+        candles.reverse()
+
+        return jsonify({
+            'candles': candles,
+            'count': len(candles)
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting candles: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/shadow_stats')
 @login_required
 def api_shadow_stats():

@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -82,6 +83,47 @@
         .spinning {
             animation: spin 1s linear;
         }
+        .live-price-widget {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+        .live-price {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .price-change {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .price-change.up {
+            color: #90EE90;
+        }
+        .price-change.down {
+            color: #FFB6C1;
+        }
+        .price-details {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .price-detail-item {
+            text-align: center;
+        }
+        .price-detail-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        .price-detail-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +173,85 @@
                 <div class="card stat-card">
                     <div class="stat-label">Total P&L</div>
                     <div class="stat-value" id="total-pnl">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Price Widget -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="live-price-widget">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-baseline">
+                                <h2 class="mb-0 me-3">NQ</h2>
+                                <div class="live-price" id="live-price">---.--</div>
+                            </div>
+                            <div class="price-change" id="price-change">
+                                <i class="bi bi-dash"></i> <span id="change-value">--</span>
+                                (<span id="change-pct">--</span>%)
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="price-details">
+                                <div class="price-detail-item">
+                                    <div class="price-detail-label">OPEN</div>
+                                    <div class="price-detail-value" id="price-open">--</div>
+                                </div>
+                                <div class="price-detail-item">
+                                    <div class="price-detail-label">HIGH</div>
+                                    <div class="price-detail-value" id="price-high">--</div>
+                                </div>
+                                <div class="price-detail-item">
+                                    <div class="price-detail-label">LOW</div>
+                                    <div class="price-detail-value" id="price-low">--</div>
+                                </div>
+                                <div class="price-detail-item">
+                                    <div class="price-detail-label">VOLUME</div>
+                                    <div class="price-detail-value" id="price-volume">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Candlestick Chart and Candles Table -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up"></i> Live Chart (Last 100 Candles)
+                    </div>
+                    <div class="card-body">
+                        <div id="candlestickChart" style="height: 500px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-table"></i> Recent Candles
+                    </div>
+                    <div class="card-body p-0">
+                        <div style="max-height: 500px; overflow-y: auto;">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead class="sticky-top bg-white">
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Close</th>
+                                        <th>Vol</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="candles-tbody">
+                                    <tr>
+                                        <td colspan="3" class="text-muted text-center">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -532,6 +653,108 @@
             }
         }
 
+        function updateLivePrice() {
+            fetch('/api/live_price')
+                .then(response => response.json())
+                .then(data => {
+                    // Update price
+                    document.getElementById('live-price').textContent = data.price.toFixed(2);
+                    document.getElementById('price-open').textContent = data.open.toFixed(2);
+                    document.getElementById('price-high').textContent = data.high.toFixed(2);
+                    document.getElementById('price-low').textContent = data.low.toFixed(2);
+                    document.getElementById('price-volume').textContent = data.volume.toLocaleString();
+
+                    // Update change
+                    const changeElem = document.getElementById('price-change');
+                    const changeValue = document.getElementById('change-value');
+                    const changePct = document.getElementById('change-pct');
+
+                    changeValue.textContent = (data.change >= 0 ? '+' : '') + data.change.toFixed(2);
+                    changePct.textContent = (data.change_pct >= 0 ? '+' : '') + data.change_pct.toFixed(2);
+
+                    // Update styling
+                    changeElem.classList.remove('up', 'down');
+                    changeElem.classList.add(data.direction);
+
+                    // Update icon
+                    const icon = changeElem.querySelector('i');
+                    icon.className = data.direction === 'up' ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
+                })
+                .catch(error => {
+                    console.error('Error fetching live price:', error);
+                });
+        }
+
+        function updateCandlesAndChart() {
+            fetch('/api/candles?limit=100')
+                .then(response => response.json())
+                .then(data => {
+                    const candles = data.candles || [];
+
+                    // Update candles table (show latest 20)
+                    const tbody = document.getElementById('candles-tbody');
+                    if (candles.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No candles yet</td></tr>';
+                    } else {
+                        const latestCandles = candles.slice(-20).reverse(); // Latest 20, reversed
+                        tbody.innerHTML = latestCandles.map(candle => {
+                            const time = new Date(candle.timestamp);
+                            const timeStr = time.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
+                            return `
+                                <tr>
+                                    <td><small>${timeStr}</small></td>
+                                    <td><strong>${candle.close.toFixed(2)}</strong></td>
+                                    <td><small>${(candle.volume / 1000).toFixed(0)}k</small></td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+
+                    // Update candlestick chart
+                    if (candles.length > 0) {
+                        const trace = {
+                            x: candles.map(c => c.timestamp),
+                            close: candles.map(c => c.close),
+                            high: candles.map(c => c.high),
+                            low: candles.map(c => c.low),
+                            open: candles.map(c => c.open),
+                            type: 'candlestick',
+                            increasing: {line: {color: '#26A69A'}},
+                            decreasing: {line: {color: '#EF5350'}},
+                            name: 'NQ'
+                        };
+
+                        const layout = {
+                            title: '',
+                            xaxis: {
+                                type: 'date',
+                                rangeslider: {visible: false}
+                            },
+                            yaxis: {
+                                title: 'Price',
+                                autorange: true
+                            },
+                            margin: {l: 50, r: 50, t: 20, b: 50},
+                            paper_bgcolor: '#f8f9fa',
+                            plot_bgcolor: 'white',
+                            font: {family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif'}
+                        };
+
+                        const config = {
+                            responsive: true,
+                            displayModeBar: true,
+                            displaylogo: false,
+                            modeBarButtonsToRemove: ['lasso2d', 'select2d']
+                        };
+
+                        Plotly.newPlot('candlestickChart', [trace], layout, config);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching candles:', error);
+                });
+        }
+
         function refreshErrorLogs() {
             fetch('/api/error_logs')
                 .then(response => response.json())
@@ -563,9 +786,13 @@
             const icon = document.getElementById('refresh-icon');
             icon.classList.add('spinning');
 
-            fetch('/api/all')
-                .then(response => response.json())
-                .then(data => {
+            // Fetch all data in parallel
+            Promise.all([
+                fetch('/api/all').then(r => r.json()),
+                updateLivePrice(),
+                updateCandlesAndChart()
+            ])
+                .then(([data]) => {
                     updateDashboard(data);
                     setTimeout(() => icon.classList.remove('spinning'), 1000);
                 })
@@ -580,11 +807,11 @@
         refreshData();
         refreshErrorLogs();
 
-        // Auto-refresh every 30 seconds
+        // Auto-refresh every 5 seconds for live updates
         autoRefreshInterval = setInterval(function() {
             refreshData();
             refreshErrorLogs();
-        }, 30000);
+        }, 5000);
     </script>
 </body>
 </html>
