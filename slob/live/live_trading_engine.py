@@ -102,7 +102,7 @@ class LiveTradingEngine:
         self.event_bus = EventBus()
         self.tick_buffer = TickBuffer()
         self.candle_aggregator = CandleAggregator(on_candle_complete=self._on_candle_complete)
-        self.candle_store = CandleStore()
+        self.candle_store = CandleStore(db_path="data/trading_state.db")
 
         # StateManager configuration with Redis support
         state_config = StateManagerConfig(
