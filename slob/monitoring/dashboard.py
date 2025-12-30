@@ -56,7 +56,7 @@ login_manager.login_message = 'Please log in to access the dashboard.'
 
 csrf = CSRFProtect(app)
 
-# Rate limiting: 10 login attempts per minute per IP
+# Rate limiting: 30 login attempts per minute per IP (allows multiple users from same IP)
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
@@ -119,7 +119,7 @@ def verify_password(password: str) -> bool:
 # ============================================================================
 
 @app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("10 per minute")  # Rate limit: 10 attempts per minute
+@limiter.limit("30 per minute")  # Rate limit: 30 attempts per minute (allows multiple users from same IP)
 def login():
     """Login page and handler."""
     if current_user.is_authenticated:
