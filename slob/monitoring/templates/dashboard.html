@@ -867,7 +867,7 @@
         }
 
         function updateCandlesAndChart() {
-            fetch('/api/candles?limit=100')
+            fetch('/api/candles?limit=60')
                 .then(response => response.json())
                 .then(data => {
                     const candles = data.candles || [];

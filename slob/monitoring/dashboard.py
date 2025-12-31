@@ -120,7 +120,7 @@ def verify_password(password: str) -> bool:
 # ============================================================================
 
 @app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("30 per minute")  # Rate limit: 30 attempts per minute (allows multiple users from same IP)
+@limiter.limit("200 per minute")  # Rate limit: 200 per minute (high limit due to session redirects from API calls)
 def login():
     """Login page and handler."""
     if current_user.is_authenticated:
