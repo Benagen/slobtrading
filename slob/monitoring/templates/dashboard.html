@@ -310,6 +310,15 @@
             </div>
             <div class="col-md-2">
                 <div class="card stat-card">
+                    <div class="stat-label"><i class="bi bi-activity"></i> Bot Status</div>
+                    <div class="stat-value" id="bot-status-icon" style="font-size: 2rem;">
+                        <i class="bi bi-circle-fill" style="color: #3fb950;"></i>
+                    </div>
+                    <div class="stat-label" style="font-size: 0.75rem;" id="bot-status-text">Online</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card">
                     <div class="stat-label">Active Setups</div>
                     <div class="stat-value" id="active-setups">-</div>
                 </div>
@@ -624,6 +633,21 @@
             document.getElementById('status-text').textContent = status.status || 'Unknown';
             document.getElementById('last-update').textContent = status.last_update || '-';
             document.getElementById('total-candles').textContent = status.total_candles || '-';
+
+            // Bot Status Indicator
+            const botStatusIcon = document.getElementById('bot-status-icon');
+            const botStatusText = document.getElementById('bot-status-text');
+            const isRunning = status.status === 'running';
+
+            if (isRunning) {
+                botStatusIcon.innerHTML = '<i class="bi bi-circle-fill" style="color: #3fb950;"></i>';
+                botStatusText.textContent = 'Online';
+                botStatusText.style.color = '#3fb950';
+            } else {
+                botStatusIcon.innerHTML = '<i class="bi bi-circle-fill" style="color: #f85149;"></i>';
+                botStatusText.textContent = 'Offline';
+                botStatusText.style.color = '#f85149';
+            }
 
             // Active Setups Count
             const setups = data.setups || [];
