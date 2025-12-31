@@ -9,7 +9,7 @@ import asyncio
 import logging
 from collections import deque
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .alpaca_ws_fetcher import Tick
 
@@ -139,7 +139,7 @@ class TickBuffer:
         if not self.timestamps:
             return
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         cutoff = now - self.ttl
 
         evicted = 0
