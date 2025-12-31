@@ -379,7 +379,7 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        <i class="bi bi-graph-up"></i> Live Chart (Last 100 Candles)
+                        <i class="bi bi-graph-up"></i> Live Chart (Last 60 Minutes)
                     </div>
                     <div class="card-body">
                         <div id="candlestickChart" style="height: 500px;"></div>
@@ -867,10 +867,11 @@
         }
 
         function updateCandlesAndChart() {
-            fetch('/api/candles?limit=100')
+            fetch('/api/candles?limit=60')
                 .then(response => response.json())
                 .then(data => {
                     const candles = data.candles || [];
+                    // Only show last 60 candles (1 hour for 1-min candles)
 
                     // Update candles table (show latest 20)
                     const tbody = document.getElementById('candles-tbody');
@@ -897,8 +898,18 @@
 
                     // Update candlestick chart
                     if (candles.length > 0) {
+                        // Format timestamps to show only time (HH:MM)
+                        const formattedLabels = candles.map(c => {
+                            const date = new Date(c.timestamp);
+                            return date.toLocaleTimeString('sv-SE', {
+                                timeZone: 'Europe/Stockholm',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        });
+
                         const trace = {
-                            x: candles.map(c => c.timestamp),
+                            x: formattedLabels,
                             close: candles.map(c => c.close),
                             high: candles.map(c => c.high),
                             low: candles.map(c => c.low),
@@ -912,10 +923,11 @@
                         const layout = {
                             title: '',
                             xaxis: {
-                                type: 'date',
+                                type: 'category',
                                 rangeslider: {visible: false},
                                 gridcolor: '#30363d',
-                                color: '#8b949e'
+                                color: '#8b949e',
+                                tickangle: -45
                             },
                             yaxis: {
                                 title: 'Price',
