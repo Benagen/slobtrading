@@ -3,10 +3,24 @@
 **Ett professionellt, helt automatiserat trading system för 5/1 SLOB-strategin med ML-filtrering, live trading och komplett produktionsinfrastruktur.**
 
 [![Production Ready](https://img.shields.io/badge/Status-Pre--Production-yellow)]()
-[![Test Coverage](https://img.shields.io/badge/Tests-58%20Total-brightgreen)]()
+[![Test Coverage](https://img.shields.io/badge/Tests-695+%20Total-brightgreen)]()
+[![E2E Tests](https://img.shields.io/badge/E2E-58%20Pass-brightgreen)]()
 [![System Readiness](https://img.shields.io/badge/Readiness-90%25-green)]()
 [![Documentation](https://img.shields.io/badge/Docs-Complete-blue)]()
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue)]()
+
+---
+
+## ⚠️ Data Source Notice
+
+**This system uses Interactive Brokers (IB Gateway)** for live market data and trade execution.
+
+- **Data Provider**: Interactive Brokers API via `ib_insync`
+- **Supported Assets**: NQ futures, stocks, forex
+- **Required Setup**: IB Gateway/TWS running on port 4002 (paper) or 4001 (live)
+- **Setup Guide**: See **[docs/SECRETS_SETUP.md](docs/SECRETS_SETUP.md)** for complete configuration
+
+> **Historical Note**: This system previously used Alpaca Markets but was migrated to Interactive Brokers for better futures trading support, more reliable real-time data, and direct broker integration. Some unused Alpaca code remains in `slob/live/alpaca_ws_fetcher.py` and `slob/config/secrets.py` (orphaned, not imported by main engine). If you find references to `ALPACA_*` variables or `AlpacaWSFetcher`, they are obsolete and scheduled for removal.
 
 ---
 
@@ -35,7 +49,38 @@
 | **Phase 7** | ✅ **COMPLETE** | Documentation & CI/CD | 100% |
 | **Phase 8** | 📋 **PLANNED** | Production Deployment | Pending |
 
-**Total Test Coverage**: 58 tests (100% pass rate)
+**Test Coverage**: 58 E2E+Stress tests (100% pass) + 695+ unit/integration tests across all modules
+
+### 🎯 Feature Implementation Status
+
+| Feature | Status | Location | Notes |
+|---------|--------|----------|-------|
+| **Data Fetching** |
+| IB WebSocket Connection | ✅ Complete | `slob/live/ib_ws_fetcher.py` | Auto-reconnect, heartbeat monitoring |
+| Tick Buffer | ✅ Complete | `slob/live/tick_buffer.py` | Thread-safe tick aggregation |
+| Candle Aggregation | ✅ Complete | `slob/live/candle_aggregator.py` | Real-time 1m candle building |
+| **Strategy Detection** |
+| Setup Tracker | ✅ Complete | `slob/live/setup_tracker.py` | 5/1 SLOB pattern detection |
+| Spike Detection | ✅ Complete | `slob/live/setup_tracker.py:629-643` | No-wick candle validation |
+| Consolidation Analysis | ✅ Complete | `slob/patterns/consolidation_detector.py` | Quality scoring, min/max duration |
+| **Trading Execution** |
+| Order Executor | ✅ Complete | `slob/live/order_executor.py` | IB order placement |
+| Risk Manager | ✅ Complete | `slob/backtest/risk_manager.py` | Position sizing, circuit breaker |
+| State Manager | ✅ Complete | `slob/live/state_manager.py` | SQLite persistence with WAL |
+| **Monitoring** |
+| Web Dashboard | ✅ Complete | `slob/monitoring/dashboard.py` | Real-time metrics (UTC timestamps) |
+| Telegram Alerts | ✅ Complete | `slob/monitoring/telegram_monitor.py` | Setup/trade notifications |
+| Email Alerts | ✅ Complete | `slob/monitoring/email_monitor.py` | Critical alerts |
+| Log Rotation | ✅ Complete | `slob/monitoring/rotating_logger.py` | Daily rotation, 30-day retention |
+| **Infrastructure** |
+| Docker Deployment | ✅ Complete | `docker-compose.yml` | IB Gateway, Redis, SLOB bot |
+| Automated Backups | ✅ Complete | `scripts/backup_state.sh` | S3 upload, verification |
+| Health Checks | ✅ Complete | `scripts/health_check.sh` | DB, IB connection monitoring |
+| **ML Integration** |
+| Shadow Mode | ⏸️ Optional | `slob/ml/` | Ready but disabled (needs 3-4 weeks data) |
+| Model Retraining | ⏸️ Optional | `ML_RETRAINING_GUIDE.md` | Automated pipeline ready |
+
+**Legend**: ✅ Complete | 🔄 In Progress | ⏸️ Optional | 📋 Planned
 
 ### 🆕 What's New (2025-12-26)
 
@@ -70,6 +115,8 @@ pip install -r requirements.txt
 ```
 
 ### 1. Configuration
+
+> **📘 Complete Setup Guide**: See **[docs/SECRETS_SETUP.md](docs/SECRETS_SETUP.md)** for comprehensive configuration instructions including IB credentials, API keys, and security setup.
 
 ```bash
 # Copy environment template
@@ -362,13 +409,20 @@ docker-compose -f docker-compose.test.yml down -v
 
 ### Test Coverage Summary
 
+**E2E & Stress Tests** (Production-critical):
 | Test Suite | Tests | Status |
 |------------|-------|--------|
-| E2E Deployment | 13 | ✅ 100% |
-| Crash Recovery | 15 | ✅ 100% |
-| Security Audit | 16 | ✅ 100% |
-| Stress Testing | 14 | ✅ 100% |
-| **Total** | **58** | ✅ **100%** |
+| E2E Deployment | 16 | ✅ 100% |
+| Crash Recovery | 13 | ✅ 100% |
+| Security Audit | 18 | ✅ 100% |
+| Stress Testing | 11 | ✅ 100% |
+| **E2E Subtotal** | **58** | ✅ **100%** |
+
+**Additional Test Coverage**:
+- Unit Tests: 600+ functions across all modules
+- Integration Tests: Component interaction testing
+- Validation Tests: Strategy validation, look-ahead bias checks
+- **Total Test Functions**: 695+ across entire codebase
 
 ---
 
@@ -493,8 +547,12 @@ See **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete deployment guide.
 
 ## 📚 Documentation
 
+### Essential Setup Guides
+- **[docs/SECRETS_SETUP.md](docs/SECRETS_SETUP.md)** - 🔑 **Complete credentials & secrets configuration** (IB, Redis, Dashboard, Alerts)
+- **[slob/live/README.md](slob/live/README.md)** - 📊 **Live trading system architecture & IB integration** (617 lines)
+
 ### Comprehensive Guides
-- **[README.md](README.md)** - This file
+- **[README.md](README.md)** - This file (main overview)
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide (640 lines)
 - **[OPERATIONAL_RUNBOOK.md](OPERATIONAL_RUNBOOK.md)** - Daily operations guide
 - **[INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md)** - Incident response procedures
@@ -668,8 +726,8 @@ docker-compose logs -f slob-bot
 
 ## 🏆 Key Achievements
 
-1. **Production Ready**: 95% system readiness
-2. **Comprehensive Testing**: 58 tests covering deployment, security, recovery, performance
+1. **Production Ready**: 90% system readiness (IB integration complete, minor cleanup pending)
+2. **Comprehensive Testing**: 695+ total tests including 58 E2E tests covering deployment, security, recovery, performance
 3. **Automated Operations**: Deploy, monitor, backup, rollback scripts
 4. **Robust Monitoring**: Web dashboard, Telegram/Email alerts, log rotation
 5. **Security Hardened**: Authentication, secure permissions, no credential exposure
@@ -714,7 +772,7 @@ This is a private trading system. All rights reserved.
 
 ---
 
-*Last Updated: 2025-12-26*
-*Status: Production Ready (95%)*
-*Test Coverage: 58 tests (100% pass)*
+*Last Updated: 2026-01-01*
+*Status: Production Ready (90%)*
+*Test Coverage: 695+ total tests (58 E2E @ 100% pass)*
 *Next Milestone: Phase 8 - Production Deployment*
