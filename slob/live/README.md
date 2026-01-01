@@ -1,22 +1,24 @@
 # Live Trading Module
 
-**Status**: Week 1 Complete (Data Layer)
-**Version**: 0.1.0
+> ⚠️ **DATA SOURCE NOTICE**: This system uses **Interactive Brokers (IB)**, not Alpaca Markets.
+
+**Status**: Production Ready (v0.9.0)
+**Current Phase**: Phase 7 - Live Trading Operations
 
 ## Overview
 
-The live trading module provides real-time trading capabilities for the 5/1 SLOB trading system. It transforms the offline backtest system into a production-ready live trading engine.
+The live trading module provides real-time trading capabilities for the 5/1 SLOB trading system using Interactive Brokers as the data source and broker. It transforms the offline backtest system into a production-ready live trading engine.
 
 ### Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   WEEK 1: DATA LAYER                         │
+│             LIVE TRADING SYSTEM (IB-BASED)                   │
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
 │  ┌──────────────┐    ┌───────────────┐   ┌───────────────┐ │
-│  │  Alpaca WS   │───>│  Tick Buffer  │──>│   Candle      │ │
-│  │  Data Feed   │    │  (asyncio)    │   │  Aggregator   │ │
+│  │  IB Gateway  │───>│  Tick Buffer  │──>│   Candle      │ │
+│  │  (ib_insync) │    │  (asyncio)    │   │  Aggregator   │ │
 │  └──────────────┘    └───────────────┘   └───────────────┘ │
 │                                                    │          │
 │                                                    v          │
@@ -24,59 +26,65 @@ The live trading module provides real-time trading capabilities for the 5/1 SLOB
 │  │          EVENT BUS (async handlers)                  │   │
 │  └──────────────────────────────────────────────────────┘   │
 │                                                    │          │
-│                                                    v          │
-│  ┌──────────────┐                     ┌───────────────────┐ │
-│  │   Candle     │                     │     Candle        │ │
-│  │   Store      │<───────────────────>│     Store         │ │
-│  │  (SQLite)    │                     │                   │ │
-│  └──────────────┘                     └───────────────────┘ │
+│       ┌────────────────────┬───────────────────┬──┴───┐     │
+│       v                    v                   v      v      │
+│  ┌─────────┐         ┌──────────┐       ┌─────────────────┐ │
+│  │ Candle  │         │  Setup   │       │  Order          │ │
+│  │ Store   │         │  Tracker │       │  Executor       │ │
+│  │(SQLite) │         │  (Live)  │       │  (IB Orders)    │ │
+│  └─────────┘         └──────────┘       └─────────────────┘ │
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Components
 
-### 1. AlpacaWSFetcher (`alpaca_ws_fetcher.py`)
+### 1. IBWSFetcher (`ib_ws_fetcher.py`)
 
-WebSocket client for Alpaca Markets real-time data streaming.
+Real-time data client for Interactive Brokers using `ib_insync` library.
 
 **Features:**
-- Async WebSocket connection
-- Authentication handling
-- Tick message parsing (symbol, price, size, timestamp, exchange)
+- Async IB Gateway/TWS connection via `ib_insync`
+- Market data subscription (live or delayed)
+- Tick message parsing (symbol, price, size, timestamp)
 - Automatic reconnection with exponential backoff (1s → 2s → 4s → ... → 60s max)
 - Circuit breaker (max 10 reconnection attempts)
-- Health monitoring
+- Health monitoring with heartbeat (30s interval)
+- Safe mode on persistent failures
 
 **Usage:**
 ```python
-from slob.live.alpaca_ws_fetcher import AlpacaWSFetcher
+from slob.live.ib_ws_fetcher import IBWSFetcher
 
 async def on_tick(tick):
     print(f"Tick: {tick.symbol} @ {tick.price}")
 
-fetcher = AlpacaWSFetcher(
-    api_key="YOUR_KEY",
-    api_secret="YOUR_SECRET",
-    paper_trading=True,
+fetcher = IBWSFetcher(
+    host='ib-gateway',      # IB Gateway hostname
+    port=4002,              # Paper trading port (live: 4001)
+    client_id=1,
+    account='DU123456',     # Your IB paper account
     on_tick=on_tick
 )
 
 await fetcher.connect()
-await fetcher.subscribe(["NQ"])
+await fetcher.subscribe(["NQ"])  # Subscribe to NQ futures
 await fetcher.listen()
 ```
 
 **Tick Data Structure:**
 ```python
-@dataclass
 class Tick:
     symbol: str
     price: float
-    size: int
+    size: int          # Also accessible as .volume
     timestamp: datetime
-    exchange: str
 ```
+
+**Connection Ports:**
+- **Paper Trading**: 4002 (default)
+- **Live Trading**: 4001
+- **VNC**: 5900 (for GUI access)
 
 ### 2. TickBuffer (`tick_buffer.py`)
 
@@ -88,6 +96,7 @@ Async queue for buffering market ticks with backpressure handling.
 - TTL-based eviction (60-second default)
 - Auto-flush background task
 - Statistics tracking
+- Stockholm timezone support
 
 **Usage:**
 ```python
@@ -111,11 +120,11 @@ print(f"Utilization: {buffer.utilization():.1%}")
 
 ### 3. CandleAggregator (`candle_aggregator.py`)
 
-Aggregates market ticks into M1 (1-minute) OHLCV candles.
+Aggregates market ticks into M1 (1-minute) OHLCV candles with timezone support.
 
 **Features:**
 - Per-symbol candle tracking
-- Minute-aligned timestamps
+- Minute-aligned timestamps (Stockholm timezone: Europe/Stockholm)
 - Gap detection and filling (flat candles for gaps ≤2 minutes)
 - Candle-close event emission
 - Statistics tracking
@@ -140,7 +149,7 @@ await aggregator.force_complete_all()
 ```python
 class Candle:
     symbol: str
-    timestamp: datetime
+    timestamp: datetime  # Stockholm timezone (Europe/Stockholm)
     open: float
     high: float
     low: float
@@ -154,7 +163,7 @@ class Candle:
 Typed event dispatcher for the live trading system.
 
 **Features:**
-- Typed event registration (14 event types)
+- Typed event registration (14+ event types)
 - Multiple handlers per event type
 - Async and sync handler support
 - Error isolation (failed handlers don't affect others)
@@ -167,11 +176,11 @@ class EventType(Enum):
     TICK_RECEIVED = "tick_received"
     CANDLE_COMPLETED = "candle_completed"
 
-    # Setup events (Week 2)
+    # Setup events
     SETUP_DETECTED = "setup_detected"
     SETUP_INVALIDATED = "setup_invalidated"
 
-    # Trading events (Week 2)
+    # Trading events
     ORDER_PLACED = "order_placed"
     ORDER_FILLED = "order_filled"
     ORDER_REJECTED = "order_rejected"
@@ -257,14 +266,36 @@ print(f"Total candles: {stats['total_candles']}")
 print(f"DB size: {stats['db_size_mb']} MB")
 ```
 
-### 6. LiveTradingEngine (`live_trading_engine.py`)
+### 6. SetupTracker (`setup_tracker.py`)
+
+Real-time setup detection and state tracking.
+
+**Features:**
+- Event-driven state machine (no look-ahead bias)
+- States: WATCHING_LIQ1, WATCHING_CONSOL, WATCHING_LIQ2, WAITING_ENTRY, SETUP_COMPLETE, INVALIDATED
+- Incremental consolidation tracking
+- Multi-setup support (track multiple concurrent setups)
+- Redis + SQLite persistence
+
+### 7. OrderExecutor (`order_executor.py`)
+
+IB order execution with bracket orders.
+
+**Features:**
+- IB bracket orders (entry + stop loss + take profit)
+- Retry logic with exponential backoff
+- Order fill tracking
+- Position management
+- Risk validation
+
+### 8. LiveTradingEngine (`live_trading_engine.py`)
 
 Main orchestrator that integrates all components.
 
 **Features:**
 - Component lifecycle management
 - Background task coordination
-- Health monitoring (60-second interval)
+- Health monitoring (8-second heartbeat)
 - Graceful shutdown
 - Signal handlers (SIGINT, SIGTERM)
 
@@ -273,10 +304,11 @@ Main orchestrator that integrates all components.
 from slob.live.live_trading_engine import LiveTradingEngine
 
 engine = LiveTradingEngine(
-    api_key="YOUR_KEY",
-    api_secret="YOUR_SECRET",
+    ib_host="ib-gateway",
+    ib_port=4002,
+    ib_client_id=1,
+    ib_account="DU123456",
     symbols=["NQ"],
-    paper_trading=True,
     db_path="data/candles.db"
 )
 
@@ -290,221 +322,295 @@ await engine.run()
 
 ## Setup
 
-### 1. Install Dependencies
+### 1. Install Interactive Brokers
+
+**Option A: IB Gateway (Recommended for servers)**
+```bash
+# Download from:
+# https://www.interactivebrokers.com/en/trading/ibgateway-stable.php
+
+# Or use Docker (recommended):
+docker pull ghcr.io/gnzsnz/ib-gateway:stable
+```
+
+**Option B: TWS (Trader Workstation)**
+- For desktop/GUI usage
+- Download from IB website
+
+**See**: [IB_SETUP_GUIDE.md](../IB_SETUP_GUIDE.md) for detailed setup
+
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**New dependencies (Week 1):**
-- `websockets>=12.0` - WebSocket client
-- `aiohttp>=3.9.0` - HTTP client for Alpaca API
-- `redis>=5.0.0` - State storage (Week 2)
-- `alpaca-trade-api>=3.0.0` - Alpaca trading SDK
+**Key IB dependencies:**
+- `ib_insync>=0.9.86` - IB API wrapper (asyncio-based)
+- `websockets>=12.0` - WebSocket support
+- `aiohttp>=3.9.0` - Async HTTP client
+- `redis>=5.0.0` - State storage
 
-### 2. Configure Environment
+### 3. Configure Environment
 
 ```bash
 # Copy template
 cp .env.template .env
 
-# Edit with your credentials
+# Edit with your IB credentials
 nano .env
 ```
 
-**Required:**
-- `ALPACA_API_KEY` - Get from https://app.alpaca.markets/paper/dashboard
-- `ALPACA_API_SECRET` - Paper trading secret key
-
-**Optional:**
-- `SYMBOLS=NQ` - Comma-separated symbols
-- `DB_PATH=data/candles.db` - Database path
-- `LOG_LEVEL=INFO` - Logging level
-
-### 3. Run Week 1 Checkpoint Test
-
+**Required IB variables:**
 ```bash
-# Create directories
-mkdir -p logs data
+# Interactive Brokers Configuration
+IB_GATEWAY_HOST=ib-gateway    # Or localhost for local
+IB_GATEWAY_PORT=4002           # Paper: 4002, Live: 4001
+IB_CLIENT_ID=1
+IB_ACCOUNT=DU123456            # Your IB paper account
 
-# Run 60-minute test
-python scripts/week1_checkpoint_test.py 60
-
-# Or run shorter test (5 minutes)
-python scripts/week1_checkpoint_test.py 5
+# Optional
+SYMBOLS=NQ                     # Comma-separated
+DB_PATH=data/candles.db
+LOG_LEVEL=INFO
 ```
 
-**Success Criteria:**
-- ✅ Uptime: 100% (no crashes)
-- ✅ WebSocket: Connected for entire duration
-- ✅ Ticks received: >0
-- ✅ Candles generated: >0
-- ✅ Candles persisted: Matches generated count
+**NOT USED** (legacy Alpaca variables - ignore):
+- ~~ALPACA_API_KEY~~
+- ~~ALPACA_API_SECRET~~
 
-### 4. Run Live Trading Engine
+### 4. Setup Secrets (Production)
+
+For production deployment with Docker secrets:
 
 ```bash
-# Run directly
+# See detailed guide:
+cat docs/SECRETS_SETUP.md
+
+# Quick setup:
+./scripts/generate_secrets.sh
+```
+
+### 5. Test IB Connection
+
+```bash
+# Quick connection test
+python scripts/test_ib_connection.py
+
+# Or use checkpoint test
+python scripts/ib_checkpoint_test.py 60 DU123456
+```
+
+**Expected output:**
+```
+✅ Connected to IB Gateway
+✅ Market data subscription active
+✅ Receiving ticks for NQ
+```
+
+### 6. Run Paper Trading
+
+```bash
+# Run 24-hour paper trading validation
+python scripts/run_paper_trading.py \
+    --account DU123456 \
+    --gateway \
+    --duration 24
+
+# Or run in monitor-only mode (no orders)
+python scripts/run_paper_trading.py \
+    --account DU123456 \
+    --monitor-only
+```
+
+**See**: [PAPER_TRADING_GUIDE.md](../PAPER_TRADING_GUIDE.md) for validation criteria
+
+## Current Implementation Status
+
+| Component | Status | File | Tests |
+|-----------|--------|------|-------|
+| IB Connection | ✅ Complete | `ib_ws_fetcher.py` | ✅ |
+| Tick Buffer | ✅ Complete | `tick_buffer.py` | ✅ |
+| Candle Aggregator | ✅ Complete | `candle_aggregator.py` | ✅ |
+| Event Bus | ✅ Complete | `event_bus.py` | ✅ |
+| Candle Store | ✅ Complete | `candle_store.py` | ✅ |
+| Setup Tracker | ✅ Complete | `setup_tracker.py` | ✅ |
+| State Manager | ✅ Complete | `state_manager.py` | ✅ |
+| Order Executor | ✅ Complete | `order_executor.py` | ✅ |
+| Live Engine | ✅ Complete | `live_trading_engine.py` | ✅ |
+| Risk Manager | ✅ Complete | `risk_manager.py` | ✅ |
+| Dashboard | ✅ Complete | `../monitoring/dashboard.py` | ⏸️ |
+
+**Total code**: ~5,000+ lines (components + tests)
+
+## Deployment
+
+### Local Development
+
+```bash
+# Run locally with IB Gateway/TWS
 python -m slob.live.live_trading_engine
-
-# Or with custom script
-python your_script.py
 ```
 
-## Week 1 Deliverables (Completed ✅)
+### Docker Deployment
 
-- [x] AlpacaWSFetcher - WebSocket data streaming
-- [x] TickBuffer - Async tick buffering
-- [x] CandleAggregator - Tick-to-M1 conversion
-- [x] EventBus - Event dispatcher
-- [x] CandleStore - SQLite persistence
-- [x] LiveTradingEngine - Main orchestrator
-- [x] Week 1 checkpoint test script
-- [x] Configuration templates
-- [x] Documentation
+```bash
+# Build and start all services
+docker-compose up -d
 
-**Total code**: ~2,000 lines (components + tests)
+# Services:
+# - redis: State storage (port 6379)
+# - ib-gateway: IB Gateway (ports 4002, 5900)
+# - slob-bot: Trading bot
+# - slob-dashboard: Web dashboard (port 5000)
+```
 
-## Week 2 Roadmap (Next Steps)
+**See**: [DEPLOYMENT.md](../DEPLOYMENT.md) for full deployment guide
 
-### State Machine for Setup Tracking
+### VPS Deployment (Production)
 
-**Goal**: Real-time setup detection without look-ahead bias.
+```bash
+# Deploy to production VPS
+./scripts/deploy.sh production
 
-**Components to build:**
-1. **SetupTracker** (`setup_tracker.py`) - Event-driven state machine
-   - States: WATCHING_LIQ1, WATCHING_CONSOL, WATCHING_LIQ2, WAITING_ENTRY, SETUP_COMPLETE, INVALIDATED
-   - Incremental consolidation tracking (no look-ahead!)
-   - Multi-setup support (track multiple concurrent setups)
-
-2. **IncrementalConsolidationDetector** (`incremental_consolidation_detector.py`)
-   - Stateful consolidation detection
-   - Quality score calculation as candles arrive
-   - Confirmed only on LIQ #2 breakout
-
-3. **StateManager** (`state_manager.py`)
-   - Redis (hot state) + SQLite (cold state)
-   - Active setup persistence
-   - Crash recovery
-
-4. **OrderExecutor** (`order_executor.py`)
-   - Alpaca bracket orders (entry + SL + TP)
-   - Retry logic with exponential backoff
-   - Order fill tracking
-
-**Estimated**: 48 hours (~1 week)
-
-## Week 3 Roadmap
-
-### Deployment & Monitoring
-
-**Components to build:**
-1. Docker deployment (`Dockerfile`, `docker-compose.yml`)
-2. Prometheus metrics + Grafana dashboards
-3. Telegram alerts for critical events
-4. VPS deployment scripts
-5. 30-day paper trading validation
-
-**Estimated**: 28 hours (~1 week)
+# Monitor
+./scripts/monitor.sh
+```
 
 ## Troubleshooting
 
-### WebSocket Connection Issues
+### IB Connection Issues
 
-**Problem**: `ConnectionError: Authentication failed`
+**Problem**: `ConnectionError: connection refused`
 
-**Solution:**
-1. Verify API keys in `.env`
-2. Check if using paper trading keys for paper endpoint
-3. Check Alpaca account status
+**Solutions:**
+1. Verify IB Gateway/TWS is running
+2. Check port (Paper: 4002, Live: 4001)
+3. Enable API connections in IB Gateway settings
+4. Accept API connection dialog in VNC
 
 ### No Ticks Received
 
-**Problem**: WebSocket connected but tick_count = 0
+**Problem**: Connected but tick_count = 0
 
-**Solution:**
-1. Check market hours (NYSE: 9:30 AM - 4:00 PM ET)
-2. Verify symbol is trading (e.g., "NQ" should be "NQ" for futures, or "AAPL" for stocks)
-3. Check Alpaca subscription level (IEX vs SIP)
+**Solutions:**
+1. Check market hours (NQ futures: Sunday 18:00 ET - Friday 17:00 ET)
+2. Verify market data subscription (delayed vs real-time)
+3. Check if paper account has market data permissions
+4. Accept "market data" dialog in IB Gateway
 
-### Buffer Overflow
+### API Read-Only Mode
 
-**Problem**: `⚠️ Tick buffer overflow`
+**Problem**: `Error 321: The API interface is currently in Read-Only mode`
 
-**Solution:**
-1. Increase buffer size: `TickBuffer(max_size=50000)`
-2. Speed up tick processing (optimize candle aggregation)
-3. Reduce number of subscribed symbols
+**Solutions:**
+1. Access IB Gateway via VNC (port 5900)
+2. Click "OK" on "API client needs write access" dialog
+3. Or: Pre-configure in IB Gateway settings
 
 ### Database Locked
 
 **Problem**: `sqlite3.OperationalError: database is locked`
 
-**Solution:**
-1. Enable WAL mode (already enabled in CandleStore)
+**Solutions:**
+1. WAL mode already enabled in CandleStore
 2. Reduce concurrent writes (use bulk inserts)
 3. Check for long-running transactions
 
 ## Performance Metrics
 
-### Expected Throughput (Week 1)
+### Expected Throughput
 
 **Single symbol (NQ):**
-- Ticks/second: 1-10 (normal market), up to 100 (high volatility)
+- Ticks/second: 1-10 (normal), up to 100 (high volatility)
 - Candles/hour: 60 (M1 candles)
 - DB writes/hour: 60 (one per candle)
 
 **Buffer utilization:**
 - Normal: <5%
 - High volatility: 10-20%
-- Critical: >80% (consider increasing buffer size)
+- Critical: >80% (increase buffer size)
 
 ### Memory Usage
 
-- Base engine: ~50 MB
+- Base engine: ~100 MB
 - Per 10,000 ticks in buffer: ~5 MB
 - Per 1,000 candles in DB: ~0.5 MB
-- Total (1 hour runtime): ~100-200 MB
+- Total (24h runtime): ~200-500 MB
 
 ## Testing
 
-### Unit Tests (TODO - Week 1+)
+### Unit Tests
 
 ```bash
-# Run all tests
+# Run all live module tests
 pytest tests/live/
 
 # Run specific test
-pytest tests/live/test_candle_aggregator.py
+pytest tests/live/test_ib_ws_fetcher.py
 
 # Run with coverage
 pytest tests/live/ --cov=slob.live --cov-report=html
 ```
 
-### Integration Tests (TODO - Week 1+)
+### Integration Tests
 
 ```bash
+# Full end-to-end test
 pytest tests/integration/test_live_engine_flow.py
+
+# IB connection test
+pytest tests/integration/test_ib_connection.py
 ```
 
-### Replay Tests (TODO - Week 2)
+### Paper Trading Validation
 
 ```bash
-# Validate no look-ahead bias
-pytest tests/replay/test_no_look_ahead.py
+# 48-hour validation run
+python scripts/run_paper_trading.py \
+    --account DU123456 \
+    --gateway \
+    --duration 48 \
+    --strict
 ```
 
-## License
+**Success criteria:**
+- ✅ Uptime: 100% (no crashes)
+- ✅ IB Connection: Stable for entire duration
+- ✅ Candles received: >0
+- ✅ Candles persisted: Matches generated
+- ✅ No look-ahead bias detected
 
-Part of the SLOB trading system. See project root for license details.
+## Migration from Alpaca (Historical)
 
-## Support
+> **Note**: This system previously used Alpaca Markets. It was migrated to Interactive Brokers for:
+> - Better futures trading support (NQ contracts)
+> - More reliable real-time data
+> - Direct broker integration (no separate data provider)
+> - Lower latency
 
-For issues or questions:
+Old Alpaca components have been removed. If you find references to `AlpacaWSFetcher` or `ALPACA_*` variables, they are obsolete.
+
+## Support & Resources
+
+**Documentation:**
+- [Main README](../README.md) - System overview
+- [IB Setup Guide](../IB_SETUP_GUIDE.md) - IB Gateway configuration
+- [Deployment Guide](../DEPLOYMENT.md) - Production deployment
+- [Paper Trading Guide](../PAPER_TRADING_GUIDE.md) - Validation process
+- [Operational Runbook](../OPERATIONAL_RUNBOOK.md) - Daily operations
+
+**For issues:**
 1. Check logs: `logs/trading.log`
 2. Review statistics: Call `.get_stats()` on any component
 3. Enable DEBUG logging: `LOG_LEVEL=DEBUG` in `.env`
+4. Check IB Gateway logs via VNC or `docker logs ib-gateway`
+
+**IB Resources:**
+- [IB API Documentation](https://interactivebrokers.github.io/tws-api/)
+- [ib_insync Documentation](https://ib-insync.readthedocs.io/)
+- [IB Market Data Guide](https://www.interactivebrokers.com/en/index.php?f=14193)
 
 ---
 
-**Status**: ✅ Week 1 Complete - Ready for Week 2 (Trading Engine)
+**Status**: ✅ Production Ready (v0.9.0) - IB-based architecture
