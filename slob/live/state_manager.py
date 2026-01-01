@@ -92,9 +92,14 @@ class StateManager:
         self.redis_client: Optional[redis.Redis] = None
         self.sqlite_conn: Optional[sqlite3.Connection] = None
         self.using_in_memory = False  # Track if using in-memory fallback
+        self.redis_available = False  # Track Redis availability
+        self.redis_prefix = "slob"  # Prefix for all Redis keys
 
         # In-memory fallback if Redis unavailable
         self._memory_store: Dict[str, str] = {}
+
+        # Background tasks
+        self._health_monitor_task: Optional[asyncio.Task] = None
 
     async def initialize(self):
         """
@@ -140,19 +145,27 @@ class StateManager:
                 tls_status = "with TLS" if self.config.redis_tls_enabled else "without TLS"
                 logger.info(f"✅ Redis connected ({tls_status}): {self.config.redis_host}:{self.config.redis_port}")
                 self.using_in_memory = False
+                self.redis_available = True
             except Exception as e:
                 logger.warning(f"Redis connection failed: {e}. Using in-memory fallback.")
                 self.redis_client = None
                 self.using_in_memory = True
+                self.redis_available = False
         else:
             logger.info("Redis disabled - using in-memory fallback")
             self.using_in_memory = True
+            self.redis_available = False
 
         # SQLite connection
         self._init_sqlite()
 
         # Create backup directory
         Path(self.config.backup_dir).mkdir(parents=True, exist_ok=True)
+
+        # Start Redis health monitoring if Redis is enabled
+        if self.config.enable_redis and self.redis_available:
+            self._health_monitor_task = asyncio.create_task(self._redis_health_monitor())
+            logger.info("Started Redis health monitor")
 
         logger.info("✅ StateManager initialized")
 
@@ -168,6 +181,17 @@ class StateManager:
         self.sqlite_conn.row_factory = sqlite3.Row  # Return rows as dicts
 
         cursor = self.sqlite_conn.cursor()
+
+        # Enable WAL mode for crash recovery and better concurrency
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")  # Balance safety/performance
+
+        # Verify WAL mode enabled
+        wal_mode = cursor.execute("PRAGMA journal_mode").fetchone()[0]
+        if wal_mode.upper() != 'WAL':
+            logger.warning(f"WAL mode not enabled, using {wal_mode}")
+        else:
+            logger.info("SQLite WAL mode enabled for crash recovery")
 
         # Table: setups (all detected setups, completed or invalidated)
         cursor.execute("""
@@ -303,6 +327,19 @@ class StateManager:
             )
         """)
 
+        # Table: active_setups (Redis fallback for active setups)
+        # This lightweight table enables quick recovery of active setups
+        # when Redis is unavailable
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS active_setups (
+                setup_id TEXT PRIMARY KEY,
+                symbol TEXT NOT NULL,
+                state TEXT NOT NULL,
+                raw_data TEXT NOT NULL,
+                last_updated REAL NOT NULL
+            )
+        """)
+
         # Indexes for performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_setups_state ON setups(state)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_setups_created ON setups(created_at)")
@@ -312,6 +349,7 @@ class StateManager:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_timestamp ON shadow_predictions(timestamp)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_agreement ON shadow_predictions(agreement)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_setup ON shadow_predictions(setup_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_active_setups_state ON active_setups(state)")
 
         self.sqlite_conn.commit()
         logger.info(f"✅ SQLite initialized: {self.config.sqlite_path}")
@@ -322,10 +360,12 @@ class StateManager:
 
     async def save_setup(self, candidate: SetupCandidate):
         """
-        Save setup candidate to both Redis (hot) and SQLite (cold).
+        Save setup candidate to Redis, SQLite setups table, and active_setups table.
 
-        Redis key: setup:active:{setup_id}
-        SQLite: INSERT OR REPLACE into setups table
+        Dual-write strategy:
+        - Redis (hot): Fast access for active setups
+        - SQLite active_setups (warm): Fallback for Redis failures
+        - SQLite setups (cold): Complete historical record
 
         Args:
             candidate: SetupCandidate to persist
@@ -333,15 +373,33 @@ class StateManager:
         setup_data = candidate.to_dict()
         setup_json = json.dumps(setup_data)
 
-        # Redis: Active setup (if still in progress)
-        if candidate.is_valid() and not candidate.is_complete():
-            await self._redis_set(f"setup:active:{candidate.id}", setup_json)
-            logger.debug(f"Saved active setup to Redis: {candidate.id[:8]}")
+        is_active = candidate.is_valid() and not candidate.is_complete()
+
+        # Primary: Redis (if available)
+        if is_active:
+            if self.redis_available:
+                try:
+                    await self._redis_set(f"setup:active:{candidate.id}", setup_json)
+                    logger.debug(f"Saved active setup to Redis: {candidate.id[:8]}")
+                except Exception as e:
+                    logger.error(f"Redis write failed: {e}")
+                    self.redis_available = False
         else:
             # Remove from active if completed/invalidated
-            await self._redis_delete(f"setup:active:{candidate.id}")
+            try:
+                await self._redis_delete(f"setup:active:{candidate.id}")
+            except Exception as e:
+                logger.error(f"Redis delete failed: {e}")
 
-        # SQLite: Persistent storage (all setups)
+        # Fallback: SQLite active_setups (ALWAYS write for durability)
+        if is_active:
+            self._sqlite_save_active_setup(candidate.id, setup_data, setup_json)
+            logger.debug(f"Saved active setup to SQLite fallback: {candidate.id[:8]}")
+        else:
+            # Remove from active_setups if completed/invalidated
+            self._sqlite_remove_active_setup(candidate.id)
+
+        # Cold storage: SQLite setups (all setups)
         self._sqlite_save_setup(setup_data, setup_json)
         logger.debug(f"Saved setup to SQLite: {candidate.id[:8]} (state: {candidate.state.name})")
 
@@ -413,6 +471,44 @@ class StateManager:
             setup_data['candles_processed'],
             raw_json
         ))
+
+        self.sqlite_conn.commit()
+
+    def _sqlite_save_active_setup(self, setup_id: str, setup_data: Dict, raw_json: str):
+        """
+        Save active setup to active_setups table for Redis fallback.
+
+        Args:
+            setup_id: Setup ID
+            setup_data: Setup data dictionary
+            raw_json: JSON string of complete setup data
+        """
+        cursor = self.sqlite_conn.cursor()
+
+        cursor.execute("""
+            INSERT OR REPLACE INTO active_setups (
+                setup_id, symbol, state, raw_data, last_updated
+            ) VALUES (?, ?, ?, ?, ?)
+        """, (
+            setup_id,
+            setup_data['symbol'],
+            setup_data['state'],
+            raw_json,
+            time.time()
+        ))
+
+        self.sqlite_conn.commit()
+
+    def _sqlite_remove_active_setup(self, setup_id: str):
+        """
+        Remove setup from active_setups table when completed/invalidated.
+
+        Args:
+            setup_id: Setup ID to remove
+        """
+        cursor = self.sqlite_conn.cursor()
+
+        cursor.execute("DELETE FROM active_setups WHERE setup_id = ?", (setup_id,))
 
         self.sqlite_conn.commit()
 
@@ -608,45 +704,46 @@ class StateManager:
 
     async def get_active_setups(self) -> List[Dict]:
         """
-        Get all active (not completed) setups from persistence.
+        Get all active (not completed) setups from Redis or SQLite fallback.
+
+        Tries Redis first, falls back to active_setups table if Redis unavailable.
 
         Returns:
             List of setup dictionaries with state NOT IN ('SETUP_COMPLETE', 'INVALIDATED')
         """
         active_setups = []
 
-        # Try Redis first
-        if self.redis_client and not self.using_in_memory:
+        # Try Redis first (if available)
+        if self.redis_available and self.redis_client:
             try:
-                keys = self.redis_client.keys(f"{self.redis_prefix}:setup:*")
-                logger.debug(f"Found {len(keys)} setup keys in Redis")
+                keys = await self._redis_keys("setup:active:*")
+                logger.debug(f"Found {len(keys)} active setup keys in Redis")
 
                 for key in keys:
-                    data_json = self.redis_client.get(key)
+                    data_json = await self._redis_get(key)
                     if data_json:
                         setup_data = json.loads(data_json)
-                        state = setup_data.get('state')
-                        # Filter out completed/invalidated
-                        if state not in ['SETUP_COMPLETE', 'INVALIDATED']:
-                            active_setups.append(setup_data)
+                        active_setups.append(setup_data)
 
                 if active_setups:
                     logger.info(f"✅ Loaded {len(active_setups)} active setups from Redis")
                     return active_setups
             except Exception as e:
                 logger.warning(f"Failed to load setups from Redis: {e}")
+                self.redis_available = False
 
-        # Fallback to SQLite
+        # Fallback to SQLite active_setups table
+        logger.info("Using SQLite fallback for active setups")
         cursor = self.sqlite_conn.cursor()
         cursor.execute("""
             SELECT raw_data
             FROM active_setups
             WHERE state NOT IN ('SETUP_COMPLETE', 'INVALIDATED')
-            ORDER BY created_at DESC
+            ORDER BY last_updated DESC
         """)
 
         rows = cursor.fetchall()
-        logger.debug(f"Found {len(rows)} active setups in SQLite")
+        logger.debug(f"Found {len(rows)} active setups in SQLite fallback")
 
         for row in rows:
             try:
@@ -655,7 +752,7 @@ class StateManager:
             except Exception as e:
                 logger.error(f"Failed to deserialize setup from SQLite: {e}")
 
-        logger.info(f"✅ Loaded {len(active_setups)} active setups from SQLite")
+        logger.info(f"✅ Loaded {len(active_setups)} active setups from SQLite fallback")
         return active_setups
 
     async def get_open_trades(self) -> List[Dict]:
@@ -943,11 +1040,78 @@ class StateManager:
             return [k for k in self._memory_store.keys() if fnmatch.fnmatch(k, pattern)]
 
     # ─────────────────────────────────────────────────────────────────
+    # REDIS HEALTH MONITORING
+    # ─────────────────────────────────────────────────────────────────
+
+    async def _check_redis_health(self) -> bool:
+        """
+        Check if Redis is available and responsive.
+
+        Returns:
+            True if Redis is healthy, False otherwise
+        """
+        if not self.redis_client:
+            return False
+
+        try:
+            await self.redis_client.ping()
+            return True
+        except Exception as e:
+            logger.error(f"Redis health check failed: {e}")
+            return False
+
+    async def _redis_health_monitor(self):
+        """
+        Monitor Redis health and trigger failover if needed.
+
+        Runs in background, checking every 30 seconds.
+        If Redis becomes unavailable, triggers failover to in-memory store.
+        If Redis becomes available again, restores connection.
+        """
+        logger.info("Redis health monitor started (check interval: 30s)")
+
+        while True:
+            try:
+                await asyncio.sleep(30)  # Check every 30 seconds
+
+                is_healthy = await self._check_redis_health()
+
+                # Redis just became unavailable
+                if not is_healthy and self.redis_available:
+                    logger.critical("⚠️ Redis became unavailable - switching to in-memory fallback")
+                    self.redis_available = False
+                    self.using_in_memory = True
+
+                    # TODO: Trigger alert via Telegram/Email
+                    # await self._send_redis_failover_alert()
+
+                # Redis just became available again
+                elif is_healthy and not self.redis_available:
+                    logger.info("✅ Redis connection restored")
+                    self.redis_available = True
+                    self.using_in_memory = False
+
+            except asyncio.CancelledError:
+                logger.info("Redis health monitor cancelled")
+                raise
+            except Exception as e:
+                logger.error(f"Error in Redis health monitor: {e}", exc_info=True)
+
+    # ─────────────────────────────────────────────────────────────────
     # CLEANUP
     # ─────────────────────────────────────────────────────────────────
 
     async def close(self):
         """Close all connections."""
+        # Stop health monitor task
+        if self._health_monitor_task:
+            self._health_monitor_task.cancel()
+            try:
+                await self._health_monitor_task
+            except asyncio.CancelledError:
+                pass
+            logger.info("Health monitor task stopped")
+
         if self.redis_client:
             await self.redis_client.close()
             logger.info("Redis connection closed")
