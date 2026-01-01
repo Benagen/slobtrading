@@ -11,7 +11,7 @@ from typing import Optional, Callable, Dict
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-from .alpaca_ws_fetcher import Tick
+from .ib_ws_fetcher import Tick
 
 logger = logging.getLogger(__name__)
 

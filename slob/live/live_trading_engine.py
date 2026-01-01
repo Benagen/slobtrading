@@ -10,7 +10,7 @@ from typing import List, Optional, Any
 from datetime import datetime
 from pathlib import Path
 
-from .alpaca_ws_fetcher import AlpacaWSFetcher, Tick
+from .ib_ws_fetcher import IBWSFetcher, Tick
 from .tick_buffer import TickBuffer
 from .candle_aggregator import CandleAggregator, Candle
 from .event_bus import EventBus, EventType
@@ -25,10 +25,8 @@ from .setup_state import SetupCandidate, SetupState
 # ML Shadow Mode
 from .ml_shadow_engine import MLShadowEngine
 
-# --- DIREKT IMPORT (INGEN TRY-EXCEPT SOM DÖLJER FEL) ---
-from .ib_ws_fetcher import IBWSFetcher
+# IB Integration
 IB_AVAILABLE = True
-# -------------------------------------------------------
 
 # Alerting
 from slob.monitoring.telegram_notifier import TelegramNotifier

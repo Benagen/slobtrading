@@ -11,7 +11,7 @@ from collections import deque
 from typing import Optional
 from datetime import datetime, timedelta, timezone
 
-from .alpaca_ws_fetcher import Tick
+from .ib_ws_fetcher import Tick
 
 logger = logging.getLogger(__name__)
 
