@@ -46,9 +46,6 @@ echo "YOUR_IB_ACCOUNT" > secrets/ib_account
 echo "YOUR_IB_USERNAME" > secrets/ib_username
 echo "YOUR_IB_PASSWORD" > secrets/ib_password
 
-echo "YOUR_ALPACA_API_KEY" > secrets/alpaca_api_key
-echo "YOUR_ALPACA_API_SECRET" > secrets/alpaca_api_secret
-
 echo "YOUR_TELEGRAM_BOT_TOKEN" > secrets/telegram_bot_token
 echo "YOUR_TELEGRAM_CHAT_ID" > secrets/telegram_chat_id
 
@@ -72,8 +69,6 @@ docker swarm init
 docker secret create ib_account secrets/ib_account
 docker secret create ib_username secrets/ib_username
 docker secret create ib_password secrets/ib_password
-docker secret create alpaca_api_key secrets/alpaca_api_key
-docker secret create alpaca_api_secret secrets/alpaca_api_secret
 docker secret create telegram_bot_token secrets/telegram_bot_token
 docker secret create telegram_chat_id secrets/telegram_chat_id
 docker secret create dashboard_password_hash secrets/dashboard_password_hash
@@ -86,15 +81,15 @@ docker stack deploy -c docker-compose.secrets.yml slob
 
 ## Secret Types
 
-### Required Secrets
+### Required Secrets (Interactive Brokers)
 
 | Secret Name | Description | Example | How to Obtain |
 |-------------|-------------|---------|---------------|
-| `ib_account` | IB account number | `U1234567` | IB account settings |
+| `ib_account` | IB account number | `DU1234567` (paper) or `U1234567` (live) | IB account settings |
 | `ib_username` | IB Gateway username | `your_username` | IB account settings |
 | `ib_password` | IB Gateway password | `your_password` | IB account settings |
-| `alpaca_api_key` | Alpaca API key | `PKVZ3TFF...` | Alpaca dashboard → API Keys |
-| `alpaca_api_secret` | Alpaca API secret | `6BTgiPsG...` | Alpaca dashboard → API Keys |
+| `dashboard_secret_key` | Flask secret key | Random 32-char string | `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `dashboard_password_hash` | Dashboard password hash | bcrypt hash | `python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('your_password'))"` |
 
 ### Optional Secrets (Monitoring)
 
@@ -130,13 +125,9 @@ mkdir -p secrets
 chmod 700 secrets
 
 # IB credentials
-echo "U1234567" > secrets/ib_account
+echo "DU1234567" > secrets/ib_account
 echo "your_username" > secrets/ib_username
 echo "your_password" > secrets/ib_password
-
-# Alpaca credentials
-echo "YOUR_ALPACA_KEY" > secrets/alpaca_api_key
-echo "YOUR_ALPACA_SECRET" > secrets/alpaca_api_secret
 
 # Telegram (optional)
 echo "123456789:ABCdefGHIjklMNOpqrsTUVwxyz" > secrets/telegram_bot_token
@@ -178,10 +169,6 @@ grep "^secrets/" .gitignore
    IB_ACCOUNT=U1234567
    IB_USERNAME=your_username
    IB_PASSWORD=your_password
-
-   # Alpaca Configuration
-   ALPACA_API_KEY=YOUR_KEY
-   ALPACA_API_SECRET=YOUR_SECRET
 
    # Telegram (optional)
    TELEGRAM_BOT_TOKEN=123456789:ABC...
@@ -229,8 +216,6 @@ grep "^secrets/" .gitignore
    docker secret create ib_account /tmp/slob-secrets/ib_account
    docker secret create ib_username /tmp/slob-secrets/ib_username
    docker secret create ib_password /tmp/slob-secrets/ib_password
-   docker secret create alpaca_api_key /tmp/slob-secrets/alpaca_api_key
-   docker secret create alpaca_api_secret /tmp/slob-secrets/alpaca_api_secret
    docker secret create telegram_bot_token /tmp/slob-secrets/telegram_bot_token
    docker secret create telegram_chat_id /tmp/slob-secrets/telegram_chat_id
    docker secret create dashboard_password_hash /tmp/slob-secrets/dashboard_password_hash
@@ -388,8 +373,9 @@ secrets/
 
 **Check for accidental commits**:
 ```bash
-# Search git history for secrets
-git log -S "ALPACA_API_KEY" --all
+# Search git history for accidentally committed secrets
+git log -S "IB_PASSWORD" --all
+git log -S "DASHBOARD_SECRET_KEY" --all
 
 # If found, rotate credentials immediately
 ```
@@ -426,12 +412,12 @@ echo "pbkdf2:sha256:260000$..." > secrets/dashboard_password_hash
 
 ```bash
 # Development
-./secrets/ib_account        # Paper trading account
-./secrets/alpaca_api_key    # Paper trading API key
+./secrets/ib_account           # Paper trading account (DU prefix)
+./secrets/dashboard_secret_key # Development secret key
 
 # Production (different files/secrets)
-/run/secrets/ib_account     # Live trading account
-/run/secrets/alpaca_api_key # Live trading API key
+/run/secrets/ib_account           # Live trading account (U prefix)
+/run/secrets/dashboard_secret_key # Production secret key (different from dev)
 ```
 
 ### 6. Monitor Secret Access
@@ -541,35 +527,6 @@ inotifywait -m -e access secrets/
 
 ---
 
-### Alpaca API Key Invalid
-
-**Error**: `Alpaca authentication failed: Invalid API key`
-
-**Solutions**:
-1. Verify key format:
-   ```bash
-   cat secrets/alpaca_api_key
-   # Format: PKXXXXXXXXXXXXXXXXXXXXXXXX (starts with PK)
-
-   cat secrets/alpaca_api_secret
-   # Format: 40-character alphanumeric string
-   ```
-
-2. Regenerate API keys:
-   - Log into Alpaca dashboard
-   - Go to Account → API Keys
-   - Generate new key pair
-   - Update secrets
-
-3. Verify environment (paper vs live):
-   ```bash
-   grep ALPACA_BASE_URL .env
-   # Paper: https://paper-api.alpaca.markets
-   # Live: https://api.alpaca.markets
-   ```
-
----
-
 ### Docker Secrets Not Accessible
 
 **Error**: `FileNotFoundError: [Errno 2] No such file or directory: '/run/secrets/ib_account'`
@@ -609,18 +566,6 @@ inotifywait -m -e access secrets/
 2. **Username/Password** (`ib_username`, `ib_password`):
    - Same credentials used to log into IB Gateway/TWS
    - Enable API connections in Account Settings
-
-### Alpaca
-
-1. **API Key** (`alpaca_api_key`, `alpaca_api_secret`):
-   - Log into Alpaca dashboard
-   - Navigate to: Account → API Keys
-   - Click "Generate New Key"
-   - Copy and save immediately (secret shown once)
-
-2. **Paper Trading** (recommended for testing):
-   - Use Paper Trading API keys
-   - Set `ALPACA_BASE_URL=https://paper-api.alpaca.markets`
 
 ### Telegram
 
