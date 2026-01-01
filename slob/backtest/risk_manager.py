@@ -98,6 +98,17 @@ class RiskManager:
 
         equity = current_equity or self.current_capital
 
+        # Validate capital doesn't go negative
+        if equity <= 0:
+            logger.error(f"Current capital is {equity} - cannot size position")
+            return {
+                'position_size': 0,
+                'risk_amount': 0,
+                'contracts': 0,
+                'method': 'error',
+                'reason': 'Negative or zero capital'
+            }
+
         # Calculate SL distance
         sl_distance = abs(entry_price - sl_price)
 

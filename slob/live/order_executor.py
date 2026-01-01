@@ -391,6 +391,21 @@ class OrderExecutor:
             )
             qty = self.config.max_position_size
 
+        # Validate sufficient capital before placing order
+        # Calculate required capital (assume 20% margin for NQ futures)
+        required_capital = abs(qty) * setup.entry_price * 0.2
+
+        if not await self.validate_sufficient_capital(required_capital):
+            return BracketOrderResult(
+                entry_order=OrderResult(
+                    order_id=0,
+                    status=OrderStatus.REJECTED,
+                    error_message="Insufficient account balance"
+                ),
+                success=False,
+                error_message="Insufficient account balance"
+            )
+
         logger.info(
             f"Placing bracket order for setup {setup.id[:8]}:\n"
             f"  Entry: {setup.entry_price} (SHORT {qty} contracts)\n"
@@ -783,54 +798,79 @@ class OrderExecutor:
     # POSITION SIZING
     # ─────────────────────────────────────────────────────────────────
 
-    def get_account_balance(self) -> float:
+    async def get_account_balance(self) -> float:
         """
         Retrieve live account balance from IBKR.
 
-        Syncs current equity from Interactive Brokers to update RiskManager.
-        Falls back to cached balance if connection fails.
+        CRITICAL: This method raises errors instead of falling back to cached values
+        to prevent trading with incorrect or stale balance information.
 
         Returns:
             float: Current account balance (USD)
-        """
-        if not self.ib or not self.ib.isConnected():
-            logger.warning("IB not connected, using cached balance")
-            return self._cached_balance
 
-        # CRITICAL: Verify account is configured
+        Raises:
+            RuntimeError: If IB not connected or account not configured
+            ValueError: If NetLiquidation not found in account values
+        """
+        # Check IB connection
+        if not self.ib or not self.ib.isConnected():
+            raise RuntimeError("IB not connected - cannot fetch account balance")
+
+        # Verify account is configured
         if not self.config.account:
-            logger.critical("❌ Account not configured! Cannot get balance.")
-            logger.critical("Returning 0.0 to prevent trades with incorrect balance.")
-            return 0.0  # Fail-safe: no balance = no trades
+            raise RuntimeError("Account not configured - cannot fetch balance")
 
         try:
             # Request account values from IB
-            account_values = self.ib.accountValues(account=self.config.account)
+            account_values = await self.ib.accountValuesAsync(account=self.config.account)
 
-            # Find TotalCashValue or NetLiquidation
+            # Find NetLiquidation (total account value)
             for av in account_values:
-                if av.tag == 'TotalCashValue':
+                if av.tag == 'NetLiquidation' and av.currency == 'USD':
                     balance = float(av.value)
                     self._cached_balance = balance
                     self.risk_manager.current_capital = balance
-                    logger.info(f"Account balance synced from IB: ${balance:,.2f}")
+                    logger.info(f"Account balance: ${balance:,.2f}")
                     return balance
 
-            # Fallback to NetLiquidation if TotalCashValue not found
-            for av in account_values:
-                if av.tag == 'NetLiquidation':
-                    balance = float(av.value)
-                    self._cached_balance = balance
-                    self.risk_manager.current_capital = balance
-                    logger.info(f"Account balance synced from IB (NetLiq): ${balance:,.2f}")
-                    return balance
-
-            logger.warning("TotalCashValue not found in account values, using cached")
-            return self._cached_balance
+            # If NetLiquidation not found, throw error
+            raise ValueError("NetLiquidation not found in account values")
 
         except Exception as e:
-            logger.error(f"Failed to get account balance from IB: {e}")
-            return self._cached_balance
+            logger.error(f"Failed to get account balance: {e}")
+            raise
+
+    async def validate_sufficient_capital(self, required_capital: float) -> bool:
+        """
+        Validate account has sufficient capital for trade.
+
+        Checks current balance against required capital with 5% safety buffer.
+
+        Args:
+            required_capital: Required capital for the trade (USD)
+
+        Returns:
+            True if sufficient capital available, False otherwise
+        """
+        try:
+            current_balance = await self.get_account_balance()
+            available_cash = current_balance * 0.95  # Reserve 5% buffer
+
+            if required_capital > available_cash:
+                logger.error(
+                    f"Insufficient capital: need ${required_capital:,.2f}, "
+                    f"have ${available_cash:,.2f} (after 5% buffer)"
+                )
+                return False
+
+            logger.debug(
+                f"Capital check passed: ${required_capital:,.2f} / ${available_cash:,.2f} available"
+            )
+            return True
+
+        except Exception as e:
+            logger.error(f"Capital validation failed: {e}")
+            return False  # Fail-safe: reject trade if can't validate
 
     def calculate_position_size(
         self,
