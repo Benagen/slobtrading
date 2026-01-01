@@ -219,16 +219,6 @@ def get_ib_account() -> str:
     return get_secret('ib_account', 'IB_ACCOUNT', required=True)
 
 
-def get_alpaca_api_key() -> str:
-    """Get Alpaca API key."""
-    return get_secret('alpaca_api_key', 'ALPACA_API_KEY', required=True)
-
-
-def get_alpaca_api_secret() -> str:
-    """Get Alpaca API secret."""
-    return get_secret('alpaca_api_secret', 'ALPACA_API_SECRET', required=True)
-
-
 def get_telegram_bot_token() -> Optional[str]:
     """Get Telegram bot token (optional)."""
     return get_secret('telegram_bot_token', 'TELEGRAM_BOT_TOKEN', required=False)
@@ -271,12 +261,12 @@ if __name__ == "__main__":
     # Test individual secrets
     print("\nTesting individual secret retrieval:")
     print(f"IB Account: {get_ib_account() or 'NOT FOUND'}")
-    print(f"Alpaca Key: {get_alpaca_api_key()[:10] or 'NOT FOUND'}... (truncated)")
     print(f"Telegram Token: {get_telegram_bot_token() or 'NOT CONFIGURED (optional)'}")
+    print(f"Redis Password: {'SET' if get_redis_password() else 'NOT SET'}")
 
     # Test validation
     print("\nValidating required secrets:")
-    required = ['ib_account', 'alpaca_api_key', 'alpaca_api_secret']
+    required = ['ib_account', 'dashboard_secret_key']
     all_found, missing = manager.validate_secrets(required)
 
     if all_found:
