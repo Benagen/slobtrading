@@ -185,8 +185,9 @@ def get_system_status() -> Dict[str, Any]:
                 if last_candle:
                     status['last_candle'] = last_candle
                     status['total_candles'] = total_candles
-            except:
-                pass
+            except Exception as e:
+                logger.debug(f"Could not read candle database: {e}")
+                # Not critical - dashboard can work without candle stats
 
         return status
 

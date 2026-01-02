@@ -459,8 +459,9 @@ class LiveTradingEngine:
                     f"System Stopped\nShutdown time: {elapsed:.1f}s\nOpen positions: {len(open_positions) if 'open_positions' in locals() else 0}",
                     "INFO"
                 )
-            except:
-                pass  # Don't fail shutdown if alert fails
+            except Exception as e:
+                self.logger.debug(f"Could not send Telegram shutdown alert: {e}")
+                # Don't fail shutdown if alert fails
 
         if self.email.enabled:
             try:
@@ -468,8 +469,9 @@ class LiveTradingEngine:
                     "System Stopped",
                     f"Trading engine shut down gracefully\nShutdown time: {elapsed:.1f}s"
                 )
-            except:
-                pass  # Don't fail shutdown if alert fails
+            except Exception as e:
+                self.logger.debug(f"Could not send email shutdown notification: {e}")
+                # Don't fail shutdown if alert fails
         self.logger.info("=" * 60)
 
     # ═══════════════════════════════════════════════════════════════════

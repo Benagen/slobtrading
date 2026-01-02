@@ -175,5 +175,6 @@ class CandleStore:
                 cursor.execute("SELECT COUNT(*) FROM candles")
                 count = cursor.fetchone()[0]
                 return {'total_candles': count}
-        except:
+        except Exception as e:
+            logger.debug(f"Could not get candle stats: {e}")
             return {'total_candles': 0}
