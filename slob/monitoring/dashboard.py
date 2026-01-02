@@ -173,18 +173,17 @@ def get_system_status() -> Dict[str, Any]:
         # Get uptime from candle data if available
         if DB_PATH.exists():
             try:
-                conn = sqlite3.connect(str(DB_PATH))
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT MIN(timestamp), MAX(timestamp), COUNT(*)
-                    FROM candles
-                """)
-                first_candle, last_candle, total_candles = cursor.fetchone()
-                conn.close()
+                with sqlite3.connect(str(DB_PATH)) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        SELECT MIN(timestamp), MAX(timestamp), COUNT(*)
+                        FROM candles
+                    """)
+                    first_candle, last_candle, total_candles = cursor.fetchone()
 
-                if last_candle:
-                    status['last_candle'] = last_candle
-                    status['total_candles'] = total_candles
+                    if last_candle:
+                        status['last_candle'] = last_candle
+                        status['total_candles'] = total_candles
             except Exception as e:
                 logger.debug(f"Could not read candle database: {e}")
                 # Not critical - dashboard can work without candle stats
@@ -202,20 +201,19 @@ def get_active_setups() -> List[Dict[str, Any]]:
         if not STATE_DB_PATH.exists():
             return []
 
-        conn = sqlite3.connect(str(STATE_DB_PATH))
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        with sqlite3.connect(str(STATE_DB_PATH)) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM active_setups
-            WHERE state != 'SETUP_COMPLETE'
-            ORDER BY created_at DESC
-            LIMIT 10
-        """)
+            cursor.execute("""
+                SELECT *
+                FROM active_setups
+                WHERE state != 'SETUP_COMPLETE'
+                ORDER BY created_at DESC
+                LIMIT 10
+            """)
 
-        setups = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+            setups = [dict(row) for row in cursor.fetchall()]
 
         return setups
 
@@ -230,19 +228,18 @@ def get_recent_trades() -> List[Dict[str, Any]]:
         if not STATE_DB_PATH.exists():
             return []
 
-        conn = sqlite3.connect(str(STATE_DB_PATH))
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        with sqlite3.connect(str(STATE_DB_PATH)) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT *
-            FROM trade_history
-            ORDER BY entry_time DESC
-            LIMIT 20
-        """)
+            cursor.execute("""
+                SELECT *
+                FROM trade_history
+                ORDER BY entry_time DESC
+                LIMIT 20
+            """)
 
-        trades = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+            trades = [dict(row) for row in cursor.fetchall()]
 
         return trades
 
@@ -263,40 +260,38 @@ def get_performance_metrics() -> Dict[str, Any]:
                 'avg_loss': 0.0
             }
 
-        conn = sqlite3.connect(str(STATE_DB_PATH))
-        cursor = conn.cursor()
+        with sqlite3.connect(str(STATE_DB_PATH)) as conn:
+            cursor = conn.cursor()
 
-        # Total trades
-        cursor.execute("SELECT COUNT(*) FROM trade_history")
-        total_trades = cursor.fetchone()[0]
+            # Total trades
+            cursor.execute("SELECT COUNT(*) FROM trade_history")
+            total_trades = cursor.fetchone()[0]
 
-        # Win/Loss stats
-        cursor.execute("""
-            SELECT
-                COUNT(CASE WHEN pnl > 0 THEN 1 END) as wins,
-                COUNT(CASE WHEN pnl < 0 THEN 1 END) as losses,
-                SUM(pnl) as total_pnl,
-                AVG(CASE WHEN pnl > 0 THEN pnl END) as avg_win,
-                AVG(CASE WHEN pnl < 0 THEN pnl END) as avg_loss
-            FROM trade_history
-        """)
+            # Win/Loss stats
+            cursor.execute("""
+                SELECT
+                    COUNT(CASE WHEN pnl > 0 THEN 1 END) as wins,
+                    COUNT(CASE WHEN pnl < 0 THEN 1 END) as losses,
+                    SUM(pnl) as total_pnl,
+                    AVG(CASE WHEN pnl > 0 THEN pnl END) as avg_win,
+                    AVG(CASE WHEN pnl < 0 THEN pnl END) as avg_loss
+                FROM trade_history
+            """)
 
-        row = cursor.fetchone()
-        wins, losses, total_pnl, avg_win, avg_loss = row
+            row = cursor.fetchone()
+            wins, losses, total_pnl, avg_win, avg_loss = row
 
-        conn.close()
+            win_rate = wins / max(total_trades, 1)
 
-        win_rate = wins / max(total_trades, 1)
-
-        return {
-            'total_trades': total_trades,
-            'wins': wins or 0,
-            'losses': losses or 0,
-            'win_rate': win_rate,
-            'total_pnl': total_pnl or 0.0,
-            'avg_win': avg_win or 0.0,
-            'avg_loss': avg_loss or 0.0
-        }
+            return {
+                'total_trades': total_trades,
+                'wins': wins or 0,
+                'losses': losses or 0,
+                'win_rate': win_rate,
+                'total_pnl': total_pnl or 0.0,
+                'avg_win': avg_win or 0.0,
+                'avg_loss': avg_loss or 0.0
+            }
 
     except Exception as e:
         logger.error(f"Error calculating performance metrics: {e}")
@@ -352,37 +347,25 @@ def api_live_price():
         if not DB_PATH.exists():
             return jsonify({'error': 'Database not found'}), 404
 
-        conn = sqlite3.connect(str(DB_PATH))
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        with sqlite3.connect(str(DB_PATH)) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
 
-        # Get latest candle
-        cursor.execute("""
-            SELECT timestamp, open, high, low, close, volume
-            FROM candles
-            ORDER BY timestamp DESC
-            LIMIT 1
-        """)
+            # Get latest 2 candles for change calculation
+            cursor.execute("""
+                SELECT timestamp, open, high, low, close, volume
+                FROM candles
+                ORDER BY timestamp DESC
+                LIMIT 2
+            """)
 
-        latest = cursor.fetchone()
-        conn.close()
+            candles = cursor.fetchall()
 
-        if not latest:
+        if not candles:
             return jsonify({'error': 'No data available'}), 404
 
-        # Get previous candle for change calculation
-        conn = sqlite3.connect(str(DB_PATH))
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT close
-            FROM candles
-            ORDER BY timestamp DESC
-            LIMIT 2
-        """)
-        candles = cursor.fetchall()
-        conn.close()
-
-        prev_close = candles[1][0] if len(candles) > 1 else latest['close']
+        latest = candles[0]
+        prev_close = candles[1]['close'] if len(candles) > 1 else latest['close']
         change = latest['close'] - prev_close
         change_pct = (change / prev_close * 100) if prev_close else 0
 
@@ -415,29 +398,27 @@ def api_candles():
         if not DB_PATH.exists():
             return jsonify({'error': 'Database not found'}), 404
 
-        conn = sqlite3.connect(str(DB_PATH))
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        with sqlite3.connect(str(DB_PATH)) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT timestamp, open, high, low, close, volume
-            FROM candles
-            ORDER BY timestamp DESC
-            LIMIT ?
-        """, (limit,))
+            cursor.execute("""
+                SELECT timestamp, open, high, low, close, volume
+                FROM candles
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (limit,))
 
-        candles = []
-        for row in cursor.fetchall():
-            candles.append({
-                'timestamp': row['timestamp'],
-                'open': round(row['open'], 2),
-                'high': round(row['high'], 2),
-                'low': round(row['low'], 2),
-                'close': round(row['close'], 2),
-                'volume': row['volume']
-            })
-
-        conn.close()
+            candles = []
+            for row in cursor.fetchall():
+                candles.append({
+                    'timestamp': row['timestamp'],
+                    'open': round(row['open'], 2),
+                    'high': round(row['high'], 2),
+                    'low': round(row['low'], 2),
+                    'close': round(row['close'], 2),
+                    'volume': row['volume']
+                })
 
         # Reverse so oldest first (for chart)
         candles.reverse()
@@ -460,70 +441,67 @@ def api_shadow_stats():
         if not STATE_DB_PATH.exists():
             return jsonify({'enabled': False, 'error': 'Database not found'})
 
-        conn = sqlite3.connect(str(STATE_DB_PATH))
-        cursor = conn.cursor()
+        with sqlite3.connect(str(STATE_DB_PATH)) as conn:
+            cursor = conn.cursor()
 
-        # Check if shadow_predictions table exists
-        cursor.execute("""
-            SELECT name FROM sqlite_master
-            WHERE type='table' AND name='shadow_predictions'
-        """)
-        if not cursor.fetchone():
-            conn.close()
-            return jsonify({'enabled': False, 'reason': 'Shadow mode not initialized'})
+            # Check if shadow_predictions table exists
+            cursor.execute("""
+                SELECT name FROM sqlite_master
+                WHERE type='table' AND name='shadow_predictions'
+            """)
+            if not cursor.fetchone():
+                return jsonify({'enabled': False, 'reason': 'Shadow mode not initialized'})
 
-        # Overall stats
-        cursor.execute("""
-            SELECT
-                COUNT(*) as total_predictions,
-                SUM(CASE WHEN agreement = 1 THEN 1 ELSE 0 END) as agreements,
-                AVG(ml_probability) as avg_ml_prob,
-                SUM(CASE WHEN ml_decision = 'TAKE' THEN 1 ELSE 0 END) as ml_approved,
-                SUM(CASE WHEN ml_decision = 'SKIP' THEN 1 ELSE 0 END) as ml_rejected
-            FROM shadow_predictions
-        """)
-        row = cursor.fetchone()
-        total, agreements, avg_prob, ml_approved, ml_rejected = row
+            # Overall stats
+            cursor.execute("""
+                SELECT
+                    COUNT(*) as total_predictions,
+                    SUM(CASE WHEN agreement = 1 THEN 1 ELSE 0 END) as agreements,
+                    AVG(ml_probability) as avg_ml_prob,
+                    SUM(CASE WHEN ml_decision = 'TAKE' THEN 1 ELSE 0 END) as ml_approved,
+                    SUM(CASE WHEN ml_decision = 'SKIP' THEN 1 ELSE 0 END) as ml_rejected
+                FROM shadow_predictions
+            """)
+            row = cursor.fetchone()
+            total, agreements, avg_prob, ml_approved, ml_rejected = row
 
-        # Recent predictions (last 10)
-        cursor.execute("""
-            SELECT
-                setup_id, timestamp, ml_probability,
-                ml_decision, rule_decision, agreement
-            FROM shadow_predictions
-            ORDER BY timestamp DESC
-            LIMIT 10
-        """)
-        recent = [
-            {
-                'setup_id': row[0],
-                'timestamp': row[1],
-                'ml_probability': row[2],
-                'ml_decision': row[3],
-                'rule_decision': row[4],
-                'agreement': bool(row[5])
-            }
-            for row in cursor.fetchall()
-        ]
+            # Recent predictions (last 10)
+            cursor.execute("""
+                SELECT
+                    setup_id, timestamp, ml_probability,
+                    ml_decision, rule_decision, agreement
+                FROM shadow_predictions
+                ORDER BY timestamp DESC
+                LIMIT 10
+            """)
+            recent = [
+                {
+                    'setup_id': row[0],
+                    'timestamp': row[1],
+                    'ml_probability': row[2],
+                    'ml_decision': row[3],
+                    'rule_decision': row[4],
+                    'agreement': bool(row[5])
+                }
+                for row in cursor.fetchall()
+            ]
 
-        conn.close()
+            if total == 0:
+                agreement_rate = 0.0
+            else:
+                agreement_rate = agreements / total
 
-        if total == 0:
-            agreement_rate = 0.0
-        else:
-            agreement_rate = agreements / total
-
-        return jsonify({
-            'enabled': True,
-            'total_predictions': total or 0,
-            'agreements': agreements or 0,
-            'disagreements': (total or 0) - (agreements or 0),
-            'agreement_rate': agreement_rate,
-            'avg_ml_probability': avg_prob or 0.0,
-            'ml_approved': ml_approved or 0,
-            'ml_rejected': ml_rejected or 0,
-            'recent_predictions': recent
-        })
+            return jsonify({
+                'enabled': True,
+                'total_predictions': total or 0,
+                'agreements': agreements or 0,
+                'disagreements': (total or 0) - (agreements or 0),
+                'agreement_rate': agreement_rate,
+                'avg_ml_probability': avg_prob or 0.0,
+                'ml_approved': ml_approved or 0,
+                'ml_rejected': ml_rejected or 0,
+                'recent_predictions': recent
+            })
     except Exception as e:
         logger.error(f"Error getting shadow stats: {e}")
         return jsonify({'enabled': False, 'error': str(e)})
@@ -537,23 +515,22 @@ def api_pnl_chart():
         if not STATE_DB_PATH.exists():
             return jsonify({'labels': [], 'data': []})
 
-        conn = sqlite3.connect(str(STATE_DB_PATH))
-        cursor = conn.cursor()
+        with sqlite3.connect(str(STATE_DB_PATH)) as conn:
+            cursor = conn.cursor()
 
-        # Get daily P&L for last 30 days
-        cursor.execute("""
-            SELECT
-                DATE(entry_time) as trade_date,
-                SUM(pnl) as daily_pnl,
-                COUNT(*) as trades_count
-            FROM trade_history
-            WHERE entry_time >= datetime('now', '-30 days')
-            GROUP BY DATE(entry_time)
-            ORDER BY trade_date ASC
-        """)
+            # Get daily P&L for last 30 days
+            cursor.execute("""
+                SELECT
+                    DATE(entry_time) as trade_date,
+                    SUM(pnl) as daily_pnl,
+                    COUNT(*) as trades_count
+                FROM trade_history
+                WHERE entry_time >= datetime('now', '-30 days')
+                GROUP BY DATE(entry_time)
+                ORDER BY trade_date ASC
+            """)
 
-        rows = cursor.fetchall()
-        conn.close()
+            rows = cursor.fetchall()
 
         if not rows:
             return jsonify({'labels': [], 'data': [], 'cumulative': []})
@@ -588,33 +565,31 @@ def api_setup_pipeline():
         if not STATE_DB_PATH.exists():
             return jsonify({'pipeline': [], 'total': 0})
 
-        conn = sqlite3.connect(str(STATE_DB_PATH))
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        with sqlite3.connect(str(STATE_DB_PATH)) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
 
-        # Check if setups table exists
-        cursor.execute("""
-            SELECT name FROM sqlite_master
-            WHERE type='table' AND name='setups'
-        """)
-        if not cursor.fetchone():
-            conn.close()
-            return jsonify({'pipeline': [], 'total': 0, 'error': 'Setups table not found'})
+            # Check if setups table exists
+            cursor.execute("""
+                SELECT name FROM sqlite_master
+                WHERE type='table' AND name='setups'
+            """)
+            if not cursor.fetchone():
+                return jsonify({'pipeline': [], 'total': 0, 'error': 'Setups table not found'})
 
-        # Get count of setups by state (only active ones, not invalidated/completed from old days)
-        # Focus on today's setups or recent active ones
-        cursor.execute("""
-            SELECT
-                state,
-                COUNT(*) as count
-            FROM setups
-            WHERE created_at >= datetime('now', '-24 hours')
-            GROUP BY state
-            ORDER BY state ASC
-        """)
+            # Get count of setups by state (only active ones, not invalidated/completed from old days)
+            # Focus on today's setups or recent active ones
+            cursor.execute("""
+                SELECT
+                    state,
+                    COUNT(*) as count
+                FROM setups
+                WHERE created_at >= datetime('now', '-24 hours')
+                GROUP BY state
+                ORDER BY state ASC
+            """)
 
-        rows = cursor.fetchall()
-        conn.close()
+            rows = cursor.fetchall()
 
         # State mapping with friendly names and colors
         state_map = {
@@ -683,17 +658,16 @@ def api_risk_metrics():
                 'circuit_breaker_active': False
             })
 
-        conn = sqlite3.connect(str(STATE_DB_PATH))
-        cursor = conn.cursor()
+        with sqlite3.connect(str(STATE_DB_PATH)) as conn:
+            cursor = conn.cursor()
 
-        # Get all trades ordered by time
-        cursor.execute("""
-            SELECT entry_time, pnl
-            FROM trade_history
-            ORDER BY entry_time ASC
-        """)
-        trades = cursor.fetchall()
-        conn.close()
+            # Get all trades ordered by time
+            cursor.execute("""
+                SELECT entry_time, pnl
+                FROM trade_history
+                ORDER BY entry_time ASC
+            """)
+            trades = cursor.fetchall()
 
         if not trades:
             return jsonify({
