@@ -543,67 +543,223 @@ class LiveTradingEngine:
         Verifies that:
         - All database positions exist in IB
         - No unexpected positions in IB
-        - Position quantities match
+        - Position quantities match exactly
 
         Critical for:
         - Detecting manual closes via TWS
         - Detecting unexpected fills
+        - Detecting partial fills or size mismatches
         - Ensuring state consistency
         """
-        self.logger.info("🔍 Reconciling positions...")
+        self.logger.info("🔍 Reconciling positions between IB and database...")
 
         try:
-            # Get positions from IB
+            # Get IB positions
             ib_positions = await self.order_executor.get_positions()
+            ib_positions_map = {
+                pos.contract.symbol: {
+                    'quantity': pos.position,
+                    'avg_price': pos.avgCost,
+                    'market_value': pos.marketValue
+                }
+                for pos in ib_positions
+            }
 
-            # Get positions from database
+            # Get DB trades
             db_trades = await self.state_manager.get_open_trades()
 
-            # Extract symbols
-            ib_symbols = {pos.contract.symbol for pos in ib_positions}
-            db_symbols = {trade.get('symbol', 'NQ') for trade in db_trades}
+            # Aggregate DB trades by symbol
+            db_positions_map = {}
+            for trade in db_trades:
+                symbol = trade.get('symbol', 'NQ')
+                if symbol not in db_positions_map:
+                    db_positions_map[symbol] = {
+                        'quantity': 0,
+                        'total_cost': 0,
+                        'trades': []
+                    }
+                quantity = trade.get('position_size', 0)
+                entry_price = trade.get('entry_price', 0)
 
-            # Check for discrepancies
-            unexpected_positions = ib_symbols - db_symbols
-            missing_positions = db_symbols - ib_symbols
+                db_positions_map[symbol]['quantity'] += quantity
+                db_positions_map[symbol]['total_cost'] += entry_price * quantity
+                db_positions_map[symbol]['trades'].append(trade)
 
-            if unexpected_positions:
-                self.logger.critical(
-                    f"❌ UNEXPECTED POSITIONS IN IB: {unexpected_positions}\n"
-                    f"These positions exist in IB but not in database.\n"
-                    f"Possible causes:\n"
-                    f"  - Manual trade via TWS\n"
-                    f"  - Database corruption\n"
-                    f"  - Failed state persistence\n"
-                    f"Action: Review positions and close manually if needed"
-                )
-                # TODO: Send alert via Telegram/Email
+            # Calculate average prices
+            for symbol, pos in db_positions_map.items():
+                if pos['quantity'] != 0:
+                    pos['avg_price'] = pos['total_cost'] / pos['quantity']
+                else:
+                    pos['avg_price'] = 0
 
-            if missing_positions:
-                self.logger.warning(
-                    f"⚠️ POSITIONS CLOSED EXTERNALLY: {missing_positions}\n"
-                    f"These positions exist in database but not in IB.\n"
-                    f"Likely closed manually via TWS.\n"
-                    f"Updating database to reflect closure..."
-                )
+            # Find discrepancies
+            all_symbols = set(ib_positions_map.keys()) | set(db_positions_map.keys())
+            discrepancies = []
 
-                # Update database to mark as closed
-                for symbol in missing_positions:
-                    # Find matching trades in db_trades
-                    for trade in db_trades:
-                        if trade.get('symbol') == symbol:
-                            await self.state_manager.close_trade(
-                                trade_id=trade.get('id'),
-                                exit_price=0.0,  # Unknown (manual close)
-                                exit_reason='manual_close_detected'
-                            )
-                            self.logger.info(f"Marked trade {trade.get('id')[:8]} as manually closed")
+            for symbol in all_symbols:
+                ib_pos = ib_positions_map.get(symbol)
+                db_pos = db_positions_map.get(symbol)
 
-            if not unexpected_positions and not missing_positions:
-                self.logger.info("✅ Position reconciliation: All positions match")
-            else:
+                # Case 1: Position in IB but not DB (orphaned)
+                if ib_pos and not db_pos:
+                    discrepancies.append({
+                        'type': 'orphaned_in_ib',
+                        'symbol': symbol,
+                        'ib_quantity': ib_pos['quantity'],
+                        'db_quantity': 0,
+                        'ib_avg_price': ib_pos['avg_price']
+                    })
+
+                # Case 2: Position in DB but not IB (manually closed)
+                elif db_pos and not ib_pos:
+                    discrepancies.append({
+                        'type': 'missing_in_ib',
+                        'symbol': symbol,
+                        'ib_quantity': 0,
+                        'db_quantity': db_pos['quantity'],
+                        'db_trades': db_pos['trades']
+                    })
+
+                # Case 3: Quantities don't match (partial fill, manual change)
+                elif ib_pos and db_pos:
+                    if abs(ib_pos['quantity'] - db_pos['quantity']) > 0.01:
+                        discrepancies.append({
+                            'type': 'quantity_mismatch',
+                            'symbol': symbol,
+                            'ib_quantity': ib_pos['quantity'],
+                            'db_quantity': db_pos['quantity'],
+                            'difference': ib_pos['quantity'] - db_pos['quantity'],
+                            'db_trades': db_pos['trades']
+                        })
+
+            # Handle discrepancies
+            if discrepancies:
+                self.logger.error(f"❌ Found {len(discrepancies)} position discrepancies:")
+
+                for disc in discrepancies:
+                    self.logger.error(f"  - {disc}")
+
+                    # Send alert for each discrepancy
+                    await self._send_position_alert(disc)
+
+                    # Handle each type
+                    if disc['type'] == 'orphaned_in_ib':
+                        await self._create_orphaned_trade_record(disc)
+
+                    elif disc['type'] == 'missing_in_ib':
+                        await self._mark_trades_manually_closed(disc)
+
+                    elif disc['type'] == 'quantity_mismatch':
+                        self.logger.warning(
+                            f"  Quantity mismatch for {disc['symbol']}: "
+                            f"IB={disc['ib_quantity']}, DB={disc['db_quantity']} "
+                            f"(diff={disc['difference']})"
+                        )
+
                 self.logger.info("✅ Position reconciliation complete (with discrepancies)")
+            else:
+                self.logger.info("✅ Position reconciliation: All positions match")
 
         except Exception as e:
-            self.logger.error(f"Position reconciliation error: {e}")
+            self.logger.error(f"Position reconciliation failed: {e}", exc_info=True)
             self.logger.warning("Continuing without reconciliation...")
+
+    async def _send_position_alert(self, discrepancy: dict):
+        """
+        Send alert for position discrepancy.
+
+        Args:
+            discrepancy: Dict with discrepancy details
+        """
+        disc_type = discrepancy['type'].replace('_', ' ').title()
+        symbol = discrepancy['symbol']
+        ib_qty = discrepancy.get('ib_quantity', 0)
+        db_qty = discrepancy.get('db_quantity', 0)
+
+        message = (
+            f"⚠️ POSITION DISCREPANCY DETECTED\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"Type: {disc_type}\n"
+            f"Symbol: {symbol}\n"
+            f"IB Quantity: {ib_qty}\n"
+            f"DB Quantity: {db_qty}\n"
+        )
+
+        if 'difference' in discrepancy:
+            message += f"Difference: {discrepancy['difference']}\n"
+
+        if 'ib_avg_price' in discrepancy:
+            message += f"IB Avg Price: ${discrepancy['ib_avg_price']:.2f}\n"
+
+        # Send via configured notifiers
+        if self.telegram_notifier:
+            await self.telegram_notifier.send_alert(message)
+
+        if self.email_notifier:
+            await self.email_notifier.send_alert(
+                subject=f"Position Discrepancy: {symbol}",
+                body=message
+            )
+
+        self.logger.warning(f"Alert sent for position discrepancy: {disc_type}")
+
+    async def _create_orphaned_trade_record(self, disc: dict):
+        """
+        Create DB record for orphaned IB position.
+
+        This handles the case where IB has a position we don't know about
+        (manual entry via TWS, system error, etc.)
+
+        Args:
+            disc: Discrepancy dict with orphaned position details
+        """
+        import uuid
+        import time
+
+        # Create a "manual entry" trade record
+        trade = {
+            'id': str(uuid.uuid4()),
+            'setup_id': 'ORPHANED',  # No associated setup
+            'symbol': disc['symbol'],
+            'position_size': int(disc['ib_quantity']),
+            'entry_price': disc.get('ib_avg_price', 0),
+            'entry_time': time.time(),
+            'sl_price': 0,  # Unknown
+            'tp_price': 0,  # Unknown
+            'result': 'OPEN',
+        }
+
+        await self.state_manager.persist_trade(trade)
+
+        self.logger.warning(
+            f"Created orphaned trade record for {disc['symbol']}: "
+            f"{disc['ib_quantity']} contracts @ ${disc.get('ib_avg_price', 0):.2f}"
+        )
+
+    async def _mark_trades_manually_closed(self, disc: dict):
+        """
+        Mark DB trades as manually closed (not in IB).
+
+        This handles the case where DB shows open trades but IB doesn't
+        have the position (manually closed via TWS).
+
+        Args:
+            disc: Discrepancy dict with missing position details
+        """
+        import time
+
+        trades = disc.get('db_trades', [])
+
+        for trade in trades:
+            trade_id = trade.get('id')
+            if trade_id:
+                await self.state_manager.close_trade(
+                    trade_id=trade_id,
+                    exit_price=0.0,  # Unknown (manual close)
+                    exit_reason='MANUALLY_CLOSED_VIA_TWS'
+                )
+
+                self.logger.warning(
+                    f"Marked trade {trade_id[:8]} as manually closed: "
+                    f"{disc['symbol']} ({disc['db_quantity']} contracts)"
+                )
