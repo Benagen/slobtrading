@@ -181,6 +181,9 @@ class OrderExecutor:
         )
         self._cached_balance = 50000.0  # Fallback if IB sync fails
 
+        # Validate trading mode early (prevents accidental live trading)
+        self.validate_paper_trading_mode()
+
     async def initialize(self):
         """
         Initialize IB connection and resolve NQ contract with retry logic.
@@ -274,6 +277,80 @@ class OrderExecutor:
                 'description': error_desc
             }
             logger.debug(f"Error stored for order {reqId}")
+
+    def validate_paper_trading_mode(self):
+        """
+        Validate paper trading mode with multiple checks.
+
+        Validates consistency between:
+        - Config paper_trading flag
+        - Account format (DU* = paper, U* = live)
+        - Port (4002 = paper, 4001 = live)
+
+        Raises:
+            ValueError: If validation fails or live trading attempted without confirmation
+        """
+        import os
+
+        # Check 1: Config flag
+        if not self.config.paper_trading:
+            logger.warning("⚠️  PAPER_TRADING=False - LIVE TRADING MODE")
+
+        # Check 2: Account format (paper accounts start with DU)
+        account = self.config.account
+        is_paper_account = account and account.startswith('DU') if account else False
+
+        # Check 3: Port (4002 = paper, 4001 = live)
+        port = self.config.port
+        is_paper_port = (port == 4002)
+
+        # Validate consistency
+        if self.config.paper_trading:
+            # Config says PAPER - verify account and port match
+            if account and not is_paper_account:
+                raise ValueError(
+                    f"❌ Config says PAPER but account {account} is LIVE (should start with DU)\n"
+                    f"   Fix: Use a DU-prefixed paper trading account"
+                )
+
+            if not is_paper_port:
+                raise ValueError(
+                    f"❌ Config says PAPER but port {port} is LIVE (should be 4002)\n"
+                    f"   Fix: Set port=4002 for paper trading"
+                )
+
+            logger.info(
+                f"✓ Paper trading mode validated: "
+                f"account={account or 'default'}, port={port}"
+            )
+
+        else:
+            # Config says LIVE - require explicit confirmation
+            logger.critical(
+                f"\n"
+                f"{'='*70}\n"
+                f"⚠️⚠️⚠️  LIVE TRADING MODE DETECTED  ⚠️⚠️⚠️\n"
+                f"{'='*70}\n"
+                f"Account: {account or 'NOT SET'}\n"
+                f"Port: {port}\n"
+                f"\n"
+                f"Set REQUIRE_LIVE_CONFIRMATION=true in .env to proceed with live trading\n"
+                f"{'='*70}"
+            )
+
+            require_confirmation = os.getenv('REQUIRE_LIVE_CONFIRMATION', 'false').lower()
+            if require_confirmation != 'true':
+                raise ValueError(
+                    "❌ LIVE TRADING requires REQUIRE_LIVE_CONFIRMATION=true in .env\n"
+                    "   This is a safety check to prevent accidental live trading.\n"
+                    "   If you understand the risks, add to .env:\n"
+                    "   REQUIRE_LIVE_CONFIRMATION=true"
+                )
+
+            logger.info(
+                f"✓ Live trading mode validated: "
+                f"account={account}, port={port}, confirmation=required"
+            )
 
     async def connect_with_retry(self, max_attempts: int = 10) -> bool:
         """

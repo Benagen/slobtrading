@@ -567,6 +567,37 @@ inotifywait -m -e access secrets/
    - Same credentials used to log into IB Gateway/TWS
    - Enable API connections in Account Settings
 
+3. **Paper vs Live Trading**:
+
+   **Paper Trading (Recommended for Testing)**:
+   - Account format: `DU1234567` (starts with 'DU')
+   - Port: `4002`
+   - Set in `.env`:
+     ```bash
+     IB_ACCOUNT=DU1234567
+     IB_GATEWAY_PORT=4002
+     TRADING_MODE=paper
+     REQUIRE_LIVE_CONFIRMATION=false
+     ```
+
+   **Live Trading (Real Money)**:
+   - Account format: `U1234567` (starts with 'U')
+   - Port: `4001`
+   - **CRITICAL**: Must set `REQUIRE_LIVE_CONFIRMATION=true` to enable
+   - Set in `.env`:
+     ```bash
+     IB_ACCOUNT=U1234567
+     IB_GATEWAY_PORT=4001
+     TRADING_MODE=live
+     REQUIRE_LIVE_CONFIRMATION=true  # ← REQUIRED for live trading
+     ```
+
+   **Safety Check**:
+   - The system validates trading mode on startup
+   - Mismatched configurations (e.g., paper account with live port) will fail
+   - Live trading without `REQUIRE_LIVE_CONFIRMATION=true` will fail
+   - This prevents accidental live trading
+
 ### Telegram
 
 1. **Bot Token** (`telegram_bot_token`):
