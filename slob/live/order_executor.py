@@ -122,6 +122,10 @@ class OrderExecutorConfig:
         default_position_size: int = 1,  # NQ contracts
         max_position_size: int = 5,
         enable_bracket_orders: bool = True,
+        # Timing parameters
+        ib_response_delay: float = 0.5,  # Wait for IB to respond after order placement
+        order_submission_delay: float = 0.2,  # Wait after submitting each order
+        fill_check_interval: float = 0.5,  # Poll interval for checking order fill status
     ):
         self.host = host
         self.port = port
@@ -133,6 +137,9 @@ class OrderExecutorConfig:
         self.default_position_size = default_position_size
         self.max_position_size = max_position_size
         self.enable_bracket_orders = enable_bracket_orders
+        self.ib_response_delay = ib_response_delay
+        self.order_submission_delay = order_submission_delay
+        self.fill_check_interval = fill_check_interval
 
 
 class OrderExecutor:
@@ -709,7 +716,7 @@ class OrderExecutor:
             tp_trade = self.ib.placeOrder(self.nq_contract, take_profit)
 
             # Wait for submission confirmation and check for errors
-            await asyncio.sleep(0.5)  # Give IB time to respond
+            await asyncio.sleep(self.config.ib_response_delay)  # Give IB time to respond
 
             # Check if error occurred during placement
             if parent_order.orderId in self.pending_orders and 'error' in self.pending_orders[parent_order.orderId]:
@@ -870,7 +877,7 @@ class OrderExecutor:
                 trade = self.ib.placeOrder(self.nq_contract, order)
 
                 # Wait for submission
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(self.config.order_submission_delay)
 
                 # Track order
                 self.active_orders[order.orderId] = trade
@@ -926,7 +933,7 @@ class OrderExecutor:
                     logger.warning(f"Order {order_id} {trade.orderStatus.status}")
                     return False
 
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(self.config.fill_check_interval)
 
         logger.warning(f"Order {order_id} fill timeout ({timeout}s)")
         return False

@@ -67,6 +67,10 @@ class SetupTrackerConfig:
     sl_buffer_pips: float = 1.0  # buffer above LIQ #2 high for SL
     tp_buffer_pips: float = 1.0  # buffer below LSE Low for TP
 
+    # Spike rule parameters
+    spike_rule_buffer_pips: float = 2.0  # Buffer above LIQ #2 body for SL (spike detection)
+    range_normalization_factor: float = 50.0  # Divisor for range normalization (fallback when no ATR)
+
     # Symbol
     symbol: str = "NQ"
 
@@ -633,10 +637,10 @@ class SetupTracker:
 
             # Apply spike rule: if upper wick > 2x body, use body top instead of spike high
             if upper_wick > 2 * body and body > 0:
-                # Spike detected - use body top + 2 pips (hardcoded, backtest alignment)
+                # Spike detected - use body top + buffer (backtest alignment)
                 body_top = max(liq2_candle['close'], liq2_candle['open'])
-                candidate.sl_price = body_top + 2.0  # Hardcoded 2.0 pips for spike rule
-                logger.info(f"Spike rule applied: body_top {body_top:.2f} + 2.0 = {candidate.sl_price:.2f}")
+                candidate.sl_price = body_top + self.config.spike_rule_buffer_pips
+                logger.info(f"Spike rule applied: body_top {body_top:.2f} + {self.config.spike_rule_buffer_pips:.1f} = {candidate.sl_price:.2f}")
             else:
                 # Normal candle - use spike high + buffer
                 candidate.sl_price = candidate.spike_high + self.config.sl_buffer_pips
@@ -697,8 +701,8 @@ class SetupTracker:
         if self.atr_value is not None and self.atr_value > 0:
             range_score = max(0, 1.0 - (range_val / (self.atr_value * 2.0)))
         else:
-            # Fallback: use absolute range
-            range_score = max(0, 1.0 - (range_val / 50.0))  # Assume 50 pips = bad
+            # Fallback: use absolute range normalization
+            range_score = max(0, 1.0 - (range_val / self.config.range_normalization_factor))
 
         # TODO: Add volume compression factor
         # TODO: Add breakout readiness factor
