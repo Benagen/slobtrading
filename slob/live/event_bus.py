@@ -114,6 +114,9 @@ class EventBus:
         # Control flags
         self.should_stop = False
 
+        # Background task tracking
+        self._pending_tasks: set = set()
+
     def subscribe(self, event_type: EventType, handler: Callable):
         """
         Subscribe to an event type.
@@ -218,7 +221,9 @@ class EventBus:
 
         for handler in handlers:
             # Run each handler in background to avoid blocking
-            asyncio.create_task(self._safe_call_handler(handler, event))
+            task = asyncio.create_task(self._safe_call_handler(handler, event))
+            self._pending_tasks.add(task)
+            task.add_done_callback(self._pending_tasks.discard)
 
     async def _safe_call_handler(self, handler: Callable, event: Event):
         """
@@ -381,7 +386,10 @@ class EventBus:
 
         self.should_stop = True
 
-        # Wait a moment for pending handlers to complete
-        await asyncio.sleep(0.5)
+        # Wait for all pending event handlers to complete
+        if self._pending_tasks:
+            logger.info(f"Waiting for {len(self._pending_tasks)} pending event handlers...")
+            await asyncio.gather(*self._pending_tasks, return_exceptions=True)
+            logger.info("All pending event handlers completed")
 
         logger.info(f"✅ Event bus shutdown complete. Final stats: {self.get_stats()}")

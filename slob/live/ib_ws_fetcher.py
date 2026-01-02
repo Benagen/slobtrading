@@ -51,6 +51,7 @@ class IBWSFetcher:
 
         # Background tasks
         self._heartbeat_task: Optional[asyncio.Task] = None
+        self._pending_tasks: set = set()  # Track fire-and-forget tasks
 
     async def connect(self):
         """
@@ -190,7 +191,19 @@ class IBWSFetcher:
                         volume=vol
                     )
                     if self.on_tick:
-                        asyncio.create_task(self.on_tick(t))
+                        # Create task and track it
+                        task = asyncio.create_task(self.on_tick(t))
+                        self._pending_tasks.add(task)
+                        task.add_done_callback(self._pending_tasks.discard)
+
+                        # Log exceptions
+                        def _handle_task_exception(t):
+                            try:
+                                t.result()
+                            except Exception as e:
+                                self.logger.error(f"Tick handler failed: {e}", exc_info=True)
+
+                        task.add_done_callback(_handle_task_exception)
             except Exception as e:
                 # Logga felet men krascha inte hela loopen
                 self.logger.error(f"Error processing tick: {e}")
@@ -198,6 +211,12 @@ class IBWSFetcher:
     async def disconnect(self):
         """Disconnect from IB and stop monitoring."""
         self.running = False
+
+        # Wait for pending tick handler tasks
+        if self._pending_tasks:
+            self.logger.info(f"Waiting for {len(self._pending_tasks)} pending tick handlers...")
+            await asyncio.gather(*self._pending_tasks, return_exceptions=True)
+            self.logger.info("All pending tick handlers completed")
 
         # Stop heartbeat monitoring
         if self._heartbeat_task and not self._heartbeat_task.done():
