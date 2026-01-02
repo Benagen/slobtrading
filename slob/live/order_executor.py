@@ -38,6 +38,33 @@ from slob.backtest.risk_manager import RiskManager
 logger = logging.getLogger(__name__)
 
 
+# IB API Error Codes
+# https://interactivebrokers.github.io/tws-api/message_codes.html
+IB_ERROR_CODES = {
+    # Critical errors (stop trading)
+    321: "Insufficient buying power",
+    502: "Session disconnected",
+    1100: "Connectivity lost",
+    2103: "Order ID exceeded max allowed",
+
+    # Warning errors (log but continue)
+    1102: "Connectivity restored",
+    2104: "Market data farm connection OK",
+    2106: "HMDS data farm connection OK",
+    2108: "HMDS data farm connection broken",
+
+    # Order-specific errors
+    10147: "Order was cancelled",
+    10148: "Order was filled",
+    201: "Order rejected - invalid contract",
+    202: "Order cancelled",
+    399: "Order message error",
+}
+
+# Critical errors that should stop trading
+IB_CRITICAL_ERRORS = {321, 502, 1100, 2103}
+
+
 class OrderStatus(Enum):
     """Order status enumeration."""
     PENDING = "pending"
@@ -132,11 +159,16 @@ class OrderExecutor:
         # Order tracking
         self.active_orders: Dict[int, Trade] = {}
         self.order_history: List[OrderResult] = []
+        self.pending_orders: Dict[int, Dict] = {}  # Track pending orders for error handling
 
         # Statistics
         self.orders_submitted = 0
         self.orders_filled = 0
         self.orders_rejected = 0
+
+        # Error tracking
+        self.trading_enabled = True  # Can be disabled by critical errors
+        self.last_error: Optional[Dict] = None
 
         # Risk Management
         self.risk_manager = RiskManager(
@@ -175,7 +207,73 @@ class OrderExecutor:
             account_values = self.ib.accountValues(account=self.config.account)
             logger.info(f"Account: {self.config.account} ({len(account_values)} values)")
 
+        # Register IB error handler
+        self.ib.errorEvent += self._handle_ib_error
+        logger.info("IB error handler registered")
+
         logger.info("✅ OrderExecutor initialized")
+
+    def _handle_ib_error(self, reqId: int, errorCode: int, errorString: str, contract):
+        """
+        Handle IB API error codes.
+
+        Registered with IB errorEvent to catch all errors from the IB API.
+        Critical errors disable trading, connectivity errors trigger reconnect.
+
+        Args:
+            reqId: Request ID that caused the error (-1 if system-wide)
+            errorCode: IB error code (see IB_ERROR_CODES)
+            errorString: Human-readable error description
+            contract: Contract associated with error (if any)
+        """
+        error_desc = IB_ERROR_CODES.get(errorCode, f"Unknown error {errorCode}")
+
+        # Log the error with appropriate severity
+        if errorCode in IB_CRITICAL_ERRORS:
+            logger.critical(
+                f"🔴 IB CRITICAL ERROR {errorCode} (reqId: {reqId}): {error_desc}\n"
+                f"   Details: {errorString}"
+            )
+        else:
+            logger.warning(
+                f"⚠️ IB Error {errorCode} (reqId: {reqId}): {error_desc} - {errorString}"
+            )
+
+        # Store last error
+        self.last_error = {
+            'code': errorCode,
+            'message': errorString,
+            'description': error_desc,
+            'reqId': reqId,
+            'timestamp': datetime.now()
+        }
+
+        # Handle critical errors
+        if errorCode in IB_CRITICAL_ERRORS:
+            if errorCode == 321:  # Insufficient buying power
+                logger.critical("❌ INSUFFICIENT BUYING POWER - Disabling all new trades")
+                self.trading_enabled = False
+                # TODO: Send alert via Telegram/Email
+                # await self._send_alert(f"Trading disabled: {error_desc}")
+
+            elif errorCode in (502, 1100):  # Connectivity lost
+                logger.critical("❌ IB CONNECTION LOST - Attempting reconnect")
+                # Note: reconnection handled by connect_with_retry()
+                # The main loop should detect is_connected() == False and call reconnect()
+
+            elif errorCode == 2103:  # Order ID exceeded
+                logger.critical("❌ ORDER ID EXCEEDED - Reconnection required to reset counter")
+                # IB requires reconnection to reset order IDs
+                # The main loop should handle this by calling reconnect()
+
+        # Track error for specific order
+        if reqId > 0 and reqId in self.pending_orders:
+            self.pending_orders[reqId]['error'] = {
+                'code': errorCode,
+                'message': errorString,
+                'description': error_desc
+            }
+            logger.debug(f"Error stored for order {reqId}")
 
     async def connect_with_retry(self, max_attempts: int = 10) -> bool:
         """
@@ -342,6 +440,23 @@ class OrderExecutor:
                 error_message="Paper trading mode - orders not sent to IB"
             )
 
+        # CRITICAL: Check if trading is enabled (could be disabled by error 321)
+        if not self.trading_enabled:
+            error_msg = "Trading disabled due to critical error"
+            if self.last_error:
+                error_msg = f"Trading disabled: {self.last_error['description']}"
+
+            logger.critical(f"❌ {error_msg}")
+            return BracketOrderResult(
+                entry_order=OrderResult(
+                    order_id=0,
+                    status=OrderStatus.REJECTED,
+                    error_message=error_msg
+                ),
+                success=False,
+                error_message=error_msg
+            )
+
         # Check connection health - reconnect if needed
         if not self.is_connected():
             logger.warning("IB connection lost, attempting reconnection...")
@@ -502,6 +617,13 @@ class OrderExecutor:
 
         # Place bracket (all 3 orders)
         try:
+            # Track as pending for error handling
+            self.pending_orders[parent_order.orderId] = {
+                'setup_id': setup.id,
+                'type': 'ENTRY',
+                'timestamp': datetime.now()
+            }
+
             # Place parent
             parent_trade = self.ib.placeOrder(self.nq_contract, parent_order)
 
@@ -509,13 +631,35 @@ class OrderExecutor:
             sl_trade = self.ib.placeOrder(self.nq_contract, stop_loss)
             tp_trade = self.ib.placeOrder(self.nq_contract, take_profit)
 
-            # Wait for submission confirmation
-            await asyncio.sleep(0.5)  # Give IB time to process
+            # Wait for submission confirmation and check for errors
+            await asyncio.sleep(0.5)  # Give IB time to respond
+
+            # Check if error occurred during placement
+            if parent_order.orderId in self.pending_orders and 'error' in self.pending_orders[parent_order.orderId]:
+                error = self.pending_orders[parent_order.orderId]['error']
+                logger.error(f"Parent order placement failed: {error['message']}")
+
+                # Clean up pending order
+                del self.pending_orders[parent_order.orderId]
+
+                return BracketOrderResult(
+                    entry_order=OrderResult(
+                        order_id=0,
+                        status=OrderStatus.REJECTED,
+                        error_message=f"IB Error {error['code']}: {error['message']}"
+                    ),
+                    success=False,
+                    error_message=f"IB Error {error['code']}: {error['message']}"
+                )
 
             # Track orders
             self.active_orders[parent_order.orderId] = parent_trade
             self.active_orders[stop_loss.orderId] = sl_trade
             self.active_orders[take_profit.orderId] = tp_trade
+
+            # Clean up from pending (order successfully placed)
+            if parent_order.orderId in self.pending_orders:
+                del self.pending_orders[parent_order.orderId]
 
             return BracketOrderResult(
                 entry_order=OrderResult(
