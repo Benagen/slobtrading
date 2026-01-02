@@ -403,17 +403,7 @@ class LiveTradingEngine:
                     f"Strategy: Leave positions open (managed by IB bracket orders)\n"
                     f"Manual action may be required via TWS if desired"
                 )
-                # Option A: Close all (risk reduction)
-                # for pos in open_positions:
-                #     await self.order_executor.close_position(pos)
-
-                # Option B: Leave open (current strategy - bracket orders manage)
                 # Positions will be managed by SL/TP orders already in IB
-
-                # Option C: Ask user (interactive mode)
-                # if input("Close all positions? (y/n): ") == 'y':
-                #     for pos in open_positions:
-                #         await self.order_executor.close_position(pos)
             else:
                 self.logger.info("3/6: No open positions")
         except Exception as e:
