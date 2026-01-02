@@ -22,7 +22,8 @@ Usage:
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from collections import deque
+from typing import Dict, List, Optional, Tuple, Deque
 from datetime import datetime, time, timedelta
 from dataclasses import dataclass
 
@@ -124,7 +125,8 @@ class SetupTracker:
         self.invalidated_setups: List[SetupCandidate] = []
 
         # ATR tracking (for consolidation range validation)
-        self.recent_candles: List[Dict] = []  # Last N candles for ATR
+        # Use deque with maxlen for O(1) rolling window (auto-evicts oldest)
+        self.recent_candles: Deque[Dict] = deque(maxlen=self.config.atr_period + 1)
         self.atr_value: Optional[float] = None
 
         # Statistics
@@ -264,11 +266,8 @@ class SetupTracker:
 
     def _update_atr(self, candle: Dict):
         """Update ATR calculation."""
+        # Deque automatically evicts oldest when maxlen exceeded (O(1))
         self.recent_candles.append(candle)
-
-        # Keep only last N candles
-        if len(self.recent_candles) > self.config.atr_period + 1:
-            self.recent_candles.pop(0)
 
         # Calculate ATR (need at least 2 candles)
         if len(self.recent_candles) >= 2:
