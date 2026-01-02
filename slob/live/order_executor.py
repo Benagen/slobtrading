@@ -285,7 +285,7 @@ class OrderExecutor:
             }
             logger.debug(f"Error stored for order {reqId}")
 
-    def validate_paper_trading_mode(self):
+    def validate_paper_trading_mode(self) -> None:
         """
         Validate paper trading mode with multiple checks.
 

@@ -40,7 +40,7 @@ class Candle:
         # Tick count
         self.tick_count = 0
 
-    def update(self, tick: Tick):
+    def update(self, tick: Tick) -> None:
         """
         Update candle with tick data.
 

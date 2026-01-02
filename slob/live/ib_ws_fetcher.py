@@ -165,7 +165,8 @@ class IBWSFetcher:
 
         self.ib.pendingTickersEvent += self._on_ib_tick
 
-    def _on_ib_tick(self, tickers):
+    def _on_ib_tick(self, tickers: List[Ticker]) -> None:
+        """Process incoming ticks from IB."""
         for ticker in tickers:
             try:
                 # Hämta pris
@@ -315,7 +316,7 @@ class IBWSFetcher:
         """
         return self.connected and not self.safe_mode and self.ib and self.ib.isConnected()
 
-    def clear_safe_mode(self):
+    def clear_safe_mode(self) -> None:
         """
         Clear safe mode (manual recovery).
 

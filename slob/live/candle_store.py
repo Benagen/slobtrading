@@ -64,7 +64,7 @@ class CandleStore:
         except Exception as e:
             logger.error(f"Failed to init DB: {e}")
 
-    def save_candle(self, data: Any):
+    def save_candle(self, data: Any) -> None:
         """
         Save a completed candle to the database.
         Handles Candle objects, Event objects, and Dictionaries.
@@ -164,11 +164,11 @@ class CandleStore:
             logger.error(f"Failed to fetch candles: {e}")
             return []
 
-    def close(self):
+    def close(self) -> None:
         """Close connections."""
         logger.info("✅ Database connection closed")
-        
-    def get_stats(self):
+
+    def get_stats(self) -> Dict[str, int]:
         try:
              with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()

@@ -7,7 +7,7 @@ Allows components to publish and subscribe to events asynchronously.
 
 import asyncio
 import logging
-from typing import Callable, Dict, List, Any, Optional
+from typing import Callable, Dict, List, Any, Optional, Union, Awaitable
 from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
@@ -117,7 +117,11 @@ class EventBus:
         # Background task tracking
         self._pending_tasks: set = set()
 
-    def subscribe(self, event_type: EventType, handler: Callable):
+    def subscribe(
+        self,
+        event_type: EventType,
+        handler: Union[Callable[[Event], None], Callable[[Event], Awaitable[None]]]
+    ) -> None:
         """
         Subscribe to an event type.
 
@@ -138,7 +142,11 @@ class EventBus:
             f"(total handlers: {len(self.handlers[event_type])})"
         )
 
-    def unsubscribe(self, event_type: EventType, handler: Callable):
+    def unsubscribe(
+        self,
+        event_type: EventType,
+        handler: Union[Callable[[Event], None], Callable[[Event], Awaitable[None]]]
+    ) -> None:
         """
         Unsubscribe from an event type.
 
@@ -225,7 +233,11 @@ class EventBus:
             self._pending_tasks.add(task)
             task.add_done_callback(self._pending_tasks.discard)
 
-    async def _safe_call_handler(self, handler: Callable, event: Event):
+    async def _safe_call_handler(
+        self,
+        handler: Union[Callable[[Event], None], Callable[[Event], Awaitable[None]]],
+        event: Event
+    ) -> None:
         """
         Safely call event handler with error handling.
 
@@ -361,7 +373,7 @@ class EventBus:
             'history_size': len(self.history) if self.enable_history else 0
         }
 
-    def clear_handlers(self, event_type: Optional[EventType] = None):
+    def clear_handlers(self, event_type: Optional[EventType] = None) -> None:
         """
         Clear event handlers.
 
@@ -375,7 +387,7 @@ class EventBus:
             self.handlers.clear()
             logger.info("Cleared all event handlers")
 
-    def clear_history(self):
+    def clear_history(self) -> None:
         """Clear event history."""
         self.history.clear()
         logger.info("Event history cleared")
