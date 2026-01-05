@@ -379,11 +379,13 @@ class OrderExecutor:
                     f"(attempt {attempt + 1}/{max_attempts})"
                 )
 
+                # Increase timeout to 20 seconds (default is 4s, too short for IB Gateway)
                 await self.ib.connectAsync(
                     host=self.config.host,
                     port=self.config.port,
                     clientId=self.config.client_id,
-                    readonly=False  # Need write access for orders
+                    readonly=False,  # Need write access for orders
+                    timeout=20
                 )
 
                 logger.info(f"✅ OrderExecutor connected to IB: {self.config.host}:{self.config.port}")

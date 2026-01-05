@@ -80,7 +80,8 @@ class IBWSFetcher:
         while attempt < max_attempts:
             try:
                 self.logger.info(f"Connecting to IB at {self.host}:{self.port} (attempt {attempt + 1}/{max_attempts})")
-                await self.ib.connectAsync(self.host, self.port, self.client_id)
+                # Increase timeout to 20 seconds (default is 4s, too short for IB Gateway)
+                await self.ib.connectAsync(self.host, self.port, self.client_id, timeout=20)
                 self.connected = True
                 self.reconnect_count = 0  # Reset on successful connection
 
