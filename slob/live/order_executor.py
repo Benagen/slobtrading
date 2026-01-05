@@ -223,7 +223,7 @@ class OrderExecutor:
 
         logger.info("✅ OrderExecutor initialized")
 
-    def _handle_ib_error(self, reqId: int, errorCode: int, errorString: str, contract):
+    async def _handle_ib_error(self, reqId: int, errorCode: int, errorString: str, contract=None):
         """
         Handle IB API error codes.
 
@@ -234,7 +234,7 @@ class OrderExecutor:
             reqId: Request ID that caused the error (-1 if system-wide)
             errorCode: IB error code (see IB_ERROR_CODES)
             errorString: Human-readable error description
-            contract: Contract associated with error (if any)
+            contract: Contract associated with error (optional)
         """
         error_desc = IB_ERROR_CODES.get(errorCode, f"Unknown error {errorCode}")
 
@@ -268,13 +268,13 @@ class OrderExecutor:
 
             elif errorCode in (502, 1100):  # Connectivity lost
                 logger.critical("❌ IB CONNECTION LOST - Attempting reconnect")
-                # Note: reconnection handled by connect_with_retry()
-                # The main loop should detect is_connected() == False and call reconnect()
+                # Trigger immediate reconnection
+                asyncio.create_task(self.reconnect())
 
             elif errorCode == 2103:  # Order ID exceeded
                 logger.critical("❌ ORDER ID EXCEEDED - Reconnection required to reset counter")
                 # IB requires reconnection to reset order IDs
-                # The main loop should handle this by calling reconnect()
+                asyncio.create_task(self.reconnect())
 
         # Track error for specific order
         if reqId > 0 and reqId in self.pending_orders:

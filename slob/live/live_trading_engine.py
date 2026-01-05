@@ -11,7 +11,6 @@ from datetime import datetime
 from pathlib import Path
 
 from .ib_ws_fetcher import IBWSFetcher, Tick
-from .tick_buffer import TickBuffer
 from .candle_aggregator import CandleAggregator, Candle
 from .event_bus import EventBus, EventType
 from .candle_store import CandleStore
@@ -98,7 +97,6 @@ class LiveTradingEngine:
         
         # Initialize Components
         self.event_bus = EventBus()
-        self.tick_buffer = TickBuffer()
         self.candle_aggregator = CandleAggregator(on_candle_complete=self._on_candle_complete)
         self.candle_store = CandleStore(db_path="data/trading_state.db")
 
@@ -292,7 +290,6 @@ class LiveTradingEngine:
         )
 
         async def on_tick_bridge(tick):
-             await self.tick_buffer.enqueue(tick)
              await self.candle_aggregator.process_tick(tick)
 
         self.ws_fetcher.on_tick = on_tick_bridge
