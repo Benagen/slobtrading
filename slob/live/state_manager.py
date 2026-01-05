@@ -12,6 +12,7 @@ Key features:
 - Daily backups
 """
 
+import asyncio
 import json
 import sqlite3
 import logging
