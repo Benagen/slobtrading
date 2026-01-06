@@ -307,9 +307,9 @@ class OrderExecutor:
         account = self.config.account
         is_paper_account = account and account.startswith('DU') if account else False
 
-        # Check 3: Port (4002 = paper, 4001 = live)
+        # Check 3: Port (4002 = paper direct, 4004 = paper SOCAT, 4001 = live)
         port = self.config.port
-        is_paper_port = (port == 4002)
+        is_paper_port = (port in [4002, 4004])
 
         # Validate consistency
         if self.config.paper_trading:
@@ -322,8 +322,8 @@ class OrderExecutor:
 
             if not is_paper_port:
                 raise ValueError(
-                    f"❌ Config says PAPER but port {port} is LIVE (should be 4002)\n"
-                    f"   Fix: Set port=4002 for paper trading"
+                    f"❌ Config says PAPER but port {port} is LIVE (should be 4002 or 4004)\n"
+                    f"   Fix: Set port=4002 (direct) or 4004 (SOCAT relay) for paper trading"
                 )
 
             logger.info(
