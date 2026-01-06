@@ -34,6 +34,7 @@ services:
       TRADING_MODE: paper
       VNC_SERVER_PASSWORD: ${VNC_PASSWORD:-vncpass}
       TWOFA_TIMEOUT_ACTION: restart
+      TWS_ACCEPT_INCOMING: accept
     ports:
       - "4002:4002"  # IB Gateway API
       - "5900:5900"  # VNC (debugging)
