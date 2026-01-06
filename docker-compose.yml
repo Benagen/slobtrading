@@ -41,18 +41,13 @@ services:
     networks:
       - trading-net
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "4002"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   slob-bot:
     build: .
     container_name: slob-bot
     depends_on:
       ib-gateway:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_healthy
     environment:
