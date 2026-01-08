@@ -24,7 +24,7 @@ Usage:
 import logging
 from collections import deque
 from typing import Dict, List, Optional, Tuple, Deque
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 from dataclasses import dataclass
 
 from .setup_state import (
@@ -165,6 +165,9 @@ class SetupTracker:
         # LSE Session: Track LSE High/Low
         if self._is_lse_session(timestamp):
             self._update_lse_levels(candle)
+            # Log periodically (every 30 candles) to confirm tracking
+            if len(self.recent_candles) % 30 == 0:
+                logger.info(f"📊 LSE session tracking: High={self.lse_high:.2f}, Low={self.lse_low:.2f}")
             return CandleUpdate(message="LSE session - tracking levels")
 
         # NYSE Session: Track setups
@@ -245,13 +248,24 @@ class SetupTracker:
         logger.info(f"📅 New trading day: {self.current_date}")
 
     def _is_lse_session(self, timestamp: datetime) -> bool:
-        """Check if timestamp is in LSE session (09:00-15:30)."""
-        t = timestamp.time()
-        return self.config.lse_open <= t < self.config.lse_close
+        """Check if timestamp is in LSE session (09:00-15:30 UTC)."""
+        # Convert to UTC first to ensure correct comparison
+        if timestamp.tzinfo is not None:
+            utc_time = timestamp.astimezone(timezone.utc).time()
+        else:
+            # Assume naive timestamps are already UTC
+            utc_time = timestamp.time()
+        return self.config.lse_open <= utc_time < self.config.lse_close
 
     def _is_nyse_session(self, timestamp: datetime) -> bool:
-        """Check if timestamp is in NYSE session (>=15:30)."""
-        return timestamp.time() >= self.config.nyse_open
+        """Check if timestamp is in NYSE session (>=15:30 UTC)."""
+        # Convert to UTC first to ensure correct comparison
+        if timestamp.tzinfo is not None:
+            utc_time = timestamp.astimezone(timezone.utc).time()
+        else:
+            # Assume naive timestamps are already UTC
+            utc_time = timestamp.time()
+        return utc_time >= self.config.nyse_open
 
     def _update_lse_levels(self, candle: Dict):
         """Update LSE High/Low from LSE session candles."""
