@@ -165,8 +165,9 @@ class SetupTracker:
         # LSE Session: Track LSE High/Low
         if self._is_lse_session(timestamp):
             self._update_lse_levels(candle)
-            # Log periodically (every 30 candles) to confirm tracking
-            if len(self.recent_candles) % 30 == 0:
+            # Log periodically (every 10 candles) to confirm tracking
+            # Note: recent_candles maxlen is atr_period+1 (typically 15), so use % 10
+            if len(self.recent_candles) % 10 == 0:
                 logger.info(f"📊 LSE session tracking: High={self.lse_high:.2f}, Low={self.lse_low:.2f}")
             return CandleUpdate(message="LSE session - tracking levels")
 

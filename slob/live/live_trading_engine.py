@@ -215,8 +215,11 @@ class LiveTradingEngine:
             'close': candle.close,
             'volume': candle.volume
         }
-        await self.setup_tracker.on_candle(candle_dict)
-        
+        # Capture and log CandleUpdate messages (session tracking, etc.)
+        update = await self.setup_tracker.on_candle(candle_dict)
+        if update and update.message:
+            self.logger.info(update.message)
+
         for setup in self.setup_tracker.completed_setups:
             await self._handle_setup_found({'setup': setup})
 
