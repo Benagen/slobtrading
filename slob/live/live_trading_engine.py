@@ -226,7 +226,9 @@ class LiveTradingEngine:
     async def _handle_setup_found(self, data: dict):
         setup = data.get('setup')
         if not setup: return
-        self.logger.info(f"⚡ SETUP FOUND: {setup.id} | Entry: {setup.entry_price}")
+
+        direction_str = setup.direction.value if setup.direction else "UNKNOWN"
+        self.logger.info(f"⚡ SETUP FOUND {direction_str}: {setup.id} | Entry: {setup.entry_price}")
 
         # Emit event for shadow mode (if enabled)
         # This allows shadow engine to make ML predictions in parallel
@@ -236,7 +238,7 @@ class LiveTradingEngine:
         if self.telegram.enabled:
             setup_data = {
                 'id': setup.id,
-                'direction': 'SHORT',  # SLOB is short-only
+                'direction': direction_str,
                 'entry_price': setup.entry_price,
                 'sl_price': setup.sl_price,
                 'tp_price': setup.tp_price,

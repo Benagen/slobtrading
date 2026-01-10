@@ -21,6 +21,12 @@ from typing import Optional, List, Dict
 from uuid import uuid4
 
 
+class TradeDirection(Enum):
+    """Direction of the trade (SHORT or LONG)."""
+    SHORT = "SHORT"  # Break up LSE high → reversal down
+    LONG = "LONG"    # Break down LSE low → reversal up
+
+
 class SetupState(Enum):
     """
     States in the 5/1 SLOB setup detection state machine.
@@ -98,6 +104,9 @@ class SetupCandidate:
 
     # Unique identifier
     id: str = field(default_factory=lambda: str(uuid4()))
+
+    # Trade direction (SHORT or LONG)
+    direction: Optional[TradeDirection] = None
 
     # Current state
     state: SetupState = SetupState.WATCHING_LIQ1

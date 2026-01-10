@@ -31,7 +31,8 @@ from .setup_state import (
     SetupState,
     SetupCandidate,
     StateTransitionValidator,
-    InvalidationReason
+    InvalidationReason,
+    TradeDirection
 )
 
 logger = logging.getLogger(__name__)
@@ -178,16 +179,23 @@ class SetupTracker:
                 return CandleUpdate(message="NYSE session - waiting for LSE levels")
 
             # Check for new LIQ #1 (create new candidate)
-            if self._check_for_liq1(candle):
-                candidate = self._create_candidate_from_liq1(candle)
+            direction = self._check_for_liq1(candle)
+            if direction:
+                candidate = self._create_candidate_from_liq1(candle, direction)
                 self.active_candidates[candidate.id] = candidate
                 self.stats['liq1_detected'] += 1
                 self.stats['candidates_active'] = len(self.active_candidates)
 
-                logger.info(
-                    f"🔵 LIQ #1 detected @ {timestamp.strftime('%H:%M')} "
-                    f"(price: {candle['high']:.2f}, LSE High: {self.lse_high:.2f})"
-                )
+                if direction == TradeDirection.SHORT:
+                    logger.info(
+                        f"🔵 LIQ #1 SHORT detected @ {timestamp.strftime('%H:%M')} "
+                        f"(break up: {candle['high']:.2f}, LSE High: {self.lse_high:.2f})"
+                    )
+                else:  # LONG
+                    logger.info(
+                        f"🔵 LIQ #1 LONG detected @ {timestamp.strftime('%H:%M')} "
+                        f"(break down: {candle['low']:.2f}, LSE Low: {self.lse_low:.2f})"
+                    )
 
             # Update all active candidates (skip just-created candidates)
             results = []
@@ -300,32 +308,42 @@ class SetupTracker:
 
             self.atr_value = sum(true_ranges) / len(true_ranges)
 
-    def _check_for_liq1(self, candle: Dict) -> bool:
+    def _check_for_liq1(self, candle: Dict) -> Optional[TradeDirection]:
         """
-        Check if current candle is a LIQ #1 (breaks LSE High).
+        Check if current candle is a LIQ #1 (breaks LSE High or Low).
 
         Returns:
-            True if LIQ #1 detected
+            TradeDirection.SHORT if breaks LSE High (reversal down expected)
+            TradeDirection.LONG if breaks LSE Low (reversal up expected)
+            None if no breakout detected
         """
-        # Must break LSE High
-        if candle['high'] <= self.lse_high:
-            return False
+        # Check for SHORT setup: Break ABOVE LSE High
+        if candle['high'] > self.lse_high:
+            # Check if we already have a SHORT candidate too recently
+            for candidate in self.active_candidates.values():
+                if candidate.direction == TradeDirection.SHORT and candidate.state == SetupState.WATCHING_CONSOL:
+                    time_diff = (candle['timestamp'] - candidate.liq1_time).total_seconds() / 60
+                    if time_diff < 5:
+                        return None
+            return TradeDirection.SHORT
 
-        # Check if we already have a candidate in WATCHING_CONSOL state
-        # (don't create multiple LIQ #1 candidates too close together)
-        for candidate in self.active_candidates.values():
-            if candidate.state == SetupState.WATCHING_CONSOL:
-                # If less than 5 minutes since last LIQ #1, skip
-                time_diff = (candle['timestamp'] - candidate.liq1_time).total_seconds() / 60
-                if time_diff < 5:
-                    return False
+        # Check for LONG setup: Break BELOW LSE Low
+        if candle['low'] < self.lse_low:
+            # Check if we already have a LONG candidate too recently
+            for candidate in self.active_candidates.values():
+                if candidate.direction == TradeDirection.LONG and candidate.state == SetupState.WATCHING_CONSOL:
+                    time_diff = (candle['timestamp'] - candidate.liq1_time).total_seconds() / 60
+                    if time_diff < 5:
+                        return None
+            return TradeDirection.LONG
 
-        return True
+        return None
 
-    def _create_candidate_from_liq1(self, candle: Dict) -> SetupCandidate:
+    def _create_candidate_from_liq1(self, candle: Dict, direction: TradeDirection) -> SetupCandidate:
         """Create new setup candidate from LIQ #1 detection."""
         candidate = SetupCandidate(
             symbol=self.config.symbol,
+            direction=direction,
             lse_high=self.lse_high,
             lse_low=self.lse_low,
             lse_close_time=self.lse_close_time,
@@ -335,14 +353,20 @@ class SetupTracker:
         # Mark LIQ #1 detected
         candidate.liq1_detected = True
         candidate.liq1_time = candle['timestamp']
-        candidate.liq1_price = candle['high']
+
+        # Set LIQ #1 price based on direction
+        if direction == TradeDirection.SHORT:
+            candidate.liq1_price = candle['high']  # Break above LSE high
+        else:  # LONG
+            candidate.liq1_price = candle['low']   # Break below LSE low
+
         candidate.liq1_confidence = self._calculate_liq1_confidence(candle)
 
         # Transition to WATCHING_CONSOL
         StateTransitionValidator.transition_to(
             candidate,
             SetupState.WATCHING_CONSOL,
-            reason=f"LIQ #1 @ {candle['high']:.2f}"
+            reason=f"LIQ #1 {direction.value} @ {candidate.liq1_price:.2f}"
         )
 
         return candidate
@@ -474,8 +498,8 @@ class SetupTracker:
                         message=f"Consolidation range too wide ({candidate.consol_range:.2f} > {max_range:.2f})"
                     )
 
-            # Find no-wick candle
-            nowick = self._find_nowick_in_consolidation(candidate.consol_candles)
+            # Find no-wick candle based on direction
+            nowick = self._find_nowick_in_consolidation(candidate.consol_candles, candidate.direction)
 
             if nowick is None:
                 # Keep waiting for no-wick
@@ -551,24 +575,52 @@ class SetupTracker:
                 message=f"LIQ #2 timeout ({candles_since_consol} candles)"
             )
 
-        # Check retracement (price went too far above no-wick high)
-        if candle['high'] > candidate.nowick_high + self.config.max_retracement_pips:
-            StateTransitionValidator.invalidate(
-                candidate,
-                InvalidationReason.RETRACEMENT_EXCEEDED
-            )
-            return CandleUpdate(
-                setup_invalidated=True,
-                candidate=candidate,
-                message=f"Retracement exceeded ({candle['high'] - candidate.nowick_high:.2f} pips)"
-            )
+        # Check retracement based on direction
+        if candidate.direction == TradeDirection.SHORT:
+            # SHORT: Check if price went too far above no-wick high
+            if candle['high'] > candidate.nowick_high + self.config.max_retracement_pips:
+                StateTransitionValidator.invalidate(
+                    candidate,
+                    InvalidationReason.RETRACEMENT_EXCEEDED
+                )
+                return CandleUpdate(
+                    setup_invalidated=True,
+                    candidate=candidate,
+                    message=f"Retracement exceeded ({candle['high'] - candidate.nowick_high:.2f} pips)"
+                )
+        else:  # LONG
+            # LONG: Check if price went too far below no-wick low
+            if candle['low'] < candidate.nowick_low - self.config.max_retracement_pips:
+                StateTransitionValidator.invalidate(
+                    candidate,
+                    InvalidationReason.RETRACEMENT_EXCEEDED
+                )
+                return CandleUpdate(
+                    setup_invalidated=True,
+                    candidate=candidate,
+                    message=f"Retracement exceeded ({candidate.nowick_low - candle['low']:.2f} pips)"
+                )
 
-        # Check if LIQ #2 (breaks consolidation high)
-        if candle['high'] > candidate.consol_high:
+        # Check if LIQ #2 based on direction
+        liq2_detected = False
+        liq2_price = None
+
+        if candidate.direction == TradeDirection.SHORT:
+            # SHORT: Break ABOVE consolidation high
+            if candle['high'] > candidate.consol_high:
+                liq2_detected = True
+                liq2_price = candle['high']
+        else:  # LONG
+            # LONG: Break BELOW consolidation low
+            if candle['low'] < candidate.consol_low:
+                liq2_detected = True
+                liq2_price = candle['low']
+
+        if liq2_detected:
             # LIQ #2 detected!
             candidate.liq2_detected = True
             candidate.liq2_time = candle['timestamp']
-            candidate.liq2_price = candle['high']
+            candidate.liq2_price = liq2_price
 
             # Store LIQ #2 candle OHLC for spike rule calculation
             candidate.liq2_candle = {
@@ -579,19 +631,23 @@ class SetupTracker:
             }
 
             # Initialize spike tracking (will be updated in WAITING_ENTRY)
-            candidate.spike_high = candle['high']
-            candidate.spike_high_time = candle['timestamp']
+            if candidate.direction == TradeDirection.SHORT:
+                candidate.spike_high = candle['high']
+                candidate.spike_high_time = candle['timestamp']
+            else:  # LONG
+                candidate.spike_low = candle['low']
+                candidate.spike_low_time = candle['timestamp']
 
             # Transition to WAITING_ENTRY
             success = StateTransitionValidator.transition_to(
                 candidate,
                 SetupState.WAITING_ENTRY,
-                reason=f"LIQ #2 @ {candle['high']:.2f}"
+                reason=f"LIQ #2 {candidate.direction.value} @ {liq2_price:.2f}"
             )
 
             if success:
                 logger.info(
-                    f"🔵 LIQ #2 detected: {candidate.id[:8]} @ {candidate.liq2_price:.2f}"
+                    f"🔵 LIQ #2 {candidate.direction.value} detected: {candidate.id[:8]} @ {candidate.liq2_price:.2f}"
                 )
 
         return CandleUpdate(message="Waiting for LIQ #2")
@@ -612,13 +668,21 @@ class SetupTracker:
         - Transition to SETUP_COMPLETE
         - Invalidate if timeout
         """
-        # Update spike high (track highest price for SL calculation)
-        if candle['high'] > candidate.spike_high:
-            candidate.spike_high = candle['high']
-            candidate.spike_high_time = candle['timestamp']
-            logger.debug(
-                f"Spike high updated: {candidate.id[:8]} @ {candidate.spike_high:.2f}"
-            )
+        # Update spike high/low based on direction (track for SL calculation)
+        if candidate.direction == TradeDirection.SHORT:
+            if candle['high'] > candidate.spike_high:
+                candidate.spike_high = candle['high']
+                candidate.spike_high_time = candle['timestamp']
+                logger.debug(
+                    f"Spike high updated: {candidate.id[:8]} @ {candidate.spike_high:.2f}"
+                )
+        else:  # LONG
+            if candle['low'] < candidate.spike_low:
+                candidate.spike_low = candle['low']
+                candidate.spike_low_time = candle['timestamp']
+                logger.debug(
+                    f"Spike low updated: {candidate.id[:8]} @ {candidate.spike_low:.2f}"
+                )
 
         # Check timeout
         candles_since_liq2 = candidate.candles_processed - len(candidate.consol_candles) - 1
@@ -633,8 +697,16 @@ class SetupTracker:
                 message=f"Entry timeout ({candles_since_liq2} candles)"
             )
 
-        # Check if entry trigger (close below no-wick low)
-        if candle['close'] < candidate.nowick_low:
+        # Check if entry trigger based on direction
+        entry_triggered = False
+        if candidate.direction == TradeDirection.SHORT:
+            # SHORT: close below no-wick low
+            entry_triggered = candle['close'] < candidate.nowick_low
+        else:  # LONG
+            # LONG: close above no-wick high
+            entry_triggered = candle['close'] > candidate.nowick_high
+
+        if entry_triggered:
             # Entry trigger fired!
             candidate.entry_triggered = True
             candidate.entry_trigger_time = candle['timestamp']
@@ -644,27 +716,54 @@ class SetupTracker:
             # In real trading, order will be placed at next open
             candidate.entry_price = candle['close']
 
-            # Calculate SL using spike rule (backtest alignment)
+            # Calculate SL/TP based on direction
             liq2_candle = candidate.liq2_candle
             body = abs(liq2_candle['close'] - liq2_candle['open'])
-            upper_wick = liq2_candle['high'] - max(liq2_candle['close'], liq2_candle['open'])
 
-            # Apply spike rule: if upper wick > 2x body, use body top instead of spike high
-            if upper_wick > 2 * body and body > 0:
-                # Spike detected - use body top + buffer (backtest alignment)
-                body_top = max(liq2_candle['close'], liq2_candle['open'])
-                candidate.sl_price = body_top + self.config.spike_rule_buffer_pips
-                logger.info(f"Spike rule applied: body_top {body_top:.2f} + {self.config.spike_rule_buffer_pips:.1f} = {candidate.sl_price:.2f}")
-            else:
-                # Normal candle - use spike high + buffer
-                candidate.sl_price = candidate.spike_high + self.config.sl_buffer_pips
-                logger.info(f"Normal SL: spike_high {candidate.spike_high:.2f} + {self.config.sl_buffer_pips:.1f} = {candidate.sl_price:.2f}")
+            if candidate.direction == TradeDirection.SHORT:
+                # SHORT: Calculate SL using spike rule (backtest alignment)
+                upper_wick = liq2_candle['high'] - max(liq2_candle['close'], liq2_candle['open'])
 
-            candidate.tp_price = self.lse_low - self.config.tp_buffer_pips
+                # Apply spike rule: if upper wick > 2x body, use body top instead of spike high
+                if upper_wick > 2 * body and body > 0:
+                    # Spike detected - use body top + buffer (backtest alignment)
+                    body_top = max(liq2_candle['close'], liq2_candle['open'])
+                    candidate.sl_price = body_top + self.config.spike_rule_buffer_pips
+                    logger.info(f"SHORT Spike rule: body_top {body_top:.2f} + {self.config.spike_rule_buffer_pips:.1f} = {candidate.sl_price:.2f}")
+                else:
+                    # Normal candle - use spike high + buffer
+                    candidate.sl_price = candidate.spike_high + self.config.sl_buffer_pips
+                    logger.info(f"SHORT SL: spike_high {candidate.spike_high:.2f} + {self.config.sl_buffer_pips:.1f} = {candidate.sl_price:.2f}")
 
-            # Calculate risk/reward
-            risk = candidate.sl_price - candidate.entry_price
-            reward = candidate.entry_price - candidate.tp_price
+                # SHORT: TP at LSE low
+                candidate.tp_price = self.lse_low - self.config.tp_buffer_pips
+
+                # Calculate risk/reward for SHORT
+                risk = candidate.sl_price - candidate.entry_price
+                reward = candidate.entry_price - candidate.tp_price
+
+            else:  # LONG
+                # LONG: Calculate SL using spike rule (inverted)
+                lower_wick = min(liq2_candle['close'], liq2_candle['open']) - liq2_candle['low']
+
+                # Apply spike rule: if lower wick > 2x body, use body bottom instead of spike low
+                if lower_wick > 2 * body and body > 0:
+                    # Spike detected - use body bottom - buffer (backtest alignment)
+                    body_bottom = min(liq2_candle['close'], liq2_candle['open'])
+                    candidate.sl_price = body_bottom - self.config.spike_rule_buffer_pips
+                    logger.info(f"LONG Spike rule: body_bottom {body_bottom:.2f} - {self.config.spike_rule_buffer_pips:.1f} = {candidate.sl_price:.2f}")
+                else:
+                    # Normal candle - use spike low - buffer
+                    candidate.sl_price = candidate.spike_low - self.config.sl_buffer_pips
+                    logger.info(f"LONG SL: spike_low {candidate.spike_low:.2f} - {self.config.sl_buffer_pips:.1f} = {candidate.sl_price:.2f}")
+
+                # LONG: TP at LSE high
+                candidate.tp_price = self.lse_high + self.config.tp_buffer_pips
+
+                # Calculate risk/reward for LONG
+                risk = candidate.entry_price - candidate.sl_price
+                reward = candidate.tp_price - candidate.entry_price
+
             candidate.risk_reward_ratio = reward / risk if risk > 0 else 0
 
             # Transition to SETUP_COMPLETE
@@ -725,12 +824,14 @@ class SetupTracker:
 
     def _find_nowick_in_consolidation(
         self,
-        candles: List[Dict]
+        candles: List[Dict],
+        direction: TradeDirection
     ) -> Optional[Dict]:
         """
         Find no-wick candle in consolidation window.
 
-        No-wick = Bullish candle (for SHORT) with minimal upper wick.
+        For SHORT: Bullish candle with minimal upper wick
+        For LONG: Bearish candle with minimal lower wick
 
         Returns:
             Dict with no-wick candle info or None
@@ -739,51 +840,79 @@ class SetupTracker:
         if len(candles) < 3:
             return None
 
-        # Calculate percentiles for wick sizes
-        upper_wicks = []
+        # Calculate percentiles for wick sizes based on direction
+        relevant_wicks = []
         body_sizes = []
 
         for c in candles:
             body_size = abs(c['close'] - c['open'])
-            upper_wick = c['high'] - max(c['open'], c['close'])
-
             body_sizes.append(body_size)
-            upper_wicks.append(upper_wick)
+
+            if direction == TradeDirection.SHORT:
+                # For SHORT: measure upper wick
+                upper_wick = c['high'] - max(c['open'], c['close'])
+                relevant_wicks.append(upper_wick)
+            else:  # LONG
+                # For LONG: measure lower wick
+                lower_wick = min(c['open'], c['close']) - c['low']
+                relevant_wicks.append(lower_wick)
 
         # Sort for percentile calculation
-        upper_wicks_sorted = sorted(upper_wicks)
+        wicks_sorted = sorted(relevant_wicks)
         body_sizes_sorted = sorted(body_sizes)
 
         # Percentile thresholds
-        p90_idx = int(len(upper_wicks_sorted) * 0.90)
+        p90_idx = int(len(wicks_sorted) * 0.90)
         p30_idx = int(len(body_sizes_sorted) * 0.30)
         p70_idx = int(len(body_sizes_sorted) * 0.70)
 
-        wick_threshold = upper_wicks_sorted[p90_idx]
+        wick_threshold = wicks_sorted[p90_idx]
         body_min = body_sizes_sorted[p30_idx]
         body_max = body_sizes_sorted[p70_idx]
 
-        # Find bullish candle with small upper wick
+        # Find candle based on direction
         for c in candles:
-            # Must be bullish (close > open)
-            if c['close'] <= c['open']:
-                continue
+            body_size = abs(c['close'] - c['open'])
 
-            body_size = c['close'] - c['open']
-            upper_wick = c['high'] - c['close']
+            if direction == TradeDirection.SHORT:
+                # SHORT: Find bullish candle with small upper wick
+                if c['close'] <= c['open']:  # Skip non-bullish
+                    continue
 
-            # Check criteria
-            if (upper_wick < wick_threshold and
-                body_min <= body_size <= body_max):
+                upper_wick = c['high'] - c['close']
 
-                wick_ratio = upper_wick / body_size if body_size > 0 else 999
+                # Check criteria
+                if (upper_wick < wick_threshold and
+                    body_min <= body_size <= body_max):
 
-                return {
-                    'timestamp': c['timestamp'],
-                    'high': c['high'],
-                    'low': c['low'],
-                    'wick_ratio': wick_ratio
-                }
+                    wick_ratio = upper_wick / body_size if body_size > 0 else 999
+
+                    return {
+                        'timestamp': c['timestamp'],
+                        'high': c['high'],
+                        'low': c['low'],
+                        'wick_ratio': wick_ratio
+                    }
+
+            else:  # LONG
+                # LONG: Find bearish candle with small lower wick
+                if c['close'] >= c['open']:  # Skip non-bearish
+                    continue
+
+                lower_wick = c['open'] - c['low']
+
+                # Check criteria
+                if (lower_wick < wick_threshold and
+                    body_min <= body_size <= body_max):
+
+                    wick_ratio = lower_wick / body_size if body_size > 0 else 999
+
+                    return {
+                        'timestamp': c['timestamp'],
+                        'high': c['high'],
+                        'low': c['low'],
+                        'wick_ratio': wick_ratio
+                    }
 
         return None
 

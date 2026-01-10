@@ -659,10 +659,18 @@ class OrderExecutor:
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         order_ref_base = f"SLOB_{setup.id[:8]}_{timestamp}"
 
+        # Determine order actions based on direction
+        from .setup_state import TradeDirection
+        if setup.direction == TradeDirection.SHORT:
+            entry_action = 'SELL'  # SHORT: Sell to enter
+            exit_action = 'BUY'    # SHORT: Buy to close
+        else:  # LONG
+            entry_action = 'BUY'   # LONG: Buy to enter
+            exit_action = 'SELL'   # LONG: Sell to close
+
         # Create parent order (entry)
-        # For SHORT setup: SELL to enter
         parent_order = LimitOrder(
-            action='SELL',
+            action=entry_action,
             totalQuantity=qty,
             lmtPrice=setup.entry_price,
             orderId=self.ib.client.getReqId(),
@@ -673,9 +681,9 @@ class OrderExecutor:
         # Create OCA group for one-cancels-all behavior
         oca_group = f"OCA_{setup.id[:8]}"
 
-        # Create stop loss (BUY to close SHORT)
+        # Create stop loss
         stop_loss = StopOrder(
-            action='BUY',
+            action=exit_action,
             totalQuantity=qty,
             stopPrice=setup.sl_price,
             orderId=self.ib.client.getReqId(),
@@ -686,9 +694,9 @@ class OrderExecutor:
         )
         stop_loss.orderRef = f"{order_ref_base}_SL"
 
-        # Create take profit (BUY to close SHORT)
+        # Create take profit
         take_profit = LimitOrder(
-            action='BUY',
+            action=exit_action,
             totalQuantity=qty,
             lmtPrice=setup.tp_price,
             orderId=self.ib.client.getReqId(),
