@@ -49,17 +49,14 @@ class SetupTrackerConfig:
 
     # Consolidation parameters
     consol_min_duration: int = 15  # minutes
-    consol_max_duration: int = 30  # minutes
-    consol_min_quality: float = 0.4  # minimum quality score
+    consol_max_duration: int = 120  # minutes (strategy: 15-120 min)
+    consol_min_range_pct: float = 0.1  # minimum range percentage (0.1%)
+    consol_max_range_pct: float = 0.3  # maximum range percentage (0.3%)
 
-    # ATR parameters (for consolidation range validation)
+    # ATR parameters (for statistics only, not validation)
     atr_period: int = 14
-    atr_multiplier_max: float = 3.0  # max ATR multiplier for consol range
 
-    # No-wick parameters
-    nowick_percentile: int = 90  # percentile threshold for wick size
-    nowick_min_body_percentile: int = 30
-    nowick_max_body_percentile: int = 70
+    # No-wick parameters (using fixed 20% threshold for backtest alignment)
 
     # Entry parameters
     max_entry_wait_candles: int = 20  # max candles to wait for entry
@@ -71,7 +68,6 @@ class SetupTrackerConfig:
 
     # Spike rule parameters
     spike_rule_buffer_pips: float = 2.0  # Buffer above LIQ #2 body for SL (spike detection)
-    range_normalization_factor: float = 50.0  # Divisor for range normalization (fallback when no ATR)
 
     # Symbol
     symbol: str = "NQ"
@@ -465,38 +461,29 @@ class SetupTracker:
                 message=f"Consolidation timeout ({len(candidate.consol_candles)} min)"
             )
 
-        # Calculate quality score
-        candidate.consol_quality_score = self._calculate_consolidation_quality(
-            candidate.consol_candles
-        )
-
         # Check if min duration reached
         if len(candidate.consol_candles) >= self.config.consol_min_duration:
-            # Check quality (only after min duration reached!)
-            if candidate.consol_quality_score < self.config.consol_min_quality:
+            # Validate range percentage (CORRECT validation per strategy spec)
+            if not self._validate_consolidation_range(
+                candidate.consol_high,
+                candidate.consol_low
+            ):
+                range_pct = ((candidate.consol_high - candidate.consol_low) /
+                             candidate.consol_high) * 100
                 StateTransitionValidator.invalidate(
                     candidate,
-                    InvalidationReason.CONSOL_QUALITY_LOW
+                    InvalidationReason.CONSOL_RANGE_INVALID
                 )
                 return CandleUpdate(
                     setup_invalidated=True,
                     candidate=candidate,
-                    message=f"Consolidation quality too low ({candidate.consol_quality_score:.2f})"
+                    message=f"Range {range_pct:.3f}% invalid "
+                           f"(must be {self.config.consol_min_range_pct}-"
+                           f"{self.config.consol_max_range_pct}%)"
                 )
 
-            # Check range (not too wide)
-            if self.atr_value is not None:
-                max_range = self.atr_value * self.config.atr_multiplier_max
-                if candidate.consol_range > max_range:
-                    StateTransitionValidator.invalidate(
-                        candidate,
-                        InvalidationReason.CONSOL_RANGE_TOO_WIDE
-                    )
-                    return CandleUpdate(
-                        setup_invalidated=True,
-                        candidate=candidate,
-                        message=f"Consolidation range too wide ({candidate.consol_range:.2f} > {max_range:.2f})"
-                    )
+            # Set quality score for backward compatibility
+            candidate.consol_quality_score = 1.0
 
             # Find no-wick candle based on direction
             nowick = self._find_nowick_in_consolidation(candidate.consol_candles, candidate.direction)
@@ -790,37 +777,38 @@ class SetupTracker:
 
         return CandleUpdate(message="Waiting for entry trigger")
 
-    def _calculate_consolidation_quality(self, candles: List[Dict]) -> float:
+    def _validate_consolidation_range(self, consol_high: float, consol_low: float) -> bool:
         """
-        Calculate consolidation quality score (0.0-1.0).
+        Validate consolidation range using PERCENTAGE-based limits.
 
-        Factors:
-        - Tightness (lower range = higher score)
-        - Volume compression
-        - Breakout readiness
+        Strategy requirement: Range must be 0.1% to 0.3% of price.
+        This is the CORRECT validation per strategy creator interview.
+
+        Old ATR-based formula was WRONG and caused 100% failure rate.
+
+        Args:
+            consol_high: Consolidation high price
+            consol_low: Consolidation low price
 
         Returns:
-            Quality score 0.0-1.0
+            True if range is within percentage limits
         """
-        if len(candles) < 3:
-            return 0.0
+        if consol_high <= 0 or consol_low <= 0:
+            return False
 
-        # Calculate range tightness
-        highs = [c['high'] for c in candles]
-        lows = [c['low'] for c in candles]
-        range_val = max(highs) - min(lows)
+        # Calculate percentage range
+        range_pct = ((consol_high - consol_low) / consol_high) * 100
 
-        # Normalize by ATR (if available)
-        if self.atr_value is not None and self.atr_value > 0:
-            range_score = max(0, 1.0 - (range_val / (self.atr_value * 2.0)))
-        else:
-            # Fallback: use absolute range normalization
-            range_score = max(0, 1.0 - (range_val / self.config.range_normalization_factor))
+        # Validate against limits (0.1-0.3%)
+        is_valid = (self.config.consol_min_range_pct <= range_pct <=
+                    self.config.consol_max_range_pct)
 
-        # TODO: Add volume compression factor
-        # TODO: Add breakout readiness factor
+        self.logger.debug(
+            f"Consolidation range: {consol_high:.2f} - {consol_low:.2f} = "
+            f"{range_pct:.3f}% | Valid: {is_valid}"
+        )
 
-        return range_score
+        return is_valid
 
     def _find_nowick_in_consolidation(
         self,
@@ -828,65 +816,41 @@ class SetupTracker:
         direction: TradeDirection
     ) -> Optional[Dict]:
         """
-        Find no-wick candle in consolidation window.
+        Find no-wick candle using FIXED 20% threshold.
+        Aligned with backtest for consistency.
 
-        For SHORT: Bullish candle with minimal upper wick
-        For LONG: Bearish candle with minimal lower wick
+        For SHORT: Bullish candle, upper wick < 20% of body
+        For LONG: Bearish candle, lower wick < 20% of body
 
         Returns:
             Dict with no-wick candle info or None
         """
-        # Need at least 3 candles for percentile calculation
         if len(candles) < 3:
             return None
 
-        # Calculate percentiles for wick sizes based on direction
-        relevant_wicks = []
-        body_sizes = []
-
-        for c in candles:
-            body_size = abs(c['close'] - c['open'])
-            body_sizes.append(body_size)
-
-            if direction == TradeDirection.SHORT:
-                # For SHORT: measure upper wick
-                upper_wick = c['high'] - max(c['open'], c['close'])
-                relevant_wicks.append(upper_wick)
-            else:  # LONG
-                # For LONG: measure lower wick
-                lower_wick = min(c['open'], c['close']) - c['low']
-                relevant_wicks.append(lower_wick)
-
-        # Sort for percentile calculation
-        wicks_sorted = sorted(relevant_wicks)
-        body_sizes_sorted = sorted(body_sizes)
-
-        # Percentile thresholds
-        p90_idx = int(len(wicks_sorted) * 0.90)
-        p30_idx = int(len(body_sizes_sorted) * 0.30)
-        p70_idx = int(len(body_sizes_sorted) * 0.70)
-
-        wick_threshold = wicks_sorted[p90_idx]
-        body_min = body_sizes_sorted[p30_idx]
-        body_max = body_sizes_sorted[p70_idx]
+        MAX_WICK_RATIO = 0.20  # Fixed threshold (backtest alignment)
 
         # Find candle based on direction
         for c in candles:
             body_size = abs(c['close'] - c['open'])
 
+            # Skip candles with no body
+            if body_size <= 0:
+                continue
+
             if direction == TradeDirection.SHORT:
-                # SHORT: Find bullish candle with small upper wick
-                if c['close'] <= c['open']:  # Skip non-bullish
+                # SHORT: Bullish candle with small upper wick
+                if c['close'] <= c['open']:
                     continue
 
                 upper_wick = c['high'] - c['close']
+                wick_ratio = upper_wick / body_size
 
-                # Check criteria
-                if (upper_wick < wick_threshold and
-                    body_min <= body_size <= body_max):
-
-                    wick_ratio = upper_wick / body_size if body_size > 0 else 999
-
+                if wick_ratio < MAX_WICK_RATIO:
+                    self.logger.debug(
+                        f"No-wick found (SHORT): body={body_size:.2f}, "
+                        f"wick={upper_wick:.2f}, ratio={wick_ratio:.2%}"
+                    )
                     return {
                         'timestamp': c['timestamp'],
                         'high': c['high'],
@@ -895,18 +859,18 @@ class SetupTracker:
                     }
 
             else:  # LONG
-                # LONG: Find bearish candle with small lower wick
-                if c['close'] >= c['open']:  # Skip non-bearish
+                # LONG: Bearish candle with small lower wick
+                if c['close'] >= c['open']:
                     continue
 
                 lower_wick = c['open'] - c['low']
+                wick_ratio = lower_wick / body_size
 
-                # Check criteria
-                if (lower_wick < wick_threshold and
-                    body_min <= body_size <= body_max):
-
-                    wick_ratio = lower_wick / body_size if body_size > 0 else 999
-
+                if wick_ratio < MAX_WICK_RATIO:
+                    self.logger.debug(
+                        f"No-wick found (LONG): body={body_size:.2f}, "
+                        f"wick={lower_wick:.2f}, ratio={wick_ratio:.2%}"
+                    )
                     return {
                         'timestamp': c['timestamp'],
                         'high': c['high'],

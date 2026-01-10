@@ -68,8 +68,11 @@ class InvalidationReason(Enum):
     # Consolidation quality too low
     CONSOL_QUALITY_LOW = "consolidation_quality_low"
 
-    # Consolidation range too wide
+    # Consolidation range too wide (DEPRECATED - kept for backward compatibility)
     CONSOL_RANGE_TOO_WIDE = "consolidation_range_too_wide"
+
+    # Consolidation range outside percentage limits (0.1-0.3%)
+    CONSOL_RANGE_INVALID = "consolidation_range_invalid"
 
     # No valid no-wick candle found
     NO_WICK_NOT_FOUND = "no_wick_not_found"
@@ -176,6 +179,29 @@ class SetupCandidate:
     liq2_candle: Optional[Dict] = None  # {'open', 'high', 'low', 'close'}
 
     # ─────────────────────────────────────────────────────────────
+    # SPIKE TRACKING (for SL calculation after LIQ #2)
+    # ─────────────────────────────────────────────────────────────
+
+    spike_high: Optional[float] = None
+    spike_high_time: Optional[datetime] = None
+    spike_low: Optional[float] = None
+    spike_low_time: Optional[datetime] = None
+
+    # ─────────────────────────────────────────────────────────────
+    # INTERNAL HIGH/LOW (time-confirmed consolidation bounds)
+    # ─────────────────────────────────────────────────────────────
+
+    # Internal HIGH tracking (confirmed after 5 min without breaking)
+    internal_high: Optional[float] = None
+    internal_high_time: Optional[datetime] = None
+    internal_high_confirmed: bool = False
+
+    # Internal LOW tracking (confirmed after 3 min without breaking)
+    internal_low: Optional[float] = None
+    internal_low_time: Optional[datetime] = None
+    internal_low_confirmed: bool = False
+
+    # ─────────────────────────────────────────────────────────────
     # ENTRY TRIGGER (close below no-wick low)
     # ─────────────────────────────────────────────────────────────
 
@@ -272,6 +298,20 @@ class SetupCandidate:
             'liq2_time': self.liq2_time.isoformat() if self.liq2_time else None,
             'liq2_price': self.liq2_price,
             'liq2_candle': self.liq2_candle,
+
+            # Spike tracking
+            'spike_high': self.spike_high,
+            'spike_high_time': self.spike_high_time.isoformat() if self.spike_high_time else None,
+            'spike_low': self.spike_low,
+            'spike_low_time': self.spike_low_time.isoformat() if self.spike_low_time else None,
+
+            # Internal HIGH/LOW
+            'internal_high': self.internal_high,
+            'internal_high_time': self.internal_high_time.isoformat() if self.internal_high_time else None,
+            'internal_high_confirmed': self.internal_high_confirmed,
+            'internal_low': self.internal_low,
+            'internal_low_time': self.internal_low_time.isoformat() if self.internal_low_time else None,
+            'internal_low_confirmed': self.internal_low_confirmed,
 
             # Entry
             'entry_triggered': self.entry_triggered,

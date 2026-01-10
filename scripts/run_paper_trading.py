@@ -180,11 +180,11 @@ async def run_paper_trading(args):
 
     # Configure setup tracker
     setup_tracker_config = SetupTrackerConfig(
-        consol_min_duration=5,
-        consol_max_duration=30,
-        consol_min_quality=0.5,
-        max_retracement_pips=100.0,  # Updated from consol_max_range_pips
-        nowick_percentile=90,  # Updated from nowick_max_wick_ratio
+        consol_min_duration=15,  # Strategy: 15-120 min
+        consol_max_duration=120,  # Increased from 30
+        consol_min_range_pct=0.1,  # NEW: 0.1% minimum
+        consol_max_range_pct=0.3,  # NEW: 0.3% maximum
+        max_retracement_pips=100.0,
         sl_buffer_pips=1.0,  # Note: Spike rule uses hardcoded 2.0
         tp_buffer_pips=1.0,
         max_entry_wait_candles=20
