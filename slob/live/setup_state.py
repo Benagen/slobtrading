@@ -527,6 +527,8 @@ class StateTransitionValidator:
             can_transition, msg = StateTransitionValidator.can_transition_to_watching_consol(candidate)
         elif new_state == SetupState.WATCHING_LIQ2:
             can_transition, msg = StateTransitionValidator.can_transition_to_watching_liq2(candidate)
+        elif new_state == SetupState.SEARCHING_NOWICK_AFTER_LIQ2:
+            can_transition, msg = StateTransitionValidator.can_transition_to_searching_nowick(candidate)
         elif new_state == SetupState.WAITING_ENTRY:
             can_transition, msg = StateTransitionValidator.can_transition_to_waiting_entry(candidate)
         elif new_state == SetupState.SETUP_COMPLETE:
