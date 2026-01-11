@@ -72,6 +72,12 @@ class SetupTrackerConfig:
     # Spike rule parameters
     spike_rule_buffer_pips: float = 2.0  # Buffer above LIQ #2 body for SL (spike detection)
 
+    # Daily invalidation timing (Q19 answer)
+    daily_invalidation_hour: int = 22  # 22:00 Swedish time
+    daily_invalidation_timezone: str = "Europe/Stockholm"  # Swedish timezone
+    skip_weekend: bool = True
+    monday_restart_hour: int = 9  # 09:00 (LSE open)
+
     # Symbol
     symbol: str = "NQ"
 
@@ -138,7 +144,14 @@ class SetupTracker:
             'candidates_active': 0
         }
 
+        # Track 22:00 invalidation (Q19 answer)
+        self._last_22_00_invalidation: Optional[datetime.date] = None
+        self._weekend_mode: bool = False
+
         logger.info(f"✅ SetupTracker initialized for {self.config.symbol}")
+        logger.info(
+            f"Daily invalidation: {self.config.daily_invalidation_hour}:00 {self.config.daily_invalidation_timezone}"
+        )
 
     async def on_candle(self, candle: Dict) -> CandleUpdate:
         """
@@ -157,6 +170,25 @@ class SetupTracker:
 
         # Update ATR
         self._update_atr(candle)
+
+        # Check 22:00 Swedish time invalidation BEFORE date check (Q19 answer)
+        self._check_22_00_invalidation(timestamp)
+
+        # Check if weekend mode (skip trading)
+        if self._weekend_mode:
+            # Check if Monday 09:00 reached
+            from zoneinfo import ZoneInfo
+            swedish_tz = ZoneInfo(self.config.daily_invalidation_timezone)
+            utc_timestamp = timestamp if timestamp.tzinfo else timestamp.replace(tzinfo=ZoneInfo("UTC"))
+            swedish_time = utc_timestamp.astimezone(swedish_tz)
+
+            if swedish_time.weekday() == 0 and swedish_time.hour >= self.config.monday_restart_hour:
+                # Monday 09:00 - exit weekend mode
+                logger.info("✅ Monday 09:00 Swedish time - resuming trading")
+                self._weekend_mode = False
+            else:
+                # Still in weekend mode - skip processing
+                return CandleUpdate(message="Weekend mode - no trading")
 
         # Check if new day
         if self.current_date != timestamp.date():
@@ -254,6 +286,75 @@ class SetupTracker:
         self.stats['candidates_active'] = 0
 
         logger.info(f"📅 New trading day: {self.current_date}")
+
+    def _check_22_00_invalidation(self, timestamp: datetime):
+        """
+        Check if we've crossed 22:00 Swedish time and need to invalidate all setups.
+
+        Rules (Q19 answer):
+        - Invalidate at 22:00 Swedish time (CET/CEST) daily
+        - Friday 22:00 → Monday 09:00 skip
+        - Reset session state
+
+        Args:
+            timestamp: Current candle timestamp (assumed UTC)
+        """
+        from zoneinfo import ZoneInfo
+
+        # Convert UTC to Swedish time
+        swedish_tz = ZoneInfo(self.config.daily_invalidation_timezone)
+
+        if timestamp.tzinfo is None:
+            # Assume naive timestamps are UTC
+            utc_timestamp = timestamp.replace(tzinfo=ZoneInfo("UTC"))
+        else:
+            utc_timestamp = timestamp
+
+        swedish_time = utc_timestamp.astimezone(swedish_tz)
+        swedish_hour = swedish_time.hour
+        swedish_date = swedish_time.date()
+        weekday = swedish_date.weekday()  # 0=Monday, 4=Friday
+
+        # Check if we've hit 22:00 Swedish time
+        if swedish_hour >= self.config.daily_invalidation_hour:
+            # Only process once per day
+            if self._last_22_00_invalidation != swedish_date:
+                self._last_22_00_invalidation = swedish_date
+
+                # Special handling for Friday
+                if weekday == 4:  # Friday
+                    logger.warning(
+                        f"⚠️ Friday 22:00 Swedish time reached - invalidating all setups "
+                        f"(will resume Monday 09:00)"
+                    )
+                    self._weekend_mode = True
+                else:
+                    logger.warning(
+                        f"⚠️ 22:00 Swedish time reached - invalidating all setups "
+                        f"(will resume tomorrow)"
+                    )
+                    self._weekend_mode = False
+
+                # Invalidate all active candidates
+                self._invalidate_all_setups_22_00()
+
+    def _invalidate_all_setups_22_00(self):
+        """Invalidate all active setups at 22:00."""
+        invalidated_count = 0
+
+        for candidate in list(self.active_candidates.values()):
+            StateTransitionValidator.invalidate(
+                candidate,
+                InvalidationReason.MARKET_CLOSED
+            )
+            self.invalidated_setups.append(candidate)
+            invalidated_count += 1
+
+        self.active_candidates.clear()
+        self.stats['candidates_active'] = 0
+
+        if invalidated_count > 0:
+            logger.info(f"✅ {invalidated_count} setups invalidated at 22:00 Swedish time")
 
     def _is_lse_session(self, timestamp: datetime) -> bool:
         """Check if timestamp is in LSE session (09:00-15:30 UTC)."""
@@ -406,6 +507,31 @@ class SetupTracker:
         candidate.candles_processed += 1
         candidate.update_timestamp()
 
+        # Check for gaps on EVERY candle after LIQ #1 (Q10: "vi skall ej tradea med gaps")
+        if candidate.liq1_detected:
+            gap = self._detect_gap(candle)
+            if gap is not None:
+                gap_type, gap_size = gap
+                candidate.gap_detected = True
+                candidate.gap_type = gap_type
+                candidate.gap_size_pips = gap_size
+
+                logger.warning(
+                    f"Gap detected in {candidate.id[:8]}: {gap_type} "
+                    f"({gap_size:.2f} pips) - invalidating setup"
+                )
+
+                StateTransitionValidator.invalidate(
+                    candidate,
+                    InvalidationReason.GAP_DETECTED
+                )
+
+                return CandleUpdate(
+                    setup_invalidated=True,
+                    candidate=candidate,
+                    message=f"Gap detected: {gap_type} ({gap_size:.2f} pips)"
+                )
+
         # State: WATCHING_CONSOL
         if candidate.state == SetupState.WATCHING_CONSOL:
             return await self._update_watching_consol(candidate, candle)
@@ -451,6 +577,10 @@ class SetupTracker:
         candidate.consol_high = max(c['high'] for c in candidate.consol_candles)
         candidate.consol_low = min(c['low'] for c in candidate.consol_candles)
         candidate.consol_range = candidate.consol_high - candidate.consol_low
+
+        # Track internal HIGH/LOW with time confirmation (Q2, Q3 answers)
+        # HIGH confirmed after 5 min, LOW after 3 min
+        self._track_internal_high_low(candidate, candle)
 
         # Check timeout (max duration exceeded)
         if len(candidate.consol_candles) > self.config.consol_max_duration:
@@ -848,6 +978,138 @@ class SetupTracker:
         )
 
         return is_valid
+
+    def _detect_gap(self, current_candle: Dict) -> Optional[tuple[str, float]]:
+        """
+        Detect gap between previous candle and current candle.
+
+        Strategy requirement (Q10): "vi skall ej tradea med gaps"
+        Definition: "gaps defineras som att priset laggar och det finns en zon där priset inte testats av"
+
+        Returns:
+            (gap_type, gap_size_pips) or None
+            gap_type: "gap_up" or "gap_down"
+            gap_size_pips: size of gap in pips/points
+        """
+        if len(self.recent_candles) < 2:
+            return None  # Not enough history
+
+        # Get last two candles (recent_candles includes current candle)
+        previous_candle = self.recent_candles[-2]
+
+        # Check for gap up (current low > previous high)
+        if current_candle['low'] > previous_candle['high']:
+            gap_size = current_candle['low'] - previous_candle['high']
+            return ("gap_up", gap_size)
+
+        # Check for gap down (current high < previous low)
+        if current_candle['high'] < previous_candle['low']:
+            gap_size = previous_candle['low'] - current_candle['high']
+            return ("gap_down", gap_size)
+
+        return None
+
+    def _track_internal_high_low(self, candidate: SetupCandidate, candle: Dict):
+        """
+        Track internal HIGH/LOW with time-based confirmation.
+
+        Strategy requirements (Q2, Q3 answers):
+        - HIGH: Confirmed after 5 min without breaking above
+        - LOW: Confirmed after 3 min without breaking below
+        - Q2C: Track EVERY HIGH separately - if 5 min passes without breaking, it's confirmed
+        - Q3A: Dynamic LOW re-detection - when LOW breaks, restart 3-min countdown
+
+        For SHORT setup:
+        - Track internal HIGH
+        - Confirm when price stays below for 5 minutes
+
+        For LONG setup:
+        - Track internal LOW
+        - Confirm when price stays above for 3 minutes
+        """
+        if candidate.direction == TradeDirection.SHORT:
+            # Track internal HIGH
+            current_high = max(c['high'] for c in candidate.consol_candles)
+
+            # If new HIGH detected, reset tracking
+            if candidate.internal_high is None or current_high > candidate.internal_high:
+                candidate.internal_high = current_high
+                candidate.internal_high_time = candle['timestamp']
+                candidate.internal_high_confirmed = False
+                logger.debug(f"New internal HIGH: {current_high:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
+
+            # Check if current HIGH has been held for 5 minutes
+            if candidate.internal_high_time is not None:
+                minutes_held = (candle['timestamp'] - candidate.internal_high_time).total_seconds() / 60
+
+                if minutes_held >= 5 and not candidate.internal_high_confirmed:
+                    # Price stayed below internal HIGH for 5 minutes - CONFIRMED
+                    candidate.internal_high_confirmed = True
+                    logger.info(
+                        f"✅ Internal HIGH confirmed: {candidate.internal_high:.2f} "
+                        f"(held for {minutes_held:.1f} min)"
+                    )
+
+            # Track internal LOW
+            current_low = min(c['low'] for c in candidate.consol_candles)
+
+            # If new LOW detected, reset tracking (Q3A: dynamic re-detection)
+            if candidate.internal_low is None or current_low < candidate.internal_low:
+                candidate.internal_low = current_low
+                candidate.internal_low_time = candle['timestamp']
+                candidate.internal_low_confirmed = False
+                logger.debug(f"New internal LOW: {current_low:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
+
+            # Check if current LOW has been held for 3 minutes
+            if candidate.internal_low_time is not None:
+                minutes_held = (candle['timestamp'] - candidate.internal_low_time).total_seconds() / 60
+
+                if minutes_held >= 3 and not candidate.internal_low_confirmed:
+                    # Price stayed above internal LOW for 3 minutes - CONFIRMED
+                    candidate.internal_low_confirmed = True
+                    logger.info(
+                        f"✅ Internal LOW confirmed: {candidate.internal_low:.2f} "
+                        f"(held for {minutes_held:.1f} min)"
+                    )
+
+        else:  # LONG setup
+            # Track internal LOW (mirror logic)
+            current_low = min(c['low'] for c in candidate.consol_candles)
+
+            if candidate.internal_low is None or current_low < candidate.internal_low:
+                candidate.internal_low = current_low
+                candidate.internal_low_time = candle['timestamp']
+                candidate.internal_low_confirmed = False
+                logger.debug(f"New internal LOW: {current_low:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
+
+            if candidate.internal_low_time is not None:
+                minutes_held = (candle['timestamp'] - candidate.internal_low_time).total_seconds() / 60
+
+                if minutes_held >= 3 and not candidate.internal_low_confirmed:
+                    candidate.internal_low_confirmed = True
+                    logger.info(
+                        f"✅ Internal LOW confirmed: {candidate.internal_low:.2f} "
+                        f"(held for {minutes_held:.1f} min)"
+                    )
+
+            # Track internal HIGH
+            current_high = max(c['high'] for c in candidate.consol_candles)
+
+            if candidate.internal_high is None or current_high > candidate.internal_high:
+                candidate.internal_high = current_high
+                candidate.internal_high_time = candle['timestamp']
+                candidate.internal_high_confirmed = False
+                logger.debug(f"New internal HIGH: {current_high:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
+
+            if candidate.internal_high_time is not None:
+                minutes_held = (candle['timestamp'] - candidate.internal_high_time).total_seconds() / 60
+
+                if minutes_held >= 5 and not candidate.internal_high_confirmed:
+                    candidate.internal_high_confirmed = True
+                    logger.info(
+                        f"✅ Internal HIGH confirmed: {candidate.internal_high:.2f} "
+                        f"(held for {minutes_held:.1f} min)"
+                    )
 
     def _find_nowick_in_consolidation(
         self,

@@ -92,6 +92,9 @@ class InvalidationReason(Enum):
     # Negative risk:reward ratio (Q16 answer)
     NEGATIVE_RISK_REWARD = "negative_risk_reward"
 
+    # Gap detected during setup (Q10 answer)
+    GAP_DETECTED = "gap_detected"
+
 
 @dataclass
 class SetupCandidate:
@@ -113,6 +116,11 @@ class SetupCandidate:
 
     # Trade direction (SHORT or LONG)
     direction: Optional[TradeDirection] = None
+
+    # Gap detection (Q10 answer: "vi skall ej tradea med gaps")
+    gap_detected: bool = False
+    gap_type: Optional[str] = None  # "gap_up" or "gap_down"
+    gap_size_pips: Optional[float] = None
 
     # Current state
     state: SetupState = SetupState.WATCHING_LIQ1
@@ -266,8 +274,14 @@ class SetupCandidate:
         return {
             'id': self.id,
             'state': self.state.name,
+            'direction': self.direction.value if self.direction else None,
             'created_at': self.created_at.isoformat(),
             'last_updated': self.last_updated.isoformat(),
+
+            # Gap detection
+            'gap_detected': self.gap_detected,
+            'gap_type': self.gap_type,
+            'gap_size_pips': self.gap_size_pips,
 
             # LSE
             'lse_high': self.lse_high,
