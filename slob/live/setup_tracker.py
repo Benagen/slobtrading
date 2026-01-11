@@ -663,9 +663,10 @@ class SetupTracker:
                 logger.debug(f"Re-processing candle in WATCHING_LIQ2 state for {candidate.id[:8]}")
                 return await self._update_watching_liq2(candidate, candle)
 
+        quality_str = f"{candidate.consol_quality_score:.2f}" if candidate.consol_quality_score is not None else "N/A"
         return CandleUpdate(
             message=f"Consolidation: {len(candidate.consol_candles)} min, "
-                    f"quality: {candidate.consol_quality_score:.2f}"
+                    f"quality: {quality_str}"
         )
 
     async def _update_watching_liq2(
@@ -968,11 +969,11 @@ class SetupTracker:
         # Calculate percentage range
         range_pct = ((consol_high - consol_low) / consol_high) * 100
 
-        # Validate against limits (0.1-0.3%)
+        # Validate against limits (0.1-0.5%)
         is_valid = (self.config.consol_min_range_pct <= range_pct <=
                     self.config.consol_max_range_pct)
 
-        self.logger.debug(
+        logger.debug(
             f"Consolidation range: {consol_high:.2f} - {consol_low:.2f} = "
             f"{range_pct:.3f}% | Valid: {is_valid}"
         )
@@ -1148,7 +1149,7 @@ class SetupTracker:
                 wick_ratio = upper_wick / body_size
 
                 if wick_ratio < MAX_WICK_RATIO:
-                    self.logger.debug(
+                    logger.debug(
                         f"No-wick found (SHORT): body={body_size:.2f}, "
                         f"wick={upper_wick:.2f}, ratio={wick_ratio:.2%}"
                     )
@@ -1168,7 +1169,7 @@ class SetupTracker:
                 wick_ratio = lower_wick / body_size
 
                 if wick_ratio < MAX_WICK_RATIO:
-                    self.logger.debug(
+                    logger.debug(
                         f"No-wick found (LONG): body={body_size:.2f}, "
                         f"wick={lower_wick:.2f}, ratio={wick_ratio:.2%}"
                     )
