@@ -183,7 +183,7 @@ async def run_paper_trading(args):
         consol_min_duration=15,  # Strategy: 15-120 min
         consol_max_duration=120,  # Increased from 30
         consol_min_range_pct=0.1,  # NEW: 0.1% minimum
-        consol_max_range_pct=0.3,  # NEW: 0.3% maximum
+        consol_max_range_pct=0.5,  # NEW: 0.5% maximum (Q18 answer)
         max_retracement_pips=100.0,
         sl_buffer_pips=1.0,  # Note: Spike rule uses hardcoded 2.0
         tp_buffer_pips=1.0,

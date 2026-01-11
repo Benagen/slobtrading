@@ -51,7 +51,10 @@ class SetupTrackerConfig:
     consol_min_duration: int = 15  # minutes
     consol_max_duration: int = 120  # minutes (strategy: 15-120 min)
     consol_min_range_pct: float = 0.1  # minimum range percentage (0.1%)
-    consol_max_range_pct: float = 0.3  # maximum range percentage (0.3%)
+    consol_max_range_pct: float = 0.5  # maximum range percentage (0.5%) - Q18 answer
+
+    # LIQ #2 timing (Q4 answer)
+    liq2_minimum_wait_minutes: int = 5  # Minimum wait from consol confirmation to LIQ #2
 
     # ATR parameters (for statistics only, not validation)
     atr_period: int = 14
@@ -562,10 +565,14 @@ class SetupTracker:
                 message=f"LIQ #2 timeout ({candles_since_consol} candles)"
             )
 
-        # Check retracement based on direction
+        # Check retracement based on direction (Q15 answer: min(100 pips, 1% of price))
         if candidate.direction == TradeDirection.SHORT:
             # SHORT: Check if price went too far above no-wick high
-            if candle['high'] > candidate.nowick_high + self.config.max_retracement_pips:
+            # Dynamic limit: min(100 pips, 1% of current price) - whichever is stricter
+            current_price = candle['high']
+            max_retracement = min(self.config.max_retracement_pips, current_price * 0.01)
+
+            if candle['high'] > candidate.nowick_high + max_retracement:
                 StateTransitionValidator.invalidate(
                     candidate,
                     InvalidationReason.RETRACEMENT_EXCEEDED
@@ -573,11 +580,15 @@ class SetupTracker:
                 return CandleUpdate(
                     setup_invalidated=True,
                     candidate=candidate,
-                    message=f"Retracement exceeded ({candle['high'] - candidate.nowick_high:.2f} pips)"
+                    message=f"Retracement exceeded: {candle['high']:.2f} > {candidate.nowick_high + max_retracement:.2f}"
                 )
         else:  # LONG
             # LONG: Check if price went too far below no-wick low
-            if candle['low'] < candidate.nowick_low - self.config.max_retracement_pips:
+            # Dynamic limit: min(100 pips, 1% of current price) - whichever is stricter
+            current_price = candle['low']
+            max_retracement = min(self.config.max_retracement_pips, current_price * 0.01)
+
+            if candle['low'] < candidate.nowick_low - max_retracement:
                 StateTransitionValidator.invalidate(
                     candidate,
                     InvalidationReason.RETRACEMENT_EXCEEDED
@@ -585,7 +596,17 @@ class SetupTracker:
                 return CandleUpdate(
                     setup_invalidated=True,
                     candidate=candidate,
-                    message=f"Retracement exceeded ({candidate.nowick_low - candle['low']:.2f} pips)"
+                    message=f"Retracement exceeded: {candle['low']:.2f} < {candidate.nowick_low - max_retracement:.2f}"
+                )
+
+        # Check 5-minute minimum wait before allowing LIQ #2 (Q4 answer)
+        if candidate.consol_confirmed_time is not None:
+            minutes_since_consol = (candle['timestamp'] - candidate.consol_confirmed_time).total_seconds() / 60
+
+            if minutes_since_consol < self.config.liq2_minimum_wait_minutes:
+                return CandleUpdate(
+                    message=f"Waiting for {self.config.liq2_minimum_wait_minutes}-min minimum "
+                           f"(elapsed: {minutes_since_consol:.1f} min)"
                 )
 
         # Check if LIQ #2 based on direction
@@ -752,6 +773,24 @@ class SetupTracker:
                 reward = candidate.tp_price - candidate.entry_price
 
             candidate.risk_reward_ratio = reward / risk if risk > 0 else 0
+
+            # Filter negative R:R setups (Q16 answer: "ta trades som ger positiv R:R")
+            if candidate.risk_reward_ratio <= 0:
+                logger.warning(
+                    f"Negative R:R filtered: {candidate.id[:8]} "
+                    f"R:R={candidate.risk_reward_ratio:.2f}"
+                )
+
+                StateTransitionValidator.invalidate(
+                    candidate,
+                    InvalidationReason.NEGATIVE_RISK_REWARD
+                )
+
+                return CandleUpdate(
+                    setup_invalidated=True,
+                    candidate=candidate,
+                    message=f"Negative R:R filtered: {candidate.risk_reward_ratio:.2f}"
+                )
 
             # Transition to SETUP_COMPLETE
             success = StateTransitionValidator.transition_to(

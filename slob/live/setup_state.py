@@ -89,6 +89,9 @@ class InvalidationReason(Enum):
     # Market closed before setup completed
     MARKET_CLOSED = "market_closed"
 
+    # Negative risk:reward ratio (Q16 answer)
+    NEGATIVE_RISK_REWARD = "negative_risk_reward"
+
 
 @dataclass
 class SetupCandidate:
