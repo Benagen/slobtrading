@@ -75,11 +75,14 @@ class SetupTrackerConfig:
     # Spike rule parameters
     spike_rule_buffer_pips: float = 2.0  # Buffer above LIQ #2 body for SL (spike detection)
 
+    # Gap detection parameters (Q10 answer)
+    min_gap_size_pips: float = 10.0  # Minimum gap size to invalidate (filter out bid/ask spreads)
+
     # Daily invalidation timing (Q19 answer)
     daily_invalidation_hour: int = 22  # 22:00 Swedish time
     daily_invalidation_timezone: str = "Europe/Stockholm"  # Swedish timezone
     skip_weekend: bool = True
-    monday_restart_hour: int = 9  # 09:00 (LSE open)
+    monday_restart_hour: int = 0  # 00:00 Monday (Q19: "00.00 måndag")
 
     # Symbol
     symbol: str = "NQ"
@@ -186,8 +189,8 @@ class SetupTracker:
             swedish_time = utc_timestamp.astimezone(swedish_tz)
 
             if swedish_time.weekday() == 0 and swedish_time.hour >= self.config.monday_restart_hour:
-                # Monday 09:00 - exit weekend mode
-                logger.info("✅ Monday 09:00 Swedish time - resuming trading")
+                # Monday 00:00 - exit weekend mode
+                logger.info("✅ Monday 00:00 Swedish time - resuming trading")
                 self._weekend_mode = False
             else:
                 # Still in weekend mode - skip processing
@@ -794,6 +797,42 @@ class SetupTracker:
                     f"Spike low updated: {candidate.id[:8]} @ {candidate.spike_low:.2f}"
                 )
 
+        # Check retracement limit (Q15: min(100 pips, 1% of price))
+        max_retracement = min(100, candle['close'] * 0.01)
+
+        if candidate.direction == TradeDirection.SHORT:
+            # SHORT: Check if price retraced too far above no-wick high
+            if candle['high'] > candidate.nowick_high + max_retracement:
+                logger.warning(
+                    f"SHORT retracement exceeded: {candidate.id[:8]} "
+                    f"high {candle['high']:.2f} > nowick_high {candidate.nowick_high:.2f} + {max_retracement:.2f}"
+                )
+                StateTransitionValidator.invalidate(
+                    candidate,
+                    InvalidationReason.RETRACEMENT_EXCEEDED
+                )
+                return CandleUpdate(
+                    setup_invalidated=True,
+                    candidate=candidate,
+                    message=f"Retracement exceeded: {candle['high']:.2f} > {candidate.nowick_high + max_retracement:.2f}"
+                )
+        else:  # LONG
+            # LONG: Check if price retraced too far below no-wick low
+            if candle['low'] < candidate.nowick_low - max_retracement:
+                logger.warning(
+                    f"LONG retracement exceeded: {candidate.id[:8]} "
+                    f"low {candle['low']:.2f} < nowick_low {candidate.nowick_low:.2f} - {max_retracement:.2f}"
+                )
+                StateTransitionValidator.invalidate(
+                    candidate,
+                    InvalidationReason.RETRACEMENT_EXCEEDED
+                )
+                return CandleUpdate(
+                    setup_invalidated=True,
+                    candidate=candidate,
+                    message=f"Retracement exceeded: {candle['low']:.2f} < {candidate.nowick_low - max_retracement:.2f}"
+                )
+
         # Check timeout
         candles_since_liq2 = candidate.candles_processed - len(candidate.consol_candles) - 1
         if candles_since_liq2 > self.config.max_entry_wait_candles:
@@ -958,6 +997,8 @@ class SetupTracker:
         Strategy requirement (Q10): "vi skall ej tradea med gaps"
         Definition: "gaps defineras som att priset laggar och det finns en zon där priset inte testats av"
 
+        Only gaps larger than min_gap_size_pips are considered (to filter out bid/ask spreads).
+
         Returns:
             (gap_type, gap_size_pips) or None
             gap_type: "gap_up" or "gap_down"
@@ -972,12 +1013,16 @@ class SetupTracker:
         # Check for gap up (current low > previous high)
         if current_candle['low'] > previous_candle['high']:
             gap_size = current_candle['low'] - previous_candle['high']
-            return ("gap_up", gap_size)
+            # Only report gaps larger than threshold (filter out bid/ask spreads)
+            if gap_size >= self.config.min_gap_size_pips:
+                return ("gap_up", gap_size)
 
         # Check for gap down (current high < previous low)
         if current_candle['high'] < previous_candle['low']:
             gap_size = previous_candle['low'] - current_candle['high']
-            return ("gap_down", gap_size)
+            # Only report gaps larger than threshold (filter out bid/ask spreads)
+            if gap_size >= self.config.min_gap_size_pips:
+                return ("gap_down", gap_size)
 
         return None
 
@@ -986,102 +1031,104 @@ class SetupTracker:
         Track internal HIGH/LOW with time-based confirmation.
 
         Strategy requirements (Q2, Q3 answers):
-        - HIGH: Confirmed after 5 min without breaking above
-        - LOW: Confirmed after 3 min without breaking below
-        - Q2C: Track EVERY HIGH separately - if 5 min passes without breaking, it's confirmed
-        - Q3A: Dynamic LOW re-detection - when LOW breaks, restart 3-min countdown
+        - HIGH: Confirmed after 5 min without breaking above (Q2C)
+        - LOW: Confirmed after 3 min without breaking below (Q3A)
+        - Q2C: "Tracka varje HIGH separat och om det går 5 minuter och priset är
+                lägre en 5 minuter tidigare skall det klassas som en high"
+        - Translation: If price NOW is lower than 5 minutes ago, that high is confirmed
 
         For SHORT setup:
         - Track internal HIGH
-        - Confirm when price stays below for 5 minutes
+        - Confirm when price is lower than 5 minutes ago
 
         For LONG setup:
         - Track internal LOW
-        - Confirm when price stays above for 3 minutes
+        - Confirm when price is higher than 3 minutes ago
         """
         if candidate.direction == TradeDirection.SHORT:
-            # Track internal HIGH
-            current_high = max(c['high'] for c in candidate.consol_candles)
+            # Track internal HIGH (Q2C: check if price NOW is lower than 5 min ago)
 
-            # If new HIGH detected, reset tracking
-            if candidate.internal_high is None or current_high > candidate.internal_high:
-                candidate.internal_high = current_high
-                candidate.internal_high_time = candle['timestamp']
-                candidate.internal_high_confirmed = False
-                logger.debug(f"New internal HIGH: {current_high:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
+            # Find candles from 5 minutes ago
+            five_min_ago = candle['timestamp'] - timedelta(minutes=5)
+            candles_5min_ago = [c for c in candidate.consol_candles
+                                if c['timestamp'] <= five_min_ago]
 
-            # Check if current HIGH has been held for 5 minutes
-            if candidate.internal_high_time is not None:
-                minutes_held = (candle['timestamp'] - candidate.internal_high_time).total_seconds() / 60
+            if len(candles_5min_ago) > 0:
+                # Get highest point from 5+ minutes ago
+                high_5min_ago = max(c['high'] for c in candles_5min_ago)
+                current_high = candle['high']
 
-                if minutes_held >= 5 and not candidate.internal_high_confirmed:
-                    # Price stayed below internal HIGH for 5 minutes - CONFIRMED
-                    candidate.internal_high_confirmed = True
-                    logger.info(
-                        f"✅ Internal HIGH confirmed: {candidate.internal_high:.2f} "
-                        f"(held for {minutes_held:.1f} min)"
-                    )
+                # Q2C: If current price is LOWER than 5 min ago, confirm that old high
+                if current_high < high_5min_ago:
+                    if candidate.internal_high is None or high_5min_ago > candidate.internal_high:
+                        candidate.internal_high = high_5min_ago
+                        candidate.internal_high_time = five_min_ago
+                        candidate.internal_high_confirmed = True
+                        logger.info(
+                            f"✅ Internal HIGH confirmed: {candidate.internal_high:.2f} "
+                            f"(price now {current_high:.2f} < 5min ago {high_5min_ago:.2f})"
+                        )
 
-            # Track internal LOW
-            current_low = min(c['low'] for c in candidate.consol_candles)
+            # Track internal LOW (Q3A: dynamic re-detection - 3 min confirmation)
+            three_min_ago = candle['timestamp'] - timedelta(minutes=3)
+            candles_3min_ago = [c for c in candidate.consol_candles
+                                if c['timestamp'] <= three_min_ago]
 
-            # If new LOW detected, reset tracking (Q3A: dynamic re-detection)
-            if candidate.internal_low is None or current_low < candidate.internal_low:
-                candidate.internal_low = current_low
-                candidate.internal_low_time = candle['timestamp']
-                candidate.internal_low_confirmed = False
-                logger.debug(f"New internal LOW: {current_low:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
+            if len(candles_3min_ago) > 0:
+                # Get lowest point from 3+ minutes ago
+                low_3min_ago = min(c['low'] for c in candles_3min_ago)
+                current_low = candle['low']
 
-            # Check if current LOW has been held for 3 minutes
-            if candidate.internal_low_time is not None:
-                minutes_held = (candle['timestamp'] - candidate.internal_low_time).total_seconds() / 60
+                # Q3A: If current price is HIGHER than 3 min ago, confirm that old low
+                if current_low > low_3min_ago:
+                    # Q3A: Dynamic LOW re-detection - if breaks, search for new LOW
+                    if candidate.internal_low is None or low_3min_ago < candidate.internal_low:
+                        candidate.internal_low = low_3min_ago
+                        candidate.internal_low_time = three_min_ago
+                        candidate.internal_low_confirmed = True
+                        logger.info(
+                            f"✅ Internal LOW confirmed: {candidate.internal_low:.2f} "
+                            f"(price now {current_low:.2f} > 3min ago {low_3min_ago:.2f})"
+                        )
 
-                if minutes_held >= 3 and not candidate.internal_low_confirmed:
-                    # Price stayed above internal LOW for 3 minutes - CONFIRMED
-                    candidate.internal_low_confirmed = True
-                    logger.info(
-                        f"✅ Internal LOW confirmed: {candidate.internal_low:.2f} "
-                        f"(held for {minutes_held:.1f} min)"
-                    )
+        else:  # LONG setup (mirror SHORT logic)
+            # Track internal LOW (primary for LONG)
+            three_min_ago = candle['timestamp'] - timedelta(minutes=3)
+            candles_3min_ago = [c for c in candidate.consol_candles
+                                if c['timestamp'] <= three_min_ago]
 
-        else:  # LONG setup
-            # Track internal LOW (mirror logic)
-            current_low = min(c['low'] for c in candidate.consol_candles)
+            if len(candles_3min_ago) > 0:
+                low_3min_ago = min(c['low'] for c in candles_3min_ago)
+                current_low = candle['low']
 
-            if candidate.internal_low is None or current_low < candidate.internal_low:
-                candidate.internal_low = current_low
-                candidate.internal_low_time = candle['timestamp']
-                candidate.internal_low_confirmed = False
-                logger.debug(f"New internal LOW: {current_low:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
+                if current_low > low_3min_ago:
+                    if candidate.internal_low is None or low_3min_ago < candidate.internal_low:
+                        candidate.internal_low = low_3min_ago
+                        candidate.internal_low_time = three_min_ago
+                        candidate.internal_low_confirmed = True
+                        logger.info(
+                            f"✅ Internal LOW confirmed: {candidate.internal_low:.2f} "
+                            f"(price now {current_low:.2f} > 3min ago {low_3min_ago:.2f})"
+                        )
 
-            if candidate.internal_low_time is not None:
-                minutes_held = (candle['timestamp'] - candidate.internal_low_time).total_seconds() / 60
+            # Track internal HIGH (secondary for LONG)
+            five_min_ago = candle['timestamp'] - timedelta(minutes=5)
+            candles_5min_ago = [c for c in candidate.consol_candles
+                                if c['timestamp'] <= five_min_ago]
 
-                if minutes_held >= 3 and not candidate.internal_low_confirmed:
-                    candidate.internal_low_confirmed = True
-                    logger.info(
-                        f"✅ Internal LOW confirmed: {candidate.internal_low:.2f} "
-                        f"(held for {minutes_held:.1f} min)"
-                    )
+            if len(candles_5min_ago) > 0:
+                high_5min_ago = max(c['high'] for c in candles_5min_ago)
+                current_high = candle['high']
 
-            # Track internal HIGH
-            current_high = max(c['high'] for c in candidate.consol_candles)
-
-            if candidate.internal_high is None or current_high > candidate.internal_high:
-                candidate.internal_high = current_high
-                candidate.internal_high_time = candle['timestamp']
-                candidate.internal_high_confirmed = False
-                logger.debug(f"New internal HIGH: {current_high:.2f} @ {candle['timestamp'].strftime('%H:%M')}")
-
-            if candidate.internal_high_time is not None:
-                minutes_held = (candle['timestamp'] - candidate.internal_high_time).total_seconds() / 60
-
-                if minutes_held >= 5 and not candidate.internal_high_confirmed:
-                    candidate.internal_high_confirmed = True
-                    logger.info(
-                        f"✅ Internal HIGH confirmed: {candidate.internal_high:.2f} "
-                        f"(held for {minutes_held:.1f} min)"
-                    )
+                if current_high < high_5min_ago:
+                    if candidate.internal_high is None or high_5min_ago > candidate.internal_high:
+                        candidate.internal_high = high_5min_ago
+                        candidate.internal_high_time = five_min_ago
+                        candidate.internal_high_confirmed = True
+                        logger.info(
+                            f"✅ Internal HIGH confirmed: {candidate.internal_high:.2f} "
+                            f"(price now {current_high:.2f} < 5min ago {high_5min_ago:.2f})"
+                        )
 
     async def _update_searching_nowick(
         self,
@@ -1116,6 +1163,44 @@ class SetupTracker:
             if candidate.spike_low is None or candle['low'] < candidate.spike_low:
                 candidate.spike_low = candle['low']
                 candidate.spike_low_time = candle['timestamp']
+
+        # Check retracement limit (Q15: min(100 pips, 1% of price))
+        # Only check if no-wick has been found
+        if candidate.nowick_found:
+            max_retracement = min(100, candle['close'] * 0.01)
+
+            if candidate.direction == TradeDirection.SHORT:
+                # SHORT: Check if price retraced too far above no-wick high
+                if candle['high'] > candidate.nowick_high + max_retracement:
+                    logger.warning(
+                        f"SHORT retracement exceeded: {candidate.id[:8]} "
+                        f"high {candle['high']:.2f} > nowick_high {candidate.nowick_high:.2f} + {max_retracement:.2f}"
+                    )
+                    StateTransitionValidator.invalidate(
+                        candidate,
+                        InvalidationReason.RETRACEMENT_EXCEEDED
+                    )
+                    return CandleUpdate(
+                        setup_invalidated=True,
+                        candidate=candidate,
+                        message=f"Retracement exceeded: {candle['high']:.2f} > {candidate.nowick_high + max_retracement:.2f}"
+                    )
+            else:  # LONG
+                # LONG: Check if price retraced too far below no-wick low
+                if candle['low'] < candidate.nowick_low - max_retracement:
+                    logger.warning(
+                        f"LONG retracement exceeded: {candidate.id[:8]} "
+                        f"low {candle['low']:.2f} < nowick_low {candidate.nowick_low:.2f} - {max_retracement:.2f}"
+                    )
+                    StateTransitionValidator.invalidate(
+                        candidate,
+                        InvalidationReason.RETRACEMENT_EXCEEDED
+                    )
+                    return CandleUpdate(
+                        setup_invalidated=True,
+                        candidate=candidate,
+                        message=f"Retracement exceeded: {candle['low']:.2f} < {candidate.nowick_low - max_retracement:.2f}"
+                    )
 
         # Add candle to search window
         candidate.nowick_search_candles.append({

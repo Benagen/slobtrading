@@ -45,16 +45,16 @@ def load_historical_data(file_path: str, days: int = None) -> pd.DataFrame:
     """
     logger.info(f"Loading historical data from {file_path}")
 
-    df = pd.read_csv(file_path, parse_dates=['Date'])
+    df = pd.read_csv(file_path)
+
+    # Convert Date column to datetime, handling timezone-aware data
+    df['Date'] = pd.to_datetime(df['Date'], utc=True)
     df = df.set_index('Date')
 
-    # Ensure timezone-aware DatetimeIndex
-    if not isinstance(df.index, pd.DatetimeIndex):
-        df.index = pd.to_datetime(df.index)
-
+    # Ensure UTC timezone
     if df.index.tz is None:
         df.index = df.index.tz_localize('UTC')
-    else:
+    elif str(df.index.tz) != 'UTC':
         df.index = df.index.tz_convert('UTC')
 
     # Limit to last N days if specified
@@ -100,11 +100,14 @@ async def run_historical_test(df: pd.DataFrame, verbose: bool = True):
         # Phase 1: Retracement (dynamic in code: min(100, price*0.01))
         max_retracement_pips=100.0,
 
+        # Phase 2: Gap detection
+        min_gap_size_pips=10.0,  # Only gaps > 10 pips invalidate (filter bid/ask spreads)
+
         # Phase 2: Daily invalidation
         daily_invalidation_hour=22,  # 22:00 Swedish time
         daily_invalidation_timezone="Europe/Stockholm",
         skip_weekend=True,
-        monday_restart_hour=9,
+        monday_restart_hour=0,  # 00:00 Monday (Q19)
 
         # Other parameters
         atr_period=14,
