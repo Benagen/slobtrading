@@ -53,7 +53,7 @@ async def fetch_historical_data(
             print(f"Connecting to IB at {host}:{port}...")
 
         # Connect to IB
-        await ib.connectAsync(host, port, clientId=999, timeout=20)
+        await ib.connectAsync(host, port, clientId=888, timeout=60)
 
         if not ib.isConnected():
             raise ConnectionError("Failed to connect to IB")

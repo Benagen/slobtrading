@@ -34,7 +34,8 @@ class SetupState(Enum):
     Transitions:
         WATCHING_LIQ1 → WATCHING_CONSOL: LIQ #1 detected (NYSE breaks LSE High)
         WATCHING_CONSOL → WATCHING_LIQ2: Consolidation formed (min duration reached)
-        WATCHING_LIQ2 → WAITING_ENTRY: LIQ #2 detected (breaks consolidation high)
+        WATCHING_LIQ2 → SEARCHING_NOWICK_AFTER_LIQ2: LIQ #2 detected (breaks consolidation high)
+        SEARCHING_NOWICK_AFTER_LIQ2 → WAITING_ENTRY: No-wick found after LIQ #2
         WAITING_ENTRY → SETUP_COMPLETE: Entry trigger fired (close below no-wick low)
 
         Any state → INVALIDATED: Invalidation condition met
@@ -49,14 +50,17 @@ class SetupState(Enum):
     # Consolidation formed, waiting for LIQ #2 breakout
     WATCHING_LIQ2 = 3
 
-    # LIQ #2 detected, waiting for entry trigger
-    WAITING_ENTRY = 4
+    # LIQ #2 detected, searching for no-wick candle
+    SEARCHING_NOWICK_AFTER_LIQ2 = 4
+
+    # No-wick found, waiting for entry trigger
+    WAITING_ENTRY = 5
 
     # Entry trigger fired - setup complete
-    SETUP_COMPLETE = 5
+    SETUP_COMPLETE = 6
 
     # Setup invalidated (timeout, retracement, etc.)
-    INVALIDATED = 6
+    INVALIDATED = 7
 
 
 class InvalidationReason(Enum):
@@ -199,6 +203,14 @@ class SetupCandidate:
     spike_low_time: Optional[datetime] = None
 
     # ─────────────────────────────────────────────────────────────
+    # NO-WICK SEARCH AFTER LIQ #2
+    # ─────────────────────────────────────────────────────────────
+
+    nowick_search_start_time: Optional[datetime] = None
+    nowick_search_candles: List[Dict] = field(default_factory=list)
+    nowick_search_candles_count: int = 0
+
+    # ─────────────────────────────────────────────────────────────
     # INTERNAL HIGH/LOW (time-confirmed consolidation bounds)
     # ─────────────────────────────────────────────────────────────
 
@@ -322,6 +334,10 @@ class SetupCandidate:
             'spike_low': self.spike_low,
             'spike_low_time': self.spike_low_time.isoformat() if self.spike_low_time else None,
 
+            # No-wick search after LIQ #2
+            'nowick_search_start_time': self.nowick_search_start_time.isoformat() if self.nowick_search_start_time else None,
+            'nowick_search_candles_count': self.nowick_search_candles_count,
+
             # Internal HIGH/LOW
             'internal_high': self.internal_high,
             'internal_high_time': self.internal_high_time.isoformat() if self.internal_high_time else None,
@@ -401,7 +417,7 @@ class StateTransitionValidator:
         Requirements:
         - Current state = WATCHING_CONSOL
         - Consolidation confirmed (min duration + quality OK)
-        - No-wick candle found
+        - NO no-wick requirement (Phase 3: no-wick found AFTER LIQ #2)
 
         Returns:
             (can_transition, reason)
@@ -412,8 +428,29 @@ class StateTransitionValidator:
         if not candidate.consol_confirmed:
             return False, "Consolidation not confirmed"
 
-        if not candidate.nowick_found:
-            return False, "No-wick candle not found"
+        if candidate.consol_high is None or candidate.consol_low is None:
+            return False, "Consolidation bounds not set"
+
+        return True, "Valid"
+
+    @staticmethod
+    def can_transition_to_searching_nowick(candidate: SetupCandidate) -> tuple[bool, str]:
+        """
+        Check if candidate can transition to SEARCHING_NOWICK_AFTER_LIQ2.
+
+        Requirements:
+        - Current state = WATCHING_LIQ2
+        - LIQ #2 detected
+        - Consolidation bounds established
+
+        Returns:
+            (can_transition, reason)
+        """
+        if candidate.state != SetupState.WATCHING_LIQ2:
+            return False, f"Invalid current state: {candidate.state.name}"
+
+        if not candidate.liq2_detected:
+            return False, "LIQ #2 not detected"
 
         if candidate.consol_high is None or candidate.consol_low is None:
             return False, "Consolidation bounds not set"
@@ -426,17 +463,21 @@ class StateTransitionValidator:
         Check if candidate can transition to WAITING_ENTRY.
 
         Requirements:
-        - Current state = WATCHING_LIQ2
+        - Current state = SEARCHING_NOWICK_AFTER_LIQ2 (Phase 3 change)
         - LIQ #2 detected
+        - No-wick found
 
         Returns:
             (can_transition, reason)
         """
-        if candidate.state != SetupState.WATCHING_LIQ2:
+        if candidate.state != SetupState.SEARCHING_NOWICK_AFTER_LIQ2:
             return False, f"Invalid current state: {candidate.state.name}"
 
         if not candidate.liq2_detected:
             return False, "LIQ #2 not detected"
+
+        if not candidate.nowick_found:
+            return False, "No-wick not found"
 
         return True, "Valid"
 

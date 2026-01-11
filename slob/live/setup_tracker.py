@@ -56,6 +56,9 @@ class SetupTrackerConfig:
     # LIQ #2 timing (Q4 answer)
     liq2_minimum_wait_minutes: int = 5  # Minimum wait from consol confirmation to LIQ #2
 
+    # No-wick search parameters (Q5C answer - search AFTER LIQ #2)
+    no_wick_search_window: int = 10  # Candles to search after LIQ #2
+
     # ATR parameters (for statistics only, not validation)
     atr_period: int = 14
 
@@ -540,6 +543,10 @@ class SetupTracker:
         elif candidate.state == SetupState.WATCHING_LIQ2:
             return await self._update_watching_liq2(candidate, candle)
 
+        # State: SEARCHING_NOWICK_AFTER_LIQ2 (Phase 3 new state)
+        elif candidate.state == SetupState.SEARCHING_NOWICK_AFTER_LIQ2:
+            return await self._update_searching_nowick(candidate, candle)
+
         # State: WAITING_ENTRY
         elif candidate.state == SetupState.WAITING_ENTRY:
             return await self._update_waiting_entry(candidate, candle)
@@ -618,21 +625,9 @@ class SetupTracker:
             # Set quality score for backward compatibility
             candidate.consol_quality_score = 1.0
 
-            # Find no-wick candle based on direction
-            nowick = self._find_nowick_in_consolidation(candidate.consol_candles, candidate.direction)
-
-            if nowick is None:
-                # Keep waiting for no-wick
-                return CandleUpdate(message="Waiting for no-wick candle")
-
-            # No-wick found! Mark it
-            candidate.nowick_found = True
-            candidate.nowick_time = nowick['timestamp']
-            candidate.nowick_high = nowick['high']
-            candidate.nowick_low = nowick['low']
-            candidate.nowick_wick_ratio = nowick['wick_ratio']
-
-            # Confirm consolidation
+            # Consolidation confirmed (NO no-wick requirement yet - Phase 3!)
+            # Strategy creator (Q5C): "No-wick kan vara OVANFÖR LIQ #2. Vi vill att systemet
+            # efter LIQ #2 letar efter no-wick candles och göra det fort."
             candidate.consol_confirmed = True
             candidate.consol_confirmed_time = candle['timestamp']
 
@@ -679,9 +674,10 @@ class SetupTracker:
 
         Actions:
         - Check if price breaks consolidation high (LIQ #2)
-        - Check retracement (invalidate if too far above no-wick)
-        - Transition to WAITING_ENTRY if LIQ #2 detected
+        - Transition to SEARCHING_NOWICK_AFTER_LIQ2 if LIQ #2 detected (Phase 3 change)
         - Invalidate if timeout
+
+        NOTE: Retracement check moved to _update_searching_nowick (after no-wick found)
         """
         # Check timeout (too many candles since consolidation)
         candles_since_consol = candidate.candles_processed - len(candidate.consol_candles)
@@ -695,40 +691,6 @@ class SetupTracker:
                 candidate=candidate,
                 message=f"LIQ #2 timeout ({candles_since_consol} candles)"
             )
-
-        # Check retracement based on direction (Q15 answer: min(100 pips, 1% of price))
-        if candidate.direction == TradeDirection.SHORT:
-            # SHORT: Check if price went too far above no-wick high
-            # Dynamic limit: min(100 pips, 1% of current price) - whichever is stricter
-            current_price = candle['high']
-            max_retracement = min(self.config.max_retracement_pips, current_price * 0.01)
-
-            if candle['high'] > candidate.nowick_high + max_retracement:
-                StateTransitionValidator.invalidate(
-                    candidate,
-                    InvalidationReason.RETRACEMENT_EXCEEDED
-                )
-                return CandleUpdate(
-                    setup_invalidated=True,
-                    candidate=candidate,
-                    message=f"Retracement exceeded: {candle['high']:.2f} > {candidate.nowick_high + max_retracement:.2f}"
-                )
-        else:  # LONG
-            # LONG: Check if price went too far below no-wick low
-            # Dynamic limit: min(100 pips, 1% of current price) - whichever is stricter
-            current_price = candle['low']
-            max_retracement = min(self.config.max_retracement_pips, current_price * 0.01)
-
-            if candle['low'] < candidate.nowick_low - max_retracement:
-                StateTransitionValidator.invalidate(
-                    candidate,
-                    InvalidationReason.RETRACEMENT_EXCEEDED
-                )
-                return CandleUpdate(
-                    setup_invalidated=True,
-                    candidate=candidate,
-                    message=f"Retracement exceeded: {candle['low']:.2f} < {candidate.nowick_low - max_retracement:.2f}"
-                )
 
         # Check 5-minute minimum wait before allowing LIQ #2 (Q4 answer)
         if candidate.consol_confirmed_time is not None:
@@ -769,7 +731,7 @@ class SetupTracker:
                 'close': candle['close']
             }
 
-            # Initialize spike tracking (will be updated in WAITING_ENTRY)
+            # Initialize spike tracking (will be updated in SEARCHING_NOWICK)
             if candidate.direction == TradeDirection.SHORT:
                 candidate.spike_high = candle['high']
                 candidate.spike_high_time = candle['timestamp']
@@ -777,17 +739,26 @@ class SetupTracker:
                 candidate.spike_low = candle['low']
                 candidate.spike_low_time = candle['timestamp']
 
-            # Transition to WAITING_ENTRY
+            # Initialize no-wick search window (Phase 3)
+            candidate.nowick_search_start_time = candle['timestamp']
+            candidate.nowick_search_candles = []
+            candidate.nowick_search_candles_count = 0
+
+            # Transition to SEARCHING_NOWICK_AFTER_LIQ2 (Phase 3 change!)
             success = StateTransitionValidator.transition_to(
                 candidate,
-                SetupState.WAITING_ENTRY,
-                reason=f"LIQ #2 {candidate.direction.value} @ {liq2_price:.2f}"
+                SetupState.SEARCHING_NOWICK_AFTER_LIQ2,
+                reason=f"LIQ #2 {candidate.direction.value} @ {liq2_price:.2f} - searching for no-wick"
             )
 
             if success:
                 logger.info(
                     f"🔵 LIQ #2 {candidate.direction.value} detected: {candidate.id[:8]} @ {candidate.liq2_price:.2f}"
                 )
+                logger.info(f"Starting no-wick search after LIQ #2: {candidate.id[:8]}")
+
+                # Re-process current candle in SEARCHING_NOWICK_AFTER_LIQ2 state
+                return await self._update_searching_nowick(candidate, candle)
 
         return CandleUpdate(message="Waiting for LIQ #2")
 
@@ -1111,6 +1082,124 @@ class SetupTracker:
                         f"✅ Internal HIGH confirmed: {candidate.internal_high:.2f} "
                         f"(held for {minutes_held:.1f} min)"
                     )
+
+    async def _update_searching_nowick(
+        self,
+        candidate: SetupCandidate,
+        candle: Dict
+    ) -> CandleUpdate:
+        """
+        Search for no-wick candle after LIQ #2 detected (Phase 3).
+
+        Strategy creator quote (Q5C): "No-wick kan vara OVANFÖR LIQ #2. Vi vill att
+        systemet efter LIQ #2 letar efter no-wick candles och göra det fort."
+
+        Actions:
+        - Add candle to search window
+        - FILTER: Skip obviously bad candles (opposite direction)
+        - Check if it's a valid no-wick (Q12: use FIRST found, not best)
+        - Transition to WAITING_ENTRY if no-wick found
+        - Invalidate if search window expires
+
+        Strategy answers integrated:
+        - Q6: Same candle as no-wick OK
+        - Q7B: Use no-wick LOW (not OPEN)
+        - Q8: Filter obviously bad candles
+        - Q12: Use FIRST no-wick found
+        """
+        # Track spike high/low for retracement check
+        if candidate.direction == TradeDirection.SHORT:
+            if candidate.spike_high is None or candle['high'] > candidate.spike_high:
+                candidate.spike_high = candle['high']
+                candidate.spike_high_time = candle['timestamp']
+        else:  # LONG
+            if candidate.spike_low is None or candle['low'] < candidate.spike_low:
+                candidate.spike_low = candle['low']
+                candidate.spike_low_time = candle['timestamp']
+
+        # Add candle to search window
+        candidate.nowick_search_candles.append({
+            'timestamp': candle['timestamp'],
+            'open': candle['open'],
+            'high': candle['high'],
+            'low': candle['low'],
+            'close': candle['close'],
+            'volume': candle['volume']
+        })
+        candidate.nowick_search_candles_count += 1
+
+        # Check timeout
+        if candidate.nowick_search_candles_count > self.config.no_wick_search_window:
+            StateTransitionValidator.invalidate(
+                candidate,
+                InvalidationReason.NO_WICK_NOT_FOUND
+            )
+            return CandleUpdate(
+                setup_invalidated=True,
+                candidate=candidate,
+                message=f"No-wick not found within {self.config.no_wick_search_window} candles after LIQ #2"
+            )
+
+        # OPTIMIZATION: Filter obviously bad candles (Q8)
+        # Strategy creator: "vi letar efter candles som ser ut att vara no wick candles
+        # så vi inte slösar tid och energi på candles som klart INTE är no wick candles"
+        body_size = abs(candle['close'] - candle['open'])
+
+        if body_size <= 0:
+            # Doji candle - skip
+            return CandleUpdate(
+                message=f"Searching for no-wick after LIQ #2 ({candidate.nowick_search_candles_count}/{self.config.no_wick_search_window})"
+            )
+
+        if candidate.direction == TradeDirection.SHORT:
+            # For SHORT: Need bullish candle (close > open) with minimal upper wick
+            if candle['close'] <= candle['open']:
+                # Bearish candle - skip
+                return CandleUpdate(
+                    message=f"Searching for no-wick after LIQ #2 ({candidate.nowick_search_candles_count}/{self.config.no_wick_search_window})"
+                )
+        else:  # LONG
+            # For LONG: Need bearish candle (close < open) with minimal lower wick
+            if candle['close'] >= candle['open']:
+                # Bullish candle - skip
+                return CandleUpdate(
+                    message=f"Searching for no-wick after LIQ #2 ({candidate.nowick_search_candles_count}/{self.config.no_wick_search_window})"
+                )
+
+        # Search for no-wick in accumulated candles (Q12: use FIRST found)
+        nowick = self._find_nowick_in_consolidation(
+            candidate.nowick_search_candles,
+            candidate.direction
+        )
+
+        if nowick is not None:
+            # No-wick found!
+            candidate.nowick_found = True
+            candidate.nowick_time = nowick['timestamp']
+            candidate.nowick_high = nowick['high']
+            candidate.nowick_low = nowick['low']
+            candidate.nowick_wick_ratio = nowick['wick_ratio']
+
+            logger.info(
+                f"✅ No-wick found after LIQ #2: {candidate.id[:8]} @ {nowick['timestamp'].strftime('%H:%M')} "
+                f"(candle {candidate.nowick_search_candles_count} of {self.config.no_wick_search_window})"
+            )
+
+            # Transition to WAITING_ENTRY
+            success = StateTransitionValidator.transition_to(
+                candidate,
+                SetupState.WAITING_ENTRY,
+                reason=f"No-wick found after LIQ #2"
+            )
+
+            if success:
+                # Re-process this candle in WAITING_ENTRY state
+                # (might also be the entry trigger candle - Q6)
+                return await self._update_waiting_entry(candidate, candle)
+
+        return CandleUpdate(
+            message=f"Searching for no-wick after LIQ #2 ({candidate.nowick_search_candles_count}/{self.config.no_wick_search_window})"
+        )
 
     def _find_nowick_in_consolidation(
         self,
