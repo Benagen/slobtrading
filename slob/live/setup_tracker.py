@@ -856,9 +856,9 @@ class SetupTracker:
                     message=f"Retracement exceeded: {candle['low']:.2f} < {candidate.nowick_low - max_retracement:.2f}"
                 )
 
-        # Check timeout
-        candles_since_liq2 = candidate.candles_processed - len(candidate.consol_candles) - 1
-        if candles_since_liq2 > self.config.max_entry_wait_candles:
+        # Check timeout (count candles since entering WAITING_ENTRY)
+        candles_in_waiting_entry = candidate.candles_processed - candidate.waiting_entry_candle_count
+        if candles_in_waiting_entry > self.config.max_entry_wait_candles:
             StateTransitionValidator.invalidate(
                 candidate,
                 InvalidationReason.ENTRY_TIMEOUT
@@ -866,7 +866,7 @@ class SetupTracker:
             return CandleUpdate(
                 setup_invalidated=True,
                 candidate=candidate,
-                message=f"Entry timeout ({candles_since_liq2} candles)"
+                message=f"Entry timeout ({candles_in_waiting_entry} candles in WAITING_ENTRY)"
             )
 
         # Check if entry trigger based on direction
@@ -1301,6 +1301,9 @@ class SetupTracker:
             )
 
             if success:
+                # Track candle count when entering WAITING_ENTRY (for timeout calculation)
+                candidate.waiting_entry_candle_count = candidate.candles_processed
+
                 # Re-process this candle in WAITING_ENTRY state
                 # (might also be the entry trigger candle - Q6)
                 return await self._update_waiting_entry(candidate, candle)

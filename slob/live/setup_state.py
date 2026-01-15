@@ -232,6 +232,9 @@ class SetupCandidate:
     entry_trigger_time: Optional[datetime] = None
     entry_price: Optional[float] = None
 
+    # Track when WAITING_ENTRY started (for timeout calculation)
+    waiting_entry_candle_count: Optional[int] = None
+
     # ─────────────────────────────────────────────────────────────
     # SL/TP
     # ─────────────────────────────────────────────────────────────
