@@ -113,7 +113,7 @@ class LiveTradingEngine:
             enable_redis=os.getenv('REDIS_HOST') is not None  # Enable if REDIS_HOST is set
         )
         self.state_manager = StateManager(state_config)
-        
+
         # Setup Tracker
         tracker_config = SetupTrackerConfig(
             symbol=config.symbol,
@@ -121,7 +121,7 @@ class LiveTradingEngine:
             consol_min_duration=getattr(config, 'consol_min_duration_minutes', 15),
             sl_buffer_pips=getattr(config, 'sl_buffer_pips', 1.0)
         )
-        self.setup_tracker = SetupTracker(tracker_config)
+        self.setup_tracker = SetupTracker(tracker_config, state_manager=self.state_manager)
         
         # Order Executor
         executor_config = OrderExecutorConfig(

@@ -114,14 +114,16 @@ class SetupTracker:
             Entry trigger → Complete (SETUP_COMPLETE)
     """
 
-    def __init__(self, config: Optional[SetupTrackerConfig] = None):
+    def __init__(self, config: Optional[SetupTrackerConfig] = None, state_manager=None):
         """
         Initialize SetupTracker.
 
         Args:
             config: Configuration object
+            state_manager: Optional StateManager for persistence
         """
         self.config = config or SetupTrackerConfig()
+        self.state_manager = state_manager
 
         # Current session state
         self.current_date: Optional[datetime] = None
@@ -159,6 +161,18 @@ class SetupTracker:
             f"Daily invalidation: {self.config.daily_invalidation_hour}:00 {self.config.daily_invalidation_timezone}"
         )
 
+    async def _save_candidate(self, candidate: SetupCandidate):
+        """
+        Save candidate to database via state_manager.
+
+        Called after every state transition and significant update.
+        """
+        if self.state_manager:
+            try:
+                await self.state_manager.save_setup(candidate)
+            except Exception as e:
+                logger.error(f"Failed to save setup {candidate.id}: {e}")
+
     async def on_candle(self, candle: Dict) -> CandleUpdate:
         """
         Process new candle.
@@ -178,7 +192,7 @@ class SetupTracker:
         self._update_atr(candle)
 
         # Check 22:00 Swedish time invalidation BEFORE date check (Q19 answer)
-        self._check_22_00_invalidation(timestamp)
+        await self._check_22_00_invalidation(timestamp)
 
         # Check if weekend mode (skip trading)
         if self._weekend_mode:
@@ -223,6 +237,9 @@ class SetupTracker:
                 self.stats['liq1_detected'] += 1
                 self.stats['candidates_active'] = len(self.active_candidates)
 
+                # Save new candidate to database
+                await self._save_candidate(candidate)
+
                 if direction == TradeDirection.SHORT:
                     logger.info(
                         f"🔵 LIQ #1 SHORT detected @ {timestamp.strftime('%H:%M')} "
@@ -245,6 +262,9 @@ class SetupTracker:
                     continue
 
                 result = await self._update_candidate(candidate, candle)
+
+                # Save candidate after update (regardless of state)
+                await self._save_candidate(candidate)
 
                 if result.setup_completed or result.setup_invalidated:
                     results.append(result)
@@ -293,7 +313,7 @@ class SetupTracker:
 
         logger.info(f"📅 New trading day: {self.current_date}")
 
-    def _check_22_00_invalidation(self, timestamp: datetime):
+    async def _check_22_00_invalidation(self, timestamp: datetime):
         """
         Check if we've crossed 22:00 Swedish time and need to invalidate all setups.
 
@@ -342,9 +362,9 @@ class SetupTracker:
                     self._weekend_mode = False
 
                 # Invalidate all active candidates
-                self._invalidate_all_setups_22_00()
+                await self._invalidate_all_setups_22_00()
 
-    def _invalidate_all_setups_22_00(self):
+    async def _invalidate_all_setups_22_00(self):
         """Invalidate all active setups at 22:00."""
         invalidated_count = 0
 
@@ -355,6 +375,9 @@ class SetupTracker:
             )
             self.invalidated_setups.append(candidate)
             invalidated_count += 1
+
+            # Save invalidated candidate to database
+            await self._save_candidate(candidate)
 
         self.active_candidates.clear()
         self.stats['candidates_active'] = 0
