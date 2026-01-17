@@ -251,8 +251,8 @@ Nu när buggar är fixade kommer nästa setup som når WAITING_ENTRY att:
 **System Configuration:**
 - Bar size: 1 minute
 - Symbol: NQ (Nasdaq-100 E-mini Futures)
-- Account: DUO333048 (IB Paper Trading)
-- Server: VPS 167.71.255.6
+- Mode: Paper Trading
+- Environment: Production VPS
 
 **Commits:**
 - `83ad592`: Database persistence fix
