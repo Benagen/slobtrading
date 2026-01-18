@@ -628,7 +628,9 @@ class SetupTracker:
             )
 
         # Check if min duration reached
-        if len(candidate.consol_candles) >= self.config.consol_min_duration:
+        # Note: We check for +1 because we pop() the current candle after this check (line 662)
+        # to freeze the consolidation bounds. This ensures we still have >= min_duration after pop.
+        if len(candidate.consol_candles) >= self.config.consol_min_duration + 1:
             # Validate range percentage (CORRECT validation per strategy spec)
             if not self._validate_consolidation_range(
                 candidate.consol_high,
@@ -1277,7 +1279,9 @@ class SetupTracker:
         # Search for no-wick in accumulated candles (Q12: use FIRST found)
         nowick = self._find_nowick_in_consolidation(
             candidate.nowick_search_candles,
-            candidate.direction
+            candidate.direction,
+            candidate.consol_high,
+            candidate.consol_low
         )
 
         if nowick is not None:
@@ -1315,7 +1319,9 @@ class SetupTracker:
     def _find_nowick_in_consolidation(
         self,
         candles: List[Dict],
-        direction: TradeDirection
+        direction: TradeDirection,
+        consol_high: float,
+        consol_low: float
     ) -> Optional[Dict]:
         """
         Find no-wick candle using FIXED 20% threshold.
@@ -1323,6 +1329,14 @@ class SetupTracker:
 
         For SHORT: Bullish candle, upper wick < 20% of body
         For LONG: Bearish candle, lower wick < 20% of body
+
+        The no-wick candle body must be within the consolidation price range.
+
+        Args:
+            candles: List of candles to search
+            direction: Trade direction
+            consol_high: Consolidation high price
+            consol_low: Consolidation low price
 
         Returns:
             Dict with no-wick candle info or None
@@ -1338,6 +1352,17 @@ class SetupTracker:
 
             # Skip candles with no body
             if body_size <= 0:
+                continue
+
+            # Check if body is within consolidation range
+            # Strategy requirement: No-wick candle body must be within consolidation price range
+            body_min = min(c['open'], c['close'])
+            body_max = max(c['open'], c['close'])
+            if body_min < consol_low or body_max > consol_high:
+                logger.debug(
+                    f"No-wick candidate rejected: body ({body_min:.2f}-{body_max:.2f}) "
+                    f"outside consolidation range ({consol_low:.2f}-{consol_high:.2f})"
+                )
                 continue
 
             if direction == TradeDirection.SHORT:
