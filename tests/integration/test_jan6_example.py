@@ -284,7 +284,7 @@ async def test_jan6_2026_setup_replay():
         consol_min_duration=15,
         consol_max_duration=120,
         consol_min_range_pct=0.1,
-        consol_max_range_pct=0.5,  # Phase 1: 0.3 → 0.5
+        consol_max_range_pct=0.7,  # Updated: 0.3 → 0.5 → 0.7
 
         # Phase 1: LIQ #2 timing
         liq2_minimum_wait_minutes=5,  # Phase 1: 15 → 5 min

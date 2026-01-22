@@ -92,7 +92,7 @@ async def run_historical_test(df: pd.DataFrame, verbose: bool = True):
         consol_min_duration=15,
         consol_max_duration=120,
         consol_min_range_pct=0.1,
-        consol_max_range_pct=0.5,  # CHANGED from 0.3 (Q18)
+        consol_max_range_pct=0.7,  # CHANGED from 0.5 per strategy creator
 
         # Phase 1: LIQ #2 timing
         liq2_minimum_wait_minutes=5,  # CHANGED from 15 (Q4)

@@ -51,7 +51,7 @@ class SetupTrackerConfig:
     consol_min_duration: int = 15  # minutes
     consol_max_duration: int = 120  # minutes (strategy: 15-120 min)
     consol_min_range_pct: float = 0.1  # minimum range percentage (0.1%)
-    consol_max_range_pct: float = 0.5  # maximum range percentage (0.5%) - Q18 answer
+    consol_max_range_pct: float = 0.7  # maximum range percentage (0.7%) - updated per strategy creator
 
     # LIQ #2 timing (Q4 answer)
     liq2_minimum_wait_minutes: int = 5  # Minimum wait from consol confirmation to LIQ #2
