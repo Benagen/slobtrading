@@ -203,7 +203,7 @@ async def run_paper_trading(args):
 
     # Configure live trading engine
     engine_config = LiveTradingEngineConfig(
-        symbol='NQ',
+        symbol='US100',
         bar_size='1 min',
         timezone='US/Eastern',
         trading_hours_start=time(9, 30),  # NYSE open

@@ -254,7 +254,7 @@ class SetupCandidate:
     # METADATA
     # ─────────────────────────────────────────────────────────────
 
-    symbol: str = "NQ"
+    symbol: str = "US100"
     candles_processed: int = 0
 
     def update_timestamp(self):

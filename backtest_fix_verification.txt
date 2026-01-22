@@ -1,0 +1,151 @@
+2026-01-18 12:46:53 - INFO - ======================================================================
+--- Logging error ---
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/logging/handlers.py", line 74, in emit
+    self.doRollover()
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/logging/handlers.py", line 405, in doRollover
+    for s in self.getFilesToDelete():
+  File "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/logging/handlers.py", line 364, in getFilesToDelete
+    if self.extMatch.match(suffix):
+AttributeError: 'str' object has no attribute 'match'
+Call stack:
+  File "/Users/erikaberg/Downloads/slobprototype/scripts/test_phase1_2_historical.py", line 31, in <module>
+    setup_logging(log_dir='logs/', console_level=logging.INFO, file_level=logging.DEBUG)
+  File "/Users/erikaberg/Downloads/slobprototype/slob/monitoring/logging_config.py", line 117, in setup_logging
+    root_logger.info("=" * 70)
+Message: '======================================================================'
+Arguments: ()
+2026-01-18 12:46:53 - INFO - SLOB Trading System - Logging Initialized
+2026-01-18 12:46:53 - INFO - Log Directory: /Users/erikaberg/Downloads/slobprototype/logs
+2026-01-18 12:46:53 - INFO - Main Log: logs/trading.log (daily rotation, 30-day retention)
+2026-01-18 12:46:53 - INFO - Error Log: logs/errors.log (10MB rotation, 5 backups)
+2026-01-18 12:46:53 - INFO - Console Level: INFO
+2026-01-18 12:46:53 - INFO - File Level: DEBUG
+2026-01-18 12:46:53 - INFO - ======================================================================
+2026-01-18 12:46:53 - INFO - Loading historical data from data/nq_1min_vps.csv
+2026-01-18 12:46:53 - INFO - ✅ Loaded 7929 candles
+2026-01-18 12:46:53 - INFO -    Date range: 2025-12-30 10:13:00+00:00 to 2026-01-11 05:01:00+00:00
+2026-01-18 12:46:53 - INFO -    Price range: $-1.00 - $25995.75
+2026-01-18 12:46:53 - INFO - ================================================================================
+2026-01-18 12:46:53 - INFO - TESTING PHASE 1+2 ON HISTORICAL DATA
+2026-01-18 12:46:53 - INFO - ================================================================================
+2026-01-18 12:46:53 - INFO - 
+📋 Phase 1+2 Configuration:
+2026-01-18 12:46:53 - INFO -    Max consolidation range: 0.5% (was 0.3%)
+2026-01-18 12:46:53 - INFO -    LIQ #2 minimum wait: 5 min (was 15 min)
+2026-01-18 12:46:53 - INFO -    Dynamic retracement: min(100 pips, 1% of price)
+2026-01-18 12:46:53 - INFO -    R:R filter: Positive only
+2026-01-18 12:46:53 - INFO -    Gap detection: Active on every candle after LIQ #1
+2026-01-18 12:46:53 - INFO -    Internal HIGH/LOW: 5-min HIGH, 3-min LOW confirmation
+2026-01-18 12:46:53 - INFO -    Daily invalidation: 22:00 Swedish time + weekend mode
+2026-01-18 12:46:53 - INFO - ✅ SetupTracker initialized for NQ
+2026-01-18 12:46:53 - INFO - Daily invalidation: 22:00 Europe/Stockholm
+2026-01-18 12:46:53 - INFO - 
+🔄 Processing 7929 candles...
+2026-01-18 12:46:53 - INFO - 📅 New trading day: 2025-12-30
+2026-01-18 12:46:53 - INFO - 📊 LSE session tracking: High=25742.50, Low=25734.00
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [4474b94e] Valid
+2026-01-18 12:46:53 - INFO - 🔵 LIQ #1 SHORT detected @ 16:30 (break up: 25780.25, LSE High: 25774.50)
+2026-01-18 12:46:53 - INFO - ✅ Internal LOW confirmed: 25777.50 (price now 25780.50 > 3min ago 25777.50)
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d5df55aa] Valid
+2026-01-18 12:46:53 - INFO - 🔵 LIQ #1 SHORT detected @ 16:35 (break up: 25778.75, LSE High: 25774.50)
+2026-01-18 12:46:53 - INFO - ✅ Internal HIGH confirmed: 25793.00 (price now 25773.75 < 5min ago 25793.00)
+2026-01-18 12:46:53 - INFO - ✅ Internal LOW confirmed: 25773.75 (price now 25774.00 > 3min ago 25773.75)
+2026-01-18 12:46:53 - INFO - ✅ Internal LOW confirmed: 25773.75 (price now 25774.00 > 3min ago 25773.75)
+2026-01-18 12:46:53 - INFO - ✅ Internal LOW confirmed: 25773.00 (price now 25773.50 > 3min ago 25773.00)
+2026-01-18 12:46:53 - INFO - ✅ Internal LOW confirmed: 25773.00 (price now 25773.50 > 3min ago 25773.00)
+2026-01-18 12:46:53 - INFO - ✅ Internal HIGH confirmed: 25773.75 (price now 25772.50 < 5min ago 25773.75)
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [efc975f2] Valid
+2026-01-18 12:46:53 - INFO - 🔵 LIQ #1 SHORT detected @ 16:42 (break up: 25775.00, LSE High: 25774.50)
+2026-01-18 12:46:53 - INFO - ✅ Internal HIGH confirmed: 25777.00 (price now 25775.00 < 5min ago 25777.00)
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_CONSOL → WATCHING_LIQ2 [4474b94e] Valid
+2026-01-18 12:46:53 - INFO - ✅ Consolidation confirmed: 4474b94e (range: 32.75, quality: 1.00)
+2026-01-18 12:46:53 - WARNING - Gap detected in 4474b94e: gap_down (16.50 pips) - invalidating setup
+2026-01-18 12:46:53 - INFO - Setup invalidated: 4474b94e - gap_detected
+2026-01-18 12:46:53 - WARNING - Gap detected in d5df55aa: gap_down (16.50 pips) - invalidating setup
+2026-01-18 12:46:53 - INFO - Setup invalidated: d5df55aa - gap_detected
+2026-01-18 12:46:53 - WARNING - Gap detected in efc975f2: gap_down (16.50 pips) - invalidating setup
+2026-01-18 12:46:53 - INFO - Setup invalidated: efc975f2 - gap_detected
+2026-01-18 12:46:53 - INFO -    🚫 Gap detected: gap_down (16.50 pips)
+2026-01-18 12:46:53 - INFO - 📅 New trading day: 2025-12-31
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [48d51168] Valid
+2026-01-18 12:46:53 - INFO - 🔵 LIQ #1 LONG detected @ 16:04 (break down: 25566.75, LSE Low: 25570.00)
+2026-01-18 12:46:53 - WARNING - Gap detected in 48d51168: gap_down (18.75 pips) - invalidating setup
+2026-01-18 12:46:53 - INFO - Setup invalidated: 48d51168 - gap_detected
+2026-01-18 12:46:53 - INFO -    🚫 Gap detected: gap_down (18.75 pips)
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c1491810] Valid
+2026-01-18 12:46:53 - INFO - 🔵 LIQ #1 LONG detected @ 16:06 (break down: 25544.50, LSE Low: 25570.00)
+2026-01-18 12:46:53 - INFO - ✅ Internal LOW confirmed: 25547.50 (price now 25553.25 > 3min ago 25547.50)
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [eb2df9bc] Valid
+2026-01-18 12:46:53 - INFO - 🔵 LIQ #1 LONG detected @ 16:11 (break down: 25558.50, LSE Low: 25570.00)
+2026-01-18 12:46:53 - INFO - ✅ Internal HIGH confirmed: 25564.75 (price now 25564.50 < 5min ago 25564.75)
+2026-01-18 12:46:53 - INFO - ✅ Internal LOW confirmed: 25556.50 (price now 25558.75 > 3min ago 25556.50)
+2026-01-18 12:46:53 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [26552205] Valid
+2026-01-18 12:46:53 - INFO - 🔵 LIQ #1 LONG detected @ 16:16 (break down: 25559.00, LSE Low: 25570.00)
+2026-01-18 12:46:53 - INFO - ✅ Internal HIGH confirmed: 25567.50 (price now 25565.00 < 5min ago 25567.50)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25564.75 (price now 25564.25 < 5min ago 25564.75)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0c444a9f] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 16:21 (break down: 25558.75, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25565.00 (price now 25564.25 < 5min ago 25565.00)
+2026-01-18 12:46:54 - INFO - Setup invalidated: c1491810 - consolidation_range_invalid
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25560.25 (price now 25563.25 > 3min ago 25560.25)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25564.25 (price now 25563.25 < 5min ago 25564.25)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25567.75 (price now 25563.00 < 5min ago 25567.75)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25556.50 (price now 25563.00 > 3min ago 25556.50)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25567.75 (price now 25563.00 < 5min ago 25567.75)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [dae1857c] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 16:26 (break down: 25569.25, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25563.00 (price now 25569.25 > 3min ago 25563.00)
+2026-01-18 12:46:54 - INFO - Setup invalidated: eb2df9bc - consolidation_range_invalid
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25562.75 (price now 25567.75 > 3min ago 25562.75)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25567.75 (price now 25580.75 > 3min ago 25567.75)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25565.00 (price now 25572.75 > 3min ago 25565.00)
+2026-01-18 12:46:54 - INFO - Setup invalidated: 26552205 - consolidation_range_invalid
+2026-01-18 12:46:54 - INFO - Setup invalidated: 0c444a9f - consolidation_range_invalid
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25587.00 (price now 25583.75 < 5min ago 25587.00)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_CONSOL → WATCHING_LIQ2 [dae1857c] Valid
+2026-01-18 12:46:54 - INFO - ✅ Consolidation confirmed: dae1857c (range: 32.00, quality: 1.00)
+2026-01-18 12:46:54 - WARNING - Gap detected in dae1857c: gap_up (11.25 pips) - invalidating setup
+2026-01-18 12:46:54 - INFO - Setup invalidated: dae1857c - gap_detected
+2026-01-18 12:46:54 - INFO -    🚫 Gap detected: gap_up (11.25 pips)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [4c28defd] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 17:20 (break down: 25568.00, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25570.50 (price now 25580.75 > 3min ago 25570.50)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25583.00 (price now 25582.75 < 5min ago 25583.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25589.00 (price now 25582.75 < 5min ago 25589.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25592.00 (price now 25579.50 < 5min ago 25592.00)
+2026-01-18 12:46:54 - INFO - Setup invalidated: 4c28defd - consolidation_range_invalid
+2026-01-18 12:46:54 - INFO -    Processed 1000/7929 candles...
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8c75bfd9] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 19:42 (break down: 25562.50, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6f1c1dab] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 19:47 (break down: 25551.75, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25536.75 (price now 25551.75 > 3min ago 25536.75)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25565.00 (price now 25542.50 < 5min ago 25565.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25542.50 (price now 25549.00 > 3min ago 25542.50)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [4976c34c] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 19:52 (break down: 25548.00, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25557.50 (price now 25548.25 < 5min ago 25557.50)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7086a083] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 19:57 (break down: 25546.25, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_CONSOL → WATCHING_LIQ2 [8c75bfd9] Valid
+2026-01-18 12:46:54 - INFO - ✅ Consolidation confirmed: 8c75bfd9 (range: 28.25, quality: 1.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25544.00 (price now 25544.25 > 3min ago 25544.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25553.50 (price now 25547.00 < 5min ago 25553.50)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25553.75 (price now 25544.75 < 5min ago 25553.75)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [3bb5305f] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 20:02 (break down: 25544.50, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25544.25 (price now 25544.50 > 3min ago 25544.25)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ2 → SEARCHING_NOWICK_AFTER_LIQ2 [8c75bfd9] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #2 LONG detected: 8c75bfd9 @ 25533.25
+2026-01-18 12:46:54 - INFO - Starting no-wick search after LIQ #2: 8c75bfd9
+2026-01-18 12:46:54 - INFO - Setup invalidated: 6f1c1dab - consolidation_range_invalid
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25547.00 (price now 25545.75 < 5min ago 25547.00)
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25547.25 (price now 25541.00 < 5min ago 25547.25)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25533.25 (price now 25536.75 > 3min ago 25533.25)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25533.25 (price now 25536.75 > 3min ago 25533.25)
+2026-01-18 12:46:54 - INFO - ✅ Internal LOW confirmed: 25533.25 (price now 25536.75 > 3min ago 25533.25)
+2026-01-18 12:46:54 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6bcb9c35] Valid
+2026-01-18 12:46:54 - INFO - 🔵 LIQ #1 LONG detected @ 20:07 (break down: 25537.75, LSE Low: 25570.00)
+2026-01-18 12:46:54 - INFO - Setup invalidated: 4976c34c - consolidation_range_invalid
+2026-01-18 12:46:54 - INFO - ✅ Internal HIGH confirmed: 25545.75 (price now 25541.25 < 5min ago 25545.75)

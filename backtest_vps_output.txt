@@ -1,0 +1,1683 @@
+2026-01-11 21:36:46 - INFO - ======================================================================
+2026-01-11 21:36:46 - INFO - SLOB Trading System - Logging Initialized
+2026-01-11 21:36:46 - INFO - Log Directory: /Users/erikaberg/Downloads/slobprototype/logs
+2026-01-11 21:36:46 - INFO - Main Log: logs/trading.log (daily rotation, 30-day retention)
+2026-01-11 21:36:46 - INFO - Error Log: logs/errors.log (10MB rotation, 5 backups)
+2026-01-11 21:36:46 - INFO - Console Level: INFO
+2026-01-11 21:36:46 - INFO - File Level: DEBUG
+2026-01-11 21:36:46 - INFO - ======================================================================
+2026-01-11 21:36:46 - INFO - Loading historical data from data/nq_1min_vps.csv
+2026-01-11 21:36:46 - INFO - ✅ Loaded 7929 candles
+2026-01-11 21:36:46 - INFO -    Date range: 2025-12-30 10:13:00+00:00 to 2026-01-11 05:01:00+00:00
+2026-01-11 21:36:46 - INFO -    Price range: $-1.00 - $25995.75
+2026-01-11 21:36:46 - INFO - ================================================================================
+2026-01-11 21:36:46 - INFO - TESTING PHASE 1+2 ON HISTORICAL DATA
+2026-01-11 21:36:46 - INFO - ================================================================================
+2026-01-11 21:36:46 - INFO - 
+📋 Phase 1+2 Configuration:
+2026-01-11 21:36:46 - INFO -    Max consolidation range: 0.5% (was 0.3%)
+2026-01-11 21:36:46 - INFO -    LIQ #2 minimum wait: 5 min (was 15 min)
+2026-01-11 21:36:46 - INFO -    Dynamic retracement: min(100 pips, 1% of price)
+2026-01-11 21:36:46 - INFO -    R:R filter: Positive only
+2026-01-11 21:36:46 - INFO -    Gap detection: Active on every candle after LIQ #1
+2026-01-11 21:36:46 - INFO -    Internal HIGH/LOW: 5-min HIGH, 3-min LOW confirmation
+2026-01-11 21:36:46 - INFO -    Daily invalidation: 22:00 Swedish time + weekend mode
+2026-01-11 21:36:46 - INFO - ✅ SetupTracker initialized for NQ
+2026-01-11 21:36:46 - INFO - Daily invalidation: 22:00 Europe/Stockholm
+2026-01-11 21:36:46 - INFO - 
+🔄 Processing 7929 candles...
+2026-01-11 21:36:46 - INFO - 📅 New trading day: 2025-12-30
+2026-01-11 21:36:46 - INFO - 📊 LSE session tracking: High=25742.50, Low=25734.00
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [425b0f99] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 SHORT detected @ 16:30 (break up: 25780.25, LSE High: 25774.50)
+2026-01-11 21:36:46 - WARNING - Gap detected in 425b0f99: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 425b0f99 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (3.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [42cc6fa3] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 SHORT detected @ 16:34 (break up: 25784.25, LSE High: 25774.50)
+2026-01-11 21:36:46 - WARNING - Gap detected in 42cc6fa3: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 42cc6fa3 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (1.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [9bef5340] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 SHORT detected @ 16:37 (break up: 25777.00, LSE High: 25774.50)
+2026-01-11 21:36:46 - WARNING - Gap detected in 9bef5340: gap_down (0.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 9bef5340 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (0.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [12708f3c] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 SHORT detected @ 16:42 (break up: 25775.00, LSE High: 25774.50)
+2026-01-11 21:36:46 - WARNING - Gap detected in 12708f3c: gap_down (6.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 12708f3c - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (6.00 pips)
+2026-01-11 21:36:46 - INFO - 📅 New trading day: 2025-12-31
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [275a3cbb] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:04 (break down: 25566.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 275a3cbb: gap_down (18.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 275a3cbb - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (18.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [71271e51] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:06 (break down: 25544.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 71271e51: gap_up (8.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 71271e51 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (8.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [57bfd6e2] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:09 (break down: 25550.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 57bfd6e2: gap_up (2.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 57bfd6e2 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (2.00 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [3ed8a62c] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:14 (break down: 25561.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25558.75 (price now 25562.25 > 3min ago 25558.75)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [01c6ac5a] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:19 (break down: 25560.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25564.50 (price now 25564.25 < 5min ago 25564.50)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25565.00 (price now 25564.25 < 5min ago 25565.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 3ed8a62c: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 3ed8a62c - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in 01c6ac5a: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 01c6ac5a - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8352b2ff] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:24 (break down: 25562.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25562.75 (price now 25565.00 > 3min ago 25562.75)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b65ff9e3] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:29 (break down: 25569.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 8352b2ff: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 8352b2ff - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in b65ff9e3: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: b65ff9e3 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (3.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f13ec90e] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 17:20 (break down: 25568.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25570.50 (price now 25580.75 > 3min ago 25570.50)
+2026-01-11 21:36:46 - WARNING - Gap detected in f13ec90e: gap_up (7.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: f13ec90e - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (7.25 pips)
+2026-01-11 21:36:46 - INFO -    Processed 1000/7929 candles...
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [bca37cb6] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 19:42 (break down: 25562.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b3fd0b84] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 19:47 (break down: 25551.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25536.75 (price now 25551.75 > 3min ago 25536.75)
+2026-01-11 21:36:46 - WARNING - Gap detected in bca37cb6: gap_down (9.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: bca37cb6 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in b3fd0b84: gap_down (9.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: b3fd0b84 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (9.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [fd26c8e2] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 19:49 (break down: 25544.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25544.25 (price now 25550.25 > 3min ago 25544.25)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [01918381] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 19:54 (break down: 25549.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in fd26c8e2: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: fd26c8e2 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in 01918381: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 01918381 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (0.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [cae11e11] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 19:56 (break down: 25544.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [15c0cd45] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:01 (break down: 25539.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25544.25 (price now 25544.50 > 3min ago 25544.25)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25546.25 (price now 25544.50 < 5min ago 25546.25)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25547.00 (price now 25545.75 < 5min ago 25547.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25547.25 (price now 25541.00 < 5min ago 25547.25)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ba869d52] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:06 (break down: 25536.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25533.25 (price now 25536.75 > 3min ago 25533.25)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25533.25 (price now 25536.75 > 3min ago 25533.25)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25544.50 (price now 25537.75 < 5min ago 25544.50)
+2026-01-11 21:36:46 - WARNING - Gap detected in cae11e11: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: cae11e11 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in 15c0cd45: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 15c0cd45 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in ba869d52: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: ba869d52 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (3.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7662bc7e] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:09 (break down: 25535.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 7662bc7e: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 7662bc7e - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f0400946] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:11 (break down: 25509.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25506.50 (price now 25514.25 > 3min ago 25506.50)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [39a00ab0] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:16 (break down: 25508.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25513.25 (price now 25511.25 < 5min ago 25513.25)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25517.75 (price now 25510.00 < 5min ago 25517.75)
+2026-01-11 21:36:46 - WARNING - Gap detected in f0400946: gap_down (10.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: f0400946 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in 39a00ab0: gap_down (10.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 39a00ab0 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (10.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [dd6ad80e] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:21 (break down: 25485.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25489.25 (price now 25496.00 > 3min ago 25489.25)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [199615d2] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:26 (break down: 25507.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in dd6ad80e: gap_up (5.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: dd6ad80e - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (5.00 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [49d6b8e8] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:31 (break down: 25483.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 199615d2: gap_down (7.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 199615d2 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (7.75 pips)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25481.00 (price now 25486.75 > 3min ago 25481.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a3ebeec0] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:36 (break down: 25489.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 49d6b8e8: gap_down (3.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 49d6b8e8 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in a3ebeec0: gap_down (3.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: a3ebeec0 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (3.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ffeb0e4e] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:39 (break down: 25476.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in ffeb0e4e: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: ffeb0e4e - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b7d81131] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:42 (break down: 25502.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25496.25 (price now 25499.00 > 3min ago 25496.25)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c14dbad5] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:47 (break down: 25508.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in b7d81131: gap_up (1.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: b7d81131 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (1.75 pips)
+2026-01-11 21:36:46 - WARNING - Gap detected in c14dbad5: gap_down (9.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: c14dbad5 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (9.00 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2a84c0d9] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:51 (break down: 25486.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 2a84c0d9: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 2a84c0d9 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [dfdadbdb] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:53 (break down: 25499.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in dfdadbdb: gap_down (6.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: dfdadbdb - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (6.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5e888fa4] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 20:57 (break down: 25490.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - ⚠️ 22:00 Swedish time reached - invalidating all setups (will resume tomorrow)
+2026-01-11 21:36:46 - INFO - Setup invalidated: 5e888fa4 - market_closed
+2026-01-11 21:36:46 - INFO - ✅ 1 setups invalidated at 22:00 Swedish time
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b57e6410] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:00 (break down: 25478.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in b57e6410: gap_up (3.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: b57e6410 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (3.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5850f096] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:02 (break down: 25479.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [701df9a7] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:07 (break down: 25472.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 5850f096: gap_down (7.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 5850f096 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in 701df9a7: gap_down (7.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 701df9a7 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (7.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2cc12edf] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:09 (break down: 25455.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 2cc12edf: gap_down (12.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 2cc12edf - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (12.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [10175585] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:13 (break down: 25451.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0529d5ad] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:18 (break down: 25443.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25443.50 (price now 25444.75 > 3min ago 25443.50)
+2026-01-11 21:36:46 - INFO - ✅ Internal HIGH confirmed: 25460.25 (price now 25448.25 < 5min ago 25460.25)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25443.25 (price now 25447.50 > 3min ago 25443.25)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25444.75 (price now 25453.25 > 3min ago 25444.75)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [375e6a48] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:23 (break down: 25454.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 10175585: gap_down (4.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 10175585 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in 0529d5ad: gap_down (4.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 0529d5ad - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in 375e6a48: gap_down (4.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 375e6a48 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (4.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [49963822] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:26 (break down: 25446.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25443.00 (price now 25449.50 > 3min ago 25443.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e7c64bc8] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:31 (break down: 25450.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 49963822: gap_down (3.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 49963822 - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in e7c64bc8: gap_down (3.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: e7c64bc8 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (3.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [52d54c8b] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:33 (break down: 25445.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25443.50 (price now 25445.75 > 3min ago 25443.50)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f4030b03] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:38 (break down: 25446.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25440.75 (price now 25446.00 > 3min ago 25440.75)
+2026-01-11 21:36:46 - WARNING - Gap detected in 52d54c8b: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 52d54c8b - gap_detected
+2026-01-11 21:36:46 - WARNING - Gap detected in f4030b03: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: f4030b03 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (0.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [520a70c0] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:40 (break down: 25443.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 520a70c0: gap_down (2.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 520a70c0 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (2.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [bba97b52] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:43 (break down: 25436.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in bba97b52: gap_up (1.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: bba97b52 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (1.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [9b84a573] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:47 (break down: 25441.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 9b84a573: gap_down (1.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 9b84a573 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (1.00 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [139c4f65] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:50 (break down: 25440.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 139c4f65: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 139c4f65 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8ab02e4e] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:52 (break down: 25441.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 8ab02e4e: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 8ab02e4e - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [16b70aa5] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:54 (break down: 25439.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [38439a8d] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 21:59 (break down: 25439.50, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 16b70aa5: gap_up (3.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 16b70aa5 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (3.25 pips)
+2026-01-11 21:36:46 - WARNING - Gap detected in 38439a8d: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 38439a8d - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8b6b1460] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 22:02 (break down: 25440.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 8b6b1460: gap_up (0.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 8b6b1460 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (0.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f39d4d77] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 22:04 (break down: 25443.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in f39d4d77: gap_down (0.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: f39d4d77 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (0.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7b464953] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 22:06 (break down: 25435.25, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 7b464953: gap_down (4.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 7b464953 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (4.00 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [963d53f5] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 22:08 (break down: 25431.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 963d53f5: gap_up (2.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 963d53f5 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (2.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f7201d91] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 22:10 (break down: 25434.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5da7d64c] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 22:38 (break down: 25434.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [545d3740] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 22:46 (break down: 25434.75, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2113ca50] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 23:45 (break down: -1.00, LSE Low: 25570.00)
+2026-01-11 21:36:46 - INFO - Setup invalidated: f7201d91 - market_closed
+2026-01-11 21:36:46 - INFO - Setup invalidated: 5da7d64c - market_closed
+2026-01-11 21:36:46 - INFO - Setup invalidated: 545d3740 - market_closed
+2026-01-11 21:36:46 - INFO - Setup invalidated: 2113ca50 - market_closed
+2026-01-11 21:36:46 - INFO - 📅 New trading day: 2026-01-01
+2026-01-11 21:36:46 - WARNING - ⚠️ 22:00 Swedish time reached - invalidating all setups (will resume tomorrow)
+2026-01-11 21:36:46 - INFO - 📅 New trading day: 2026-01-02
+2026-01-11 21:36:46 - INFO -    Processed 2000/7929 candles...
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d63abb6e] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:30 (break down: 25534.75, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in d63abb6e: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: d63abb6e - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (0.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [acb0f869] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:34 (break down: 25483.00, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in acb0f869: gap_down (7.75 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: acb0f869 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (7.75 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [3f92b40c] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:36 (break down: 25498.25, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 3f92b40c: gap_down (21.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 3f92b40c - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (21.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [902b3e0c] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:38 (break down: 25475.75, LSE Low: 25554.00)
+2026-01-11 21:36:46 - INFO - ✅ Internal LOW confirmed: 25471.25 (price now 25471.75 > 3min ago 25471.25)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ccdf22fa] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:43 (break down: 25535.25, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 902b3e0c: gap_up (19.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 902b3e0c - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (19.00 pips)
+2026-01-11 21:36:46 - WARNING - Gap detected in ccdf22fa: gap_up (3.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: ccdf22fa - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (3.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f5f4c7ec] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:45 (break down: 25551.75, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in f5f4c7ec: gap_down (15.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: f5f4c7ec - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (15.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [66b2b253] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:49 (break down: 25551.25, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 66b2b253: gap_up (4.00 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 66b2b253 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (4.00 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [66001342] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 15:58 (break down: 25551.50, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 66001342: gap_down (21.50 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 66001342 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_down (21.50 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [3da63071] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:01 (break down: 25473.25, LSE Low: 25554.00)
+2026-01-11 21:36:46 - WARNING - Gap detected in 3da63071: gap_up (5.25 pips) - invalidating setup
+2026-01-11 21:36:46 - INFO - Setup invalidated: 3da63071 - gap_detected
+2026-01-11 21:36:46 - INFO -    🚫 Gap detected: gap_up (5.25 pips)
+2026-01-11 21:36:46 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [699bdb93] Valid
+2026-01-11 21:36:46 - INFO - 🔵 LIQ #1 LONG detected @ 16:05 (break down: 25474.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [63df4403] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:10 (break down: 25350.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 699bdb93: gap_down (5.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 699bdb93 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 63df4403: gap_down (5.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 63df4403 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (5.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a32f9ba5] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:12 (break down: 25349.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a32f9ba5: gap_down (15.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a32f9ba5 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (15.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0dbadd66] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:15 (break down: 25328.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25326.25 (price now 25350.25 > 3min ago 25326.25)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c4424b48] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:20 (break down: 25341.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 0dbadd66: gap_down (21.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 0dbadd66 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in c4424b48: gap_down (21.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: c4424b48 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (21.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [267bc11a] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:22 (break down: 25301.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 267bc11a: gap_up (3.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 267bc11a - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (3.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [36cb62e6] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:24 (break down: 25357.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 36cb62e6: gap_up (17.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 36cb62e6 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (17.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0821c6e6] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:26 (break down: 25367.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 0821c6e6: gap_down (34.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 0821c6e6 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (34.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d253178e] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:29 (break down: 25355.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in d253178e: gap_up (29.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d253178e - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (29.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [902059f9] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:33 (break down: 25382.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 902059f9: gap_up (16.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 902059f9 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (16.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e56969cb] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:37 (break down: 25388.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5eb906b8] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:42 (break down: 25369.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in e56969cb: gap_up (13.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: e56969cb - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 5eb906b8: gap_up (13.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 5eb906b8 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (13.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0189843b] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:45 (break down: 25392.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ae22544d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:50 (break down: 25380.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 0189843b: gap_down (2.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 0189843b - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.50 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in ae22544d: gap_down (8.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ae22544d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (8.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8ea85a77] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:52 (break down: 25381.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 8ea85a77: gap_down (6.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 8ea85a77 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (6.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [075874bc] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:54 (break down: 25362.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 075874bc: gap_down (10.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 075874bc - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (10.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [fa432506] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 16:59 (break down: 25351.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in fa432506: gap_down (4.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: fa432506 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (4.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [80fa3be9] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:03 (break down: 25315.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 80fa3be9: gap_up (5.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 80fa3be9 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (5.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [00399b3c] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:06 (break down: 25313.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25319.00 (price now 25336.00 > 3min ago 25319.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6fb68446] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:11 (break down: 25328.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25316.75 (price now 25328.25 > 3min ago 25316.75)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25344.25 (price now 25327.50 < 5min ago 25344.25)
+2026-01-11 21:36:47 - WARNING - Gap detected in 00399b3c: gap_up (11.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 00399b3c - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 6fb68446: gap_up (11.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 6fb68446 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (11.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [38c1547d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:16 (break down: 25347.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 38c1547d: gap_up (2.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 38c1547d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (2.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [76c17100] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:21 (break down: 25349.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 76c17100: gap_up (25.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 76c17100 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (25.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0c8a0c49] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:23 (break down: 25386.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25384.00 (price now 25388.00 > 3min ago 25384.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5a42fa81] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:28 (break down: 25390.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 0c8a0c49: gap_down (9.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 0c8a0c49 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 5a42fa81: gap_down (9.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 5a42fa81 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (9.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [cce57263] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:31 (break down: 25367.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25372.25 (price now 25375.00 > 3min ago 25372.25)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d5f2f8a3] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:36 (break down: 25372.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in cce57263: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: cce57263 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in d5f2f8a3: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d5f2f8a3 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a53ba43e] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:38 (break down: 25377.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a53ba43e: gap_up (4.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a53ba43e - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (4.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [cdbf2307] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:40 (break down: 25386.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in cdbf2307: gap_down (6.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: cdbf2307 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (6.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [696c7149] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:45 (break down: 25370.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 696c7149: gap_down (10.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 696c7149 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (10.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [aedd9d6c] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:48 (break down: 25362.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in aedd9d6c: gap_up (8.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: aedd9d6c - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (8.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5ac915f4] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:53 (break down: 25364.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 5ac915f4: gap_down (0.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 5ac915f4 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f3aa6e40] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 17:58 (break down: 25333.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25322.00 (price now 25328.75 > 3min ago 25322.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [cd2d7ccf] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:03 (break down: 25330.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25320.00 (price now 25323.00 > 3min ago 25320.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in f3aa6e40: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: f3aa6e40 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in cd2d7ccf: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: cd2d7ccf - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (3.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [39969371] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:06 (break down: 25334.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 39969371: gap_down (6.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 39969371 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (6.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [1629fed4] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:08 (break down: 25314.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25323.75 (price now 25330.50 > 3min ago 25323.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [631f886e] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:13 (break down: 25351.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 1629fed4: gap_up (15.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 1629fed4 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (15.00 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in 631f886e: gap_down (9.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 631f886e - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (9.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2bf6f074] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:15 (break down: 25330.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 2bf6f074: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 2bf6f074 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ac77cadb] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:18 (break down: 25320.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in ac77cadb: gap_down (3.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ac77cadb - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (3.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a1f90f6b] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:23 (break down: 25313.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a1f90f6b: gap_up (9.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a1f90f6b - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (9.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [3e5e6516] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:27 (break down: 25324.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25330.75 (price now 25338.75 > 3min ago 25330.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6565f1dd] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:32 (break down: 25352.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25351.25 (price now 25341.75 < 5min ago 25351.25)
+2026-01-11 21:36:47 - WARNING - Gap detected in 3e5e6516: gap_down (8.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 3e5e6516 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 6565f1dd: gap_down (8.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 6565f1dd - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (8.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b96de65e] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:37 (break down: 25327.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in b96de65e: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b96de65e - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d66f9dba] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:41 (break down: 25326.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in d66f9dba: gap_up (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d66f9dba - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b73c1c9d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:45 (break down: 25325.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in b73c1c9d: gap_up (3.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b73c1c9d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (3.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [16454b04] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:48 (break down: 25327.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 16454b04: gap_down (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 16454b04 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [4f1af57f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:51 (break down: 25329.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 4f1af57f: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 4f1af57f - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f34d4f0f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:56 (break down: 25338.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in f34d4f0f: gap_down (11.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: f34d4f0f - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (11.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [285225e8] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 18:59 (break down: 25283.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d6280f90] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:04 (break down: 25277.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25268.50 (price now 25277.75 > 3min ago 25268.50)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25268.00 (price now 25277.75 > 3min ago 25268.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25267.75 (price now 25279.75 > 3min ago 25267.75)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25286.00 (price now 25279.75 < 5min ago 25286.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d53fb924] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:09 (break down: 25275.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25296.50 (price now 25295.00 < 5min ago 25296.50)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25272.25 (price now 25292.00 > 3min ago 25272.25)
+2026-01-11 21:36:47 - WARNING - Gap detected in 285225e8: gap_up (2.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 285225e8 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in d6280f90: gap_up (2.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d6280f90 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in d53fb924: gap_up (2.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d53fb924 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (2.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [056aae20] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:13 (break down: 25300.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 056aae20: gap_up (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 056aae20 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [fcaac285] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:15 (break down: 25324.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in fcaac285: gap_up (6.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: fcaac285 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (6.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5b56d822] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:20 (break down: 25355.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 5b56d822: gap_up (14.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 5b56d822 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (14.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [cd2b475f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:22 (break down: 25389.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in cd2b475f: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: cd2b475f - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [676979b0] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:27 (break down: 25380.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d2443df2] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:32 (break down: 25381.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25371.50 (price now 25381.00 > 3min ago 25371.50)
+2026-01-11 21:36:47 - WARNING - Gap detected in 676979b0: gap_up (6.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 676979b0 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in d2443df2: gap_up (6.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d2443df2 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (6.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c63b3cd4] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:34 (break down: 25412.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in c63b3cd4: gap_down (3.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: c63b3cd4 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (3.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [188696ad] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:37 (break down: 25399.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25405.50 (price now 25416.00 > 3min ago 25405.50)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [9fab7404] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:42 (break down: 25431.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 188696ad: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 188696ad - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in 9fab7404: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 9fab7404 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [18c234a6] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:44 (break down: 25431.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25427.25 (price now 25439.50 > 3min ago 25427.25)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d5ecad25] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:49 (break down: 25447.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 18c234a6: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 18c234a6 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ebd2d7cb] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:54 (break down: 25434.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25454.75 (price now 25442.00 < 5min ago 25454.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [51c232d3] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 19:59 (break down: 25424.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25442.00 (price now 25436.25 < 5min ago 25442.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in d5ecad25: gap_down (2.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d5ecad25 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in ebd2d7cb: gap_down (2.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ebd2d7cb - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 51c232d3: gap_down (2.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 51c232d3 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [57d78148] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:03 (break down: 25415.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7b7bc7c5] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:08 (break down: 25387.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 57d78148: gap_down (15.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 57d78148 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (15.75 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in 7b7bc7c5: gap_up (12.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 7b7bc7c5 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (12.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2dd4cce5] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:10 (break down: 25389.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 2dd4cce5: gap_up (11.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 2dd4cce5 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (11.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b327542d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:14 (break down: 25411.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in b327542d: gap_down (2.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b327542d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8f789541] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:17 (break down: 25401.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25407.75 (price now 25423.75 > 3min ago 25407.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c1e13cc5] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:22 (break down: 25428.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 8f789541: gap_up (4.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 8f789541 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (4.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ba4a77a1] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:27 (break down: 25419.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in c1e13cc5: gap_up (14.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: c1e13cc5 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in ba4a77a1: gap_up (14.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ba4a77a1 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (14.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [27877b1a] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:29 (break down: 25437.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 27877b1a: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 27877b1a - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f21fe27f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:33 (break down: 25436.50, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in f21fe27f: gap_down (2.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: f21fe27f - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c16638ef] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:35 (break down: 25426.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in c16638ef: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: c16638ef - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [84a1de2a] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:39 (break down: 25432.00, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 84a1de2a: gap_down (10.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 84a1de2a - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (10.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [9d7eb233] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:43 (break down: 25416.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 9d7eb233: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 9d7eb233 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (3.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b8328a07] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:48 (break down: 25419.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [1dff9c3f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:53 (break down: 25403.75, LSE Low: 25554.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25421.50 (price now 25403.75 < 5min ago 25421.50)
+2026-01-11 21:36:47 - WARNING - Gap detected in b8328a07: gap_down (3.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b8328a07 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 1dff9c3f: gap_down (3.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 1dff9c3f - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (3.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [074c62cc] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 LONG detected @ 20:58 (break down: 25371.25, LSE Low: 25554.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 074c62cc: gap_up (8.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 074c62cc - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (8.75 pips)
+2026-01-11 21:36:47 - WARNING - ⚠️ Friday 22:00 Swedish time reached - invalidating all setups (will resume Monday 09:00)
+2026-01-11 21:36:47 - WARNING - ⚠️ 22:00 Swedish time reached - invalidating all setups (will resume tomorrow)
+2026-01-11 21:36:47 - INFO - 📅 New trading day: 2026-01-03
+2026-01-11 21:36:47 - INFO - 📅 New trading day: 2026-01-04
+2026-01-11 21:36:47 - INFO - 📅 New trading day: 2026-01-05
+2026-01-11 21:36:47 - INFO -    Processed 3000/7929 candles...
+2026-01-11 21:36:47 - INFO - 📅 New trading day: 2026-01-06
+2026-01-11 21:36:47 - WARNING - ⚠️ 22:00 Swedish time reached - invalidating all setups (will resume tomorrow)
+2026-01-11 21:36:47 - INFO - 📅 New trading day: 2026-01-07
+2026-01-11 21:36:47 - INFO -    Processed 4000/7929 candles...
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [44704295] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 15:38 (break up: 25874.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 44704295: gap_up (17.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 44704295 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (17.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ac207558] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 15:43 (break up: 25883.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in ac207558: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ac207558 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [68eeb747] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 15:45 (break up: 25898.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 68eeb747: gap_up (19.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 68eeb747 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (19.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [28ebd6ad] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 15:56 (break up: 25877.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 28ebd6ad: gap_up (8.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 28ebd6ad - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (8.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2411d649] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 15:59 (break up: 25904.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 2411d649: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 2411d649 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [3352ec78] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:02 (break up: 25906.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5dbe4bd1] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:07 (break up: 25905.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25910.50 (price now 25907.75 < 5min ago 25910.50)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25903.00 (price now 25903.25 > 3min ago 25903.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25900.50 (price now 25901.00 > 3min ago 25900.50)
+2026-01-11 21:36:47 - WARNING - Gap detected in 3352ec78: gap_up (10.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 3352ec78 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 5dbe4bd1: gap_up (10.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 5dbe4bd1 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (10.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [bb99ff28] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:11 (break up: 25918.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in bb99ff28: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: bb99ff28 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e3e5d150] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:13 (break up: 25925.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ef253c80] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:18 (break up: 25919.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25916.25 (price now 25917.00 > 3min ago 25916.25)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25922.00 (price now 25919.25 < 5min ago 25922.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in e3e5d150: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: e3e5d150 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in ef253c80: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ef253c80 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [09e39003] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:21 (break up: 25919.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25919.75 (price now 25922.00 > 3min ago 25919.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [503c73d2] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:26 (break up: 25921.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 09e39003: gap_down (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 09e39003 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.00 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in 503c73d2: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 503c73d2 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b3043309] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:30 (break up: 25918.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in b3043309: gap_down (2.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b3043309 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [dbc6e783] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:34 (break up: 25903.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in dbc6e783: gap_down (11.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: dbc6e783 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (11.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ff5e462f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:36 (break up: 25892.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in ff5e462f: gap_down (2.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ff5e462f - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e97fa05c] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:39 (break up: 25895.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in e97fa05c: gap_up (3.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: e97fa05c - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (3.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0626dea2] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:43 (break up: 25907.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25900.00 (price now 25903.25 > 3min ago 25900.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8270b0a5] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:48 (break up: 25903.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 0626dea2: gap_up (4.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 0626dea2 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 8270b0a5: gap_up (4.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 8270b0a5 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (4.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [dca62bf7] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:50 (break up: 25916.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in dca62bf7: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: dca62bf7 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [25b910f5] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:54 (break up: 25942.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25940.00 (price now 25955.50 > 3min ago 25940.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ee6e4b02] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 16:59 (break up: 25957.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25962.00 (price now 25954.00 < 5min ago 25962.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 25b910f5: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 25b910f5 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in ee6e4b02: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ee6e4b02 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [619f8370] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:04 (break up: 25954.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 619f8370: gap_up (6.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 619f8370 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (6.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [75a7b7b6] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:07 (break up: 25969.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6c05c070] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:12 (break up: 25966.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 75a7b7b6: gap_down (0.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 75a7b7b6 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.50 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in 6c05c070: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 6c05c070 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b53b2477] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:15 (break up: 25979.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in b53b2477: gap_up (2.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b53b2477 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (2.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [33d2fa5d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:18 (break up: 25987.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 33d2fa5d: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 33d2fa5d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (3.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [02c718a7] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:20 (break up: 25984.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 02c718a7: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 02c718a7 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [4d271b2f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:22 (break up: 25976.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25971.25 (price now 25972.00 > 3min ago 25971.25)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c7e16583] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:27 (break up: 25977.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 4d271b2f: gap_up (2.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 4d271b2f - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (2.50 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in c7e16583: gap_up (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: c7e16583 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8569411f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:31 (break up: 25983.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25981.50 (price now 25982.00 > 3min ago 25981.50)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [93f50330] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:36 (break up: 25984.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25984.25 (price now 25984.00 < 5min ago 25984.25)
+2026-01-11 21:36:47 - WARNING - Gap detected in 8569411f: gap_up (5.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 8569411f - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 93f50330: gap_up (5.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 93f50330 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (5.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e2a67c61] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:39 (break up: 25989.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in e2a67c61: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: e2a67c61 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [df1e973d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:41 (break up: 25985.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in df1e973d: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: df1e973d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [95d88b17] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:45 (break up: 25981.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25978.00 (price now 25980.75 > 3min ago 25978.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0d72a5b7] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:50 (break up: 25980.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25975.50 (price now 25980.75 > 3min ago 25975.50)
+2026-01-11 21:36:47 - WARNING - Gap detected in 95d88b17: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 95d88b17 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 0d72a5b7: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 0d72a5b7 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a2be96ca] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:55 (break up: 25995.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a2be96ca: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a2be96ca - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [670c54fa] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:57 (break up: 25988.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 670c54fa: gap_down (4.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 670c54fa - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (4.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6d78aa41] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 17:59 (break up: 25986.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 6d78aa41: gap_down (6.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 6d78aa41 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (6.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e4c92a9d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:01 (break up: 25974.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in e4c92a9d: gap_up (1.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: e4c92a9d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c677c5db] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:04 (break up: 25972.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in c677c5db: gap_up (3.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: c677c5db - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (3.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ed22d75c] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:06 (break up: 25979.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in ed22d75c: gap_down (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ed22d75c - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [aedf9a70] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:09 (break up: 25971.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in aedf9a70: gap_down (2.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: aedf9a70 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ad119c69] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:14 (break up: 25966.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in ad119c69: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ad119c69 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a8c06ccd] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:16 (break up: 25965.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a8c06ccd: gap_down (2.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a8c06ccd - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a66b7af2] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:21 (break up: 25951.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a66b7af2: gap_down (13.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a66b7af2 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (13.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [fa25e486] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:26 (break up: 25952.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in fa25e486: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: fa25e486 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [968ae905] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:29 (break up: 25946.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [642cc19b] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:34 (break up: 25945.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 968ae905: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 968ae905 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 642cc19b: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 642cc19b - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (3.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [232f9604] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:36 (break up: 25934.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 232f9604: gap_up (5.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 232f9604 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (5.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b5571167] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:38 (break up: 25939.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25927.00 (price now 25932.75 > 3min ago 25927.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [13ea66cd] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:43 (break up: 25945.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in b5571167: gap_up (5.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b5571167 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 13ea66cd: gap_up (5.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 13ea66cd - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (5.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [42996fd4] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:45 (break up: 25951.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25942.75 (price now 25950.75 > 3min ago 25942.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f34e5077] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:50 (break up: 25961.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 42996fd4: gap_up (8.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 42996fd4 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (8.75 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in f34e5077: gap_up (1.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: f34e5077 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8e3ae167] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:53 (break up: 25970.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ed3a6368] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 18:58 (break up: 25970.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25961.50 (price now 25970.50 > 3min ago 25961.50)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25970.50 (price now 25974.50 > 3min ago 25970.50)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a6bc013a] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:03 (break up: 25977.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25977.50 (price now 25973.25 < 5min ago 25977.50)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25977.50 (price now 25973.25 < 5min ago 25977.50)
+2026-01-11 21:36:47 - WARNING - Gap detected in 8e3ae167: gap_down (6.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 8e3ae167 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in ed3a6368: gap_down (6.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: ed3a6368 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in a6bc013a: gap_down (6.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a6bc013a - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (6.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e5c964d0] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:07 (break up: 25956.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b06882d9] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:12 (break up: 25952.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25951.50 (price now 25952.75 > 3min ago 25951.50)
+2026-01-11 21:36:47 - WARNING - Gap detected in e5c964d0: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: e5c964d0 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in b06882d9: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b06882d9 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (5.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5dbae68d] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:14 (break up: 25954.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 5dbae68d: gap_down (4.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 5dbae68d - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (4.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d293af46] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:16 (break up: 25946.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in d293af46: gap_down (2.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d293af46 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8f9b40d3] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:19 (break up: 25933.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25912.75 (price now 25914.75 > 3min ago 25912.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b1a3af3b] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:24 (break up: 25920.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25934.00 (price now 25920.25 < 5min ago 25934.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d3799e6f] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:29 (break up: 25914.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25895.00 (price now 25904.75 > 3min ago 25895.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25895.00 (price now 25904.75 > 3min ago 25895.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal HIGH confirmed: 25920.25 (price now 25913.50 < 5min ago 25920.25)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [1e7fff5e] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:34 (break up: 25904.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_CONSOL → WATCHING_LIQ2 [8f9b40d3] Valid
+2026-01-11 21:36:47 - INFO - ✅ Consolidation confirmed: 8f9b40d3 (range: 39.00, quality: 1.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 8f9b40d3: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 8f9b40d3 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in b1a3af3b: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: b1a3af3b - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in d3799e6f: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d3799e6f - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 1e7fff5e: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 1e7fff5e - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (5.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [1b2eeb08] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:36 (break up: 25896.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [aa8055eb] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:41 (break up: 25909.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25892.75 (price now 25900.00 > 3min ago 25892.75)
+2026-01-11 21:36:47 - WARNING - Gap detected in 1b2eeb08: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 1b2eeb08 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in aa8055eb: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: aa8055eb - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [34d4cd26] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:43 (break up: 25915.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 34d4cd26: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 34d4cd26 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [fda04cd0] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:46 (break up: 25915.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d5529f12] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:51 (break up: 25905.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in fda04cd0: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: fda04cd0 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:47 - WARNING - Gap detected in d5529f12: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d5529f12 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8b28d420] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:54 (break up: 25915.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 8b28d420: gap_down (2.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 8b28d420 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [094e115c] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:56 (break up: 25913.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO -    Processed 5000/7929 candles...
+2026-01-11 21:36:47 - WARNING - Gap detected in 094e115c: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 094e115c - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [1888f554] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 19:59 (break up: 25915.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 1888f554: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 1888f554 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [029cc0f8] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:03 (break up: 25915.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 029cc0f8: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 029cc0f8 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [9aec589b] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:06 (break up: 25911.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in 9aec589b: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 9aec589b - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a609505c] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:08 (break up: 25911.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a609505c: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a609505c - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [dc5443d4] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:12 (break up: 25901.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - INFO - ✅ Internal LOW confirmed: 25899.75 (price now 25906.25 > 3min ago 25899.75)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7f3aefe6] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:17 (break up: 25909.75, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in dc5443d4: gap_down (2.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: dc5443d4 - gap_detected
+2026-01-11 21:36:47 - WARNING - Gap detected in 7f3aefe6: gap_down (2.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: 7f3aefe6 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (2.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e06cbd99] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:19 (break up: 25902.00, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in e06cbd99: gap_down (14.00 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: e06cbd99 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (14.00 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a20a828a] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:23 (break up: 25874.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a20a828a: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a20a828a - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d95e914a] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:26 (break up: 25875.25, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in d95e914a: gap_up (3.50 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: d95e914a - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_up (3.50 pips)
+2026-01-11 21:36:47 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a0094549] Valid
+2026-01-11 21:36:47 - INFO - 🔵 LIQ #1 SHORT detected @ 20:30 (break up: 25886.50, LSE High: 25873.00)
+2026-01-11 21:36:47 - WARNING - Gap detected in a0094549: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:47 - INFO - Setup invalidated: a0094549 - gap_detected
+2026-01-11 21:36:47 - INFO -    🚫 Gap detected: gap_down (5.75 pips)
+2026-01-11 21:36:47 - WARNING - ⚠️ 22:00 Swedish time reached - invalidating all setups (will resume tomorrow)
+2026-01-11 21:36:47 - INFO - 📅 New trading day: 2026-01-08
+2026-01-11 21:36:48 - INFO -    Processed 6000/7929 candles...
+2026-01-11 21:36:48 - WARNING - ⚠️ 22:00 Swedish time reached - invalidating all setups (will resume tomorrow)
+2026-01-11 21:36:48 - INFO - 📅 New trading day: 2026-01-09
+2026-01-11 21:36:48 - INFO -    Processed 7000/7929 candles...
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2a01633b] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 15:36 (break up: 25823.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 2a01633b: gap_up (10.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 2a01633b - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (10.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2529d4fa] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 15:39 (break up: 25854.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 2529d4fa: gap_up (10.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 2529d4fa - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (10.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [535507d9] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 15:42 (break up: 25870.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 535507d9: gap_down (4.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 535507d9 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (4.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a0b6c0dd] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 15:44 (break up: 25872.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f409aea4] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 15:49 (break up: 25851.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25865.75 (price now 25845.00 < 5min ago 25865.75)
+2026-01-11 21:36:48 - WARNING - Gap detected in a0b6c0dd: gap_down (3.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: a0b6c0dd - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in f409aea4: gap_down (3.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: f409aea4 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (3.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [da190ff8] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:10 (break up: 25825.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in da190ff8: gap_up (5.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: da190ff8 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (5.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [39b00f28] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:12 (break up: 25851.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 39b00f28: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 39b00f28 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c792e38f] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:16 (break up: 25854.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in c792e38f: gap_up (2.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: c792e38f - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (2.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b5511a2d] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:18 (break up: 25872.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [97874319] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:23 (break up: 25894.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in b5511a2d: gap_up (13.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: b5511a2d - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (13.50 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in 97874319: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 97874319 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (5.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [10e36f46] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:26 (break up: 25878.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25878.25 (price now 25884.50 > 3min ago 25878.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [60eaea9d] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:31 (break up: 25891.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 10e36f46: gap_down (1.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 10e36f46 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 60eaea9d: gap_down (1.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 60eaea9d - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (1.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [30469566] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:34 (break up: 25876.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [61ec49dd] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:39 (break up: 25867.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25880.00 (price now 25868.75 < 5min ago 25880.00)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25860.00 (price now 25864.50 > 3min ago 25860.00)
+2026-01-11 21:36:48 - WARNING - Gap detected in 30469566: gap_down (11.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 30469566 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 61ec49dd: gap_down (11.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 61ec49dd - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (11.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [aa287668] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:44 (break up: 25858.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in aa287668: gap_up (0.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: aa287668 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (0.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a70ee41b] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:46 (break up: 25860.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [bf22153c] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:51 (break up: 25869.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25854.25 (price now 25858.75 > 3min ago 25854.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in a70ee41b: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: a70ee41b - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in bf22153c: gap_down (0.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: bf22153c - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (0.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [708166ed] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:53 (break up: 25864.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25864.00 (price now 25871.00 > 3min ago 25864.00)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [43ab51be] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 16:58 (break up: 25895.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 708166ed: gap_up (19.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 708166ed - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (19.25 pips)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25893.25 (price now 25905.25 > 3min ago 25893.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [666c99c8] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:03 (break up: 25913.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0ce7f04b] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:08 (break up: 25915.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25916.25 (price now 25910.50 < 5min ago 25916.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25916.25 (price now 25910.50 < 5min ago 25916.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25909.25 (price now 25910.50 > 3min ago 25909.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 43ab51be: gap_down (8.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 43ab51be - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 666c99c8: gap_down (8.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 666c99c8 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 0ce7f04b: gap_down (8.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 0ce7f04b - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (8.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [41f028d0] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:11 (break up: 25906.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25905.25 (price now 25919.25 > 3min ago 25905.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f146ce82] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:16 (break up: 25922.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25922.75 (price now 25921.00 < 5min ago 25922.75)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25925.00 (price now 25920.50 < 5min ago 25925.00)
+2026-01-11 21:36:48 - WARNING - Gap detected in 41f028d0: gap_down (8.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 41f028d0 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in f146ce82: gap_down (8.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: f146ce82 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (8.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2e601890] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:21 (break up: 25908.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 2e601890: gap_up (3.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 2e601890 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (3.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [df492a2b] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:24 (break up: 25913.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in df492a2b: gap_down (4.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: df492a2b - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (4.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [abf298d6] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:27 (break up: 25897.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [cf0827ad] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:32 (break up: 25902.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in abf298d6: gap_up (8.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: abf298d6 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (8.25 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in cf0827ad: gap_up (9.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: cf0827ad - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (9.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [4f9fe873] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:34 (break up: 25912.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25911.00 (price now 25916.50 > 3min ago 25911.00)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0be0480e] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:39 (break up: 25910.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 4f9fe873: gap_down (5.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 4f9fe873 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (5.75 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in 0be0480e: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 0be0480e - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (3.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e0b6a3fa] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:41 (break up: 25910.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in e0b6a3fa: gap_up (5.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: e0b6a3fa - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (5.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5735335e] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:44 (break up: 25922.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 5735335e: gap_down (5.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 5735335e - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (5.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [313c401a] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:47 (break up: 25917.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [025abf67] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:52 (break up: 25915.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 313c401a: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 313c401a - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 025abf67: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 025abf67 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (3.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [34693b60] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:54 (break up: 25910.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 34693b60: gap_up (2.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 34693b60 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (2.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [152cbd56] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:56 (break up: 25913.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 152cbd56: gap_up (10.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 152cbd56 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (10.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6b0fb7ad] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 17:58 (break up: 25927.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 6b0fb7ad: gap_up (5.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 6b0fb7ad - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (5.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [8ea116db] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:02 (break up: 25930.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b47cca5a] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:07 (break up: 25934.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 8ea116db: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 8ea116db - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.50 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in b47cca5a: gap_down (8.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: b47cca5a - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (8.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [046964ba] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:11 (break up: 25919.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 046964ba: gap_down (5.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 046964ba - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (5.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7cc70aa9] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:13 (break up: 25915.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 7cc70aa9: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 7cc70aa9 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [0e703196] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:17 (break up: 25912.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b30d4877] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:22 (break up: 25898.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25912.25 (price now 25895.00 < 5min ago 25912.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25890.50 (price now 25895.00 > 3min ago 25890.50)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25889.00 (price now 25890.00 > 3min ago 25889.00)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [bc3ba8f5] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:27 (break up: 25892.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25887.00 (price now 25889.50 > 3min ago 25887.00)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25895.00 (price now 25893.50 < 5min ago 25895.00)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25887.00 (price now 25889.50 > 3min ago 25887.00)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d7da3646] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:32 (break up: 25891.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - Setup invalidated: 0e703196 - consolidation_range_invalid
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25896.75 (price now 25891.00 < 5min ago 25896.75)
+2026-01-11 21:36:48 - WARNING - Gap detected in b30d4877: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: b30d4877 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in bc3ba8f5: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: bc3ba8f5 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in d7da3646: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: d7da3646 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d517ae88] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:34 (break up: 25892.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in d517ae88: gap_up (8.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: d517ae88 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (8.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5b3991fd] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:39 (break up: 25909.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25908.75 (price now 25917.75 > 3min ago 25908.75)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5346f7e0] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:44 (break up: 25928.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 5b3991fd: gap_up (2.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 5b3991fd - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (2.75 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in 5346f7e0: gap_up (12.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 5346f7e0 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (12.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [40293a97] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:46 (break up: 25943.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25939.75 (price now 25950.75 > 3min ago 25939.75)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [54fc65a6] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:51 (break up: 25957.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 40293a97: gap_down (13.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 40293a97 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 54fc65a6: gap_down (13.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 54fc65a6 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (13.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [e1d39f91] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:54 (break up: 25939.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in e1d39f91: gap_up (1.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: e1d39f91 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [93a1532b] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 18:57 (break up: 25942.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 93a1532b: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 93a1532b - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [81d10c94] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:00 (break up: 25952.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25950.50 (price now 25954.00 > 3min ago 25950.50)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [5272234c] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:05 (break up: 25957.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 81d10c94: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 81d10c94 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in 5272234c: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 5272234c - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ffa73350] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:07 (break up: 25966.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [70ecac34] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:12 (break up: 25954.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25966.00 (price now 25958.50 < 5min ago 25966.00)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25953.50 (price now 25954.75 > 3min ago 25953.50)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25952.50 (price now 25956.25 > 3min ago 25952.50)
+2026-01-11 21:36:48 - WARNING - Gap detected in ffa73350: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: ffa73350 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 70ecac34: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 70ecac34 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [d6573e48] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:16 (break up: 25952.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in d6573e48: gap_down (1.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: d6573e48 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (1.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [6a0aecc1] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:18 (break up: 25950.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 6a0aecc1: gap_up (4.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 6a0aecc1 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (4.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [f3ebcb35] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:22 (break up: 25959.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in f3ebcb35: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: f3ebcb35 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [82669f7b] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:26 (break up: 25960.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 82669f7b: gap_up (0.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 82669f7b - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (0.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [37615583] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:29 (break up: 25965.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [51cb62e3] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:34 (break up: 25962.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25961.50 (price now 25962.25 > 3min ago 25961.50)
+2026-01-11 21:36:48 - WARNING - Gap detected in 37615583: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 37615583 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 51cb62e3: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 51cb62e3 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (1.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [1a203722] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:36 (break up: 25960.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 1a203722: gap_up (2.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 1a203722 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (2.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [ac2aa660] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:38 (break up: 25963.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25957.50 (price now 25959.50 > 3min ago 25957.50)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2a8fd65e] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:43 (break up: 25959.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in ac2aa660: gap_down (0.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: ac2aa660 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 2a8fd65e: gap_down (0.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 2a8fd65e - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (0.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [cf9b4307] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:45 (break up: 25959.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25956.50 (price now 25959.00 > 3min ago 25956.50)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [9d319431] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:50 (break up: 25957.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in cf9b4307: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: cf9b4307 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (1.75 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in 9d319431: gap_up (2.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 9d319431 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (2.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [2fc62bc4] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:52 (break up: 25960.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25960.75 (price now 25961.25 > 3min ago 25960.75)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [53720213] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 19:57 (break up: 25967.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25958.50 (price now 25964.75 > 3min ago 25958.50)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [fcfc068f] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:02 (break up: 25971.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 2fc62bc4: gap_up (1.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 2fc62bc4 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 53720213: gap_up (1.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 53720213 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.75 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in fcfc068f: gap_down (4.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: fcfc068f - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (4.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [27f692cf] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:05 (break up: 25958.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7c540b4c] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:10 (break up: 25954.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 27f692cf: gap_down (0.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 27f692cf - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (0.50 pips)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25954.00 (price now 25963.50 > 3min ago 25954.00)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [987de83b] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:15 (break up: 25963.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 7c540b4c: gap_down (0.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 7c540b4c - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (0.25 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in 987de83b: gap_up (4.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 987de83b - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (4.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [606458b4] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:17 (break up: 25973.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 606458b4: gap_down (3.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 606458b4 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (3.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [b1c4e243] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:21 (break up: 25969.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in b1c4e243: gap_down (2.25 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: b1c4e243 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (2.25 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [10a91ad4] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:24 (break up: 25966.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 10a91ad4: gap_up (1.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 10a91ad4 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [fa5f665f] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:27 (break up: 25971.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25969.25 (price now 25971.25 > 3min ago 25969.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [c518fdb3] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:32 (break up: 25982.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in fa5f665f: gap_up (1.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: fa5f665f - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (1.50 pips)
+2026-01-11 21:36:48 - WARNING - Gap detected in c518fdb3: gap_down (1.50 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: c518fdb3 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (1.50 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [71844c50] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:36 (break up: 25976.25, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [578c3c67] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:41 (break up: 25972.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal HIGH confirmed: 25977.00 (price now 25971.50 < 5min ago 25977.00)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25964.25 (price now 25968.25 > 3min ago 25964.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 71844c50: gap_down (2.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 71844c50 - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in 578c3c67: gap_down (2.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 578c3c67 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (2.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7ecb5df7] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:46 (break up: 25965.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 7ecb5df7: gap_down (1.75 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 7ecb5df7 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_down (1.75 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [7bb6268e] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:48 (break up: 25964.50, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [a211a2e9] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:53 (break up: 25957.75, LSE High: 25818.25)
+2026-01-11 21:36:48 - WARNING - Gap detected in 7bb6268e: gap_up (4.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: 7bb6268e - gap_detected
+2026-01-11 21:36:48 - WARNING - Gap detected in a211a2e9: gap_up (4.00 pips) - invalidating setup
+2026-01-11 21:36:48 - INFO - Setup invalidated: a211a2e9 - gap_detected
+2026-01-11 21:36:48 - INFO -    🚫 Gap detected: gap_up (4.00 pips)
+2026-01-11 21:36:48 - INFO - State transition: WATCHING_LIQ1 → WATCHING_CONSOL [df865d80] Valid
+2026-01-11 21:36:48 - INFO - 🔵 LIQ #1 SHORT detected @ 20:55 (break up: 25957.00, LSE High: 25818.25)
+2026-01-11 21:36:48 - INFO - ✅ Internal LOW confirmed: 25956.50 (price now 25959.50 > 3min ago 25956.50)
+2026-01-11 21:36:48 - WARNING - ⚠️ Friday 22:00 Swedish time reached - invalidating all setups (will resume Monday 09:00)
+2026-01-11 21:36:48 - INFO - Setup invalidated: df865d80 - market_closed
+2026-01-11 21:36:48 - INFO - ✅ 1 setups invalidated at 22:00 Swedish time
+2026-01-11 21:36:48 - WARNING - ⚠️ 22:00 Swedish time reached - invalidating all setups (will resume tomorrow)
+2026-01-11 21:36:48 - INFO - 📅 New trading day: 2026-01-10
+2026-01-11 21:36:48 - INFO - 📅 New trading day: 2026-01-11
+2026-01-11 21:36:48 - INFO - 
+================================================================================
+2026-01-11 21:36:48 - INFO - PHASE 1+2 TEST RESULTS
+2026-01-11 21:36:48 - INFO - ================================================================================
+2026-01-11 21:36:48 - INFO - 
+📊 PROCESSING STATISTICS:
+2026-01-11 21:36:48 - INFO -    Candles processed:        7,929
+2026-01-11 21:36:48 - INFO -    LIQ #1 detected:          0
+2026-01-11 21:36:48 - INFO -    Consolidations confirmed: 0
+2026-01-11 21:36:48 - INFO -    LIQ #2 detected:          0
+2026-01-11 21:36:48 - INFO -    Setups complete:          0
+2026-01-11 21:36:48 - INFO -    Setups invalidated:       242
+2026-01-11 21:36:48 - INFO - 
+🆕 PHASE 1 IMPACT (Config Changes):
+2026-01-11 21:36:48 - INFO -    Consolidations in 0.3-0.5% range: 0 (NEW - was rejected before)
+2026-01-11 21:36:48 - INFO -    Negative R:R filtered:            0 (NEW filter)
+2026-01-11 21:36:48 - INFO - 
+🆕 PHASE 2 IMPACT (Safety Features):
+2026-01-11 21:36:48 - INFO -    Gap detections:                   482 (NEW filter)
+2026-01-11 21:36:48 - INFO -    Internal HIGH confirmed:          23 (NEW tracking)
+2026-01-11 21:36:48 - INFO -    Internal LOW confirmed:           61 (NEW tracking)
+2026-01-11 21:36:48 - INFO -    22:00 invalidations:              0 (NEW daily reset)
+2026-01-11 21:36:48 - INFO - 
+🚫 INVALIDATION REASONS:
+2026-01-11 21:36:48 - INFO -    gap_detected                  : 241
+2026-01-11 21:36:48 - INFO -    consolidation_range_invalid   : 1
+2026-01-11 21:36:48 - INFO - 
+================================================================================
+2026-01-11 21:36:48 - INFO - ⚠️  No complete setups found
+2026-01-11 21:36:48 - INFO -    This may be normal if market conditions don't produce setups
+2026-01-11 21:36:48 - INFO - ✅ Gap detection WORKING: 482 gaps detected and filtered
+2026-01-11 21:36:48 - INFO - 
+================================================================================
+
