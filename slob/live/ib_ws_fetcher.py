@@ -6,7 +6,7 @@ from typing import List, Callable, Optional, Any
 from datetime import datetime
 
 # Importera biblioteket direkt
-from ib_insync import IB, Stock, Future, Forex, Contract, Ticker, CFD
+from ib_insync import IB, Stock, Future, Forex, Contract, Ticker
 
 class Tick:
     """
@@ -144,14 +144,7 @@ class IBWSFetcher:
         for symbol in symbols:
             try:
                 contract = None
-                if symbol == "US100":
-                    # US100 Spot/CFD - no contract month, single contract
-                    us100 = CFD(symbol='IBUS100', exchange='SMART', currency='USD')
-                    await self.ib.qualifyContractsAsync(us100)
-                    contract = us100
-                    self.logger.info(f"Resolved US100 to {contract.localSymbol if contract.localSymbol else 'IBUS100'}")
-                elif symbol == "NQ":
-                    # Legacy NQ futures support
+                if symbol == "NQ":
                     nq = Future(symbol='NQ', exchange='CME', currency='USD')
                     details = await self.ib.reqContractDetailsAsync(nq)
                     if not details: continue
@@ -192,9 +185,9 @@ class IBWSFetcher:
                 if ticker.volume and not math.isnan(ticker.volume):
                     vol = int(ticker.volume)
                 
-                if price and price == price:
+                if price and price == price: 
                     t = Tick(
-                        symbol=ticker.contract.symbol if ticker.contract else "US100", 
+                        symbol="NQ", 
                         price=float(price),
                         timestamp=ticker.time if ticker.time else datetime.now(),
                         volume=vol

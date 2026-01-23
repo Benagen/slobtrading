@@ -27,7 +27,7 @@ from enum import Enum
 from typing import Optional, Dict, List
 
 try:
-    from ib_insync import IB, Future, Contract, CFD, Order, Trade, LimitOrder, StopOrder, MarketOrder
+    from ib_insync import IB, Future, Order, Trade, LimitOrder, StopOrder, MarketOrder
 except ImportError:
     raise ImportError("ib_insync not installed. Install with: pip install ib_insync")
 
@@ -161,7 +161,7 @@ class OrderExecutor:
     def __init__(self, config: OrderExecutorConfig):
         self.config = config
         self.ib: Optional[IB] = None
-        self.trading_contract: Optional[Contract] = None  # Can be US100 CFD or NQ Future
+        self.nq_contract: Optional[Future] = None
 
         # Order tracking
         self.active_orders: Dict[int, Trade] = {}
@@ -208,9 +208,9 @@ class OrderExecutor:
         if not success:
             raise ConnectionError("Failed to connect to IB after multiple attempts")
 
-        # Resolve trading contract (US100 CFD or NQ Futures)
-        self.trading_contract = await self._resolve_trading_contract()
-        logger.info(f"✅ Trading contract resolved: {self.trading_contract.localSymbol or self.trading_contract.symbol}")
+        # Resolve NQ contract
+        self.nq_contract = await self._resolve_nq_contract()
+        logger.info(f"✅ NQ contract resolved: {self.nq_contract.localSymbol}")
 
         # Get account info
         if self.config.account:
@@ -429,13 +429,13 @@ class OrderExecutor:
         success = await self.connect_with_retry(max_attempts=5)
 
         if success:
-            # Re-resolve trading contract
+            # Re-resolve NQ contract
             try:
-                self.trading_contract = await self._resolve_trading_contract()
-                logger.info(f"✅ OrderExecutor reconnected and trading contract re-resolved")
+                self.nq_contract = await self._resolve_nq_contract()
+                logger.info(f"✅ OrderExecutor reconnected and NQ contract re-resolved")
                 return True
             except Exception as e:
-                logger.error(f"Failed to re-resolve trading contract: {e}")
+                logger.error(f"Failed to re-resolve NQ contract: {e}")
                 return False
 
         return False
@@ -444,46 +444,7 @@ class OrderExecutor:
         """Check if IB connection is active."""
         return self.ib is not None and self.ib.isConnected()
 
-    async def _resolve_trading_contract(self) -> Contract:
-        """
-        Resolve trading contract based on symbol (US100 CFD or NQ Futures).
-
-        Returns:
-            Contract for trading
-        """
-        symbol = getattr(self.config, 'symbol', 'US100')
-
-        if symbol == "US100":
-            return await self._resolve_us100_contract()
-        elif symbol == "NQ":
-            return await self._resolve_nq_contract()
-        else:
-            raise ValueError(f"Unknown symbol: {symbol}")
-
-    async def _resolve_us100_contract(self) -> Contract:
-        """
-        Resolve US100 Spot/CFD contract.
-
-        US100 doesn't have expiration dates like futures.
-
-        Returns:
-            CFD contract for US100
-        """
-        # US100 CFD on IBKR
-        us100 = CFD(symbol='IBUS100', exchange='SMART', currency='USD')
-
-        # Qualify contract
-        qualified = await self.ib.qualifyContractsAsync(us100)
-
-        if not qualified:
-            raise ValueError("Failed to qualify US100 contract. Check IB permissions for CFD trading.")
-
-        contract = qualified[0]
-        logger.info(f"Resolved US100: {contract.localSymbol or contract.symbol}")
-
-        return contract
-
-    async def _resolve_nq_contract(self) -> Contract:
+    async def _resolve_nq_contract(self) -> Future:
         """
         Resolve NQ futures contract (front month).
 
@@ -758,11 +719,11 @@ class OrderExecutor:
             }
 
             # Place parent
-            parent_trade = self.ib.placeOrder(self.trading_contract, parent_order)
+            parent_trade = self.ib.placeOrder(self.nq_contract, parent_order)
 
             # Place children
-            sl_trade = self.ib.placeOrder(self.trading_contract, stop_loss)
-            tp_trade = self.ib.placeOrder(self.trading_contract, take_profit)
+            sl_trade = self.ib.placeOrder(self.nq_contract, stop_loss)
+            tp_trade = self.ib.placeOrder(self.nq_contract, take_profit)
 
             # Wait for submission confirmation and check for errors
             await asyncio.sleep(self.config.ib_response_delay)  # Give IB time to respond
@@ -923,7 +884,7 @@ class OrderExecutor:
                     raise ValueError(f"Unknown order type: {order_type}")
 
                 # Place order
-                trade = self.ib.placeOrder(self.trading_contract, order)
+                trade = self.ib.placeOrder(self.nq_contract, order)
 
                 # Wait for submission
                 await asyncio.sleep(self.config.order_submission_delay)

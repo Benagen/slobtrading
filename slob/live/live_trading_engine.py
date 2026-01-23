@@ -44,7 +44,7 @@ class LiveTradingEngineConfig:
         self.account = ""
         self.risk_per_trade = 0.01
         self.max_position_size = 5
-        self.symbol = "US100"
+        self.symbol = "NQ"
 
         # Strategy Defaults
         self.max_retracement_pips = 100.0  # Updated from consol_max_range_pips

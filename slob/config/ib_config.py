@@ -46,7 +46,7 @@ class IBConfig:
     def __post_init__(self):
         """Initialize default symbols."""
         if self.symbols is None:
-            self.symbols = ['US100']  # Default to US100 spot/CFD
+            self.symbols = ['NQ']  # Default to NQ futures
 
     @classmethod
     def paper_trading_config(cls, account: str, client_id: int = 1) -> 'IBConfig':
@@ -66,7 +66,7 @@ class IBConfig:
             client_id=client_id,
             account=account,
             paper_trading=True,
-            symbols=['US100']
+            symbols=['NQ']
         )
 
     @classmethod
@@ -87,7 +87,7 @@ class IBConfig:
             client_id=client_id,
             account=account,
             paper_trading=False,
-            symbols=['US100']
+            symbols=['NQ']
         )
 
     @classmethod
@@ -108,7 +108,7 @@ class IBConfig:
             client_id=client_id,
             account=account,
             paper_trading=True,
-            symbols=['US100']
+            symbols=['NQ']
         )
 
     @classmethod
@@ -129,7 +129,7 @@ class IBConfig:
             client_id=client_id,
             account=account,
             paper_trading=False,
-            symbols=['US100']
+            symbols=['NQ']
         )
 
     def validate(self):
@@ -174,7 +174,7 @@ EXAMPLE_PAPER_CONFIG = IBConfig(
     client_id=1,
     account='DU123456',
     paper_trading=True,
-    symbols=['US100']
+    symbols=['NQ']
 )
 
 EXAMPLE_GATEWAY_PAPER_CONFIG = IBConfig(
@@ -183,5 +183,5 @@ EXAMPLE_GATEWAY_PAPER_CONFIG = IBConfig(
     client_id=1,
     account='DU123456',
     paper_trading=True,
-    symbols=['US100']
+    symbols=['NQ']
 )

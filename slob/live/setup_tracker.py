@@ -85,7 +85,7 @@ class SetupTrackerConfig:
     monday_restart_hour: int = 0  # 00:00 Monday (Q19: "00.00 måndag")
 
     # Symbol
-    symbol: str = "US100"
+    symbol: str = "NQ"
 
 
 @dataclass
