@@ -208,7 +208,7 @@ def get_active_setups() -> List[Dict[str, Any]]:
             cursor.execute("""
                 SELECT *
                 FROM setups
-                WHERE state != 'SETUP_COMPLETE'
+                WHERE state NOT IN ('SETUP_COMPLETE', 'INVALIDATED')
                 ORDER BY created_at DESC
                 LIMIT 10
             """)
