@@ -209,6 +209,7 @@ def get_active_setups() -> List[Dict[str, Any]]:
                 SELECT *
                 FROM setups
                 WHERE state NOT IN ('SETUP_COMPLETE', 'INVALIDATED')
+                AND created_at >= datetime('now', '-24 hours')
                 ORDER BY created_at DESC
                 LIMIT 10
             """)
@@ -591,32 +592,38 @@ def api_setup_pipeline():
 
             rows = cursor.fetchall()
 
-        # State mapping with friendly names and colors
+        # State mapping with friendly names and colors (keys match database state strings)
         state_map = {
-            1: {'name': 'WATCHING_LIQ1', 'label': 'Watching LIQ #1', 'color': '#8b949e'},
-            2: {'name': 'WATCHING_CONSOL', 'label': 'Watching Consolidation', 'color': '#58a6ff'},
-            3: {'name': 'WATCHING_LIQ2', 'label': 'Watching LIQ #2', 'color': '#1f6feb'},
-            4: {'name': 'WAITING_ENTRY', 'label': 'Waiting Entry', 'color': '#f0883e'},
-            5: {'name': 'SETUP_COMPLETE', 'label': 'Setup Complete', 'color': '#3fb950'},
-            6: {'name': 'INVALIDATED', 'label': 'Invalidated', 'color': '#f85149'}
+            'WATCHING_LIQ1': {'label': 'Watching LIQ #1', 'color': '#8b949e', 'order': 1},
+            'WATCHING_CONSOL': {'label': 'Watching Consolidation', 'color': '#58a6ff', 'order': 2},
+            'WATCHING_LIQ2': {'label': 'Watching LIQ #2', 'color': '#1f6feb', 'order': 3},
+            'SEARCHING_NOWICK': {'label': 'Searching No-Wick', 'color': '#a371f7', 'order': 4},
+            'WAITING_ENTRY': {'label': 'Waiting Entry', 'color': '#f0883e', 'order': 5},
+            'SETUP_COMPLETE': {'label': 'Setup Complete', 'color': '#3fb950', 'order': 6},
+            'INVALIDATED': {'label': 'Invalidated', 'color': '#f85149', 'order': 7}
         }
 
         # Build pipeline data
         pipeline = []
         total_setups = 0
+        active_setups = 0  # Non-invalidated, non-completed
 
         for row in rows:
             state = row['state']
             count = row['count']
             total_setups += count
 
+            if state not in ('INVALIDATED', 'SETUP_COMPLETE'):
+                active_setups += count
+
             if state in state_map:
                 pipeline.append({
                     'state': state,
-                    'name': state_map[state]['name'],
+                    'name': state,
                     'label': state_map[state]['label'],
                     'count': count,
-                    'color': state_map[state]['color']
+                    'color': state_map[state]['color'],
+                    'order': state_map[state]['order']
                 })
 
         # Fill in missing states with 0 count (for consistent chart)
@@ -625,18 +632,20 @@ def api_setup_pipeline():
             if state not in existing_states:
                 pipeline.append({
                     'state': state,
-                    'name': info['name'],
+                    'name': state,
                     'label': info['label'],
                     'count': 0,
-                    'color': info['color']
+                    'color': info['color'],
+                    'order': info['order']
                 })
 
         # Sort by state order
-        pipeline.sort(key=lambda x: x['state'])
+        pipeline.sort(key=lambda x: x['order'])
 
         return jsonify({
             'pipeline': pipeline,
             'total': total_setups,
+            'active': active_setups,
             'timestamp': datetime.now().isoformat()
         })
 
