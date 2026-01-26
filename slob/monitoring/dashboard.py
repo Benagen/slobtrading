@@ -207,7 +207,7 @@ def get_active_setups() -> List[Dict[str, Any]]:
 
             cursor.execute("""
                 SELECT *
-                FROM active_setups
+                FROM setups
                 WHERE state != 'SETUP_COMPLETE'
                 ORDER BY created_at DESC
                 LIMIT 10
@@ -234,7 +234,7 @@ def get_recent_trades() -> List[Dict[str, Any]]:
 
             cursor.execute("""
                 SELECT *
-                FROM trade_history
+                FROM trades
                 ORDER BY entry_time DESC
                 LIMIT 20
             """)
@@ -264,7 +264,7 @@ def get_performance_metrics() -> Dict[str, Any]:
             cursor = conn.cursor()
 
             # Total trades
-            cursor.execute("SELECT COUNT(*) FROM trade_history")
+            cursor.execute("SELECT COUNT(*) FROM trades")
             total_trades = cursor.fetchone()[0]
 
             # Win/Loss stats
@@ -275,7 +275,7 @@ def get_performance_metrics() -> Dict[str, Any]:
                     SUM(pnl) as total_pnl,
                     AVG(CASE WHEN pnl > 0 THEN pnl END) as avg_win,
                     AVG(CASE WHEN pnl < 0 THEN pnl END) as avg_loss
-                FROM trade_history
+                FROM trades
             """)
 
             row = cursor.fetchone()
@@ -524,7 +524,7 @@ def api_pnl_chart():
                     DATE(entry_time) as trade_date,
                     SUM(pnl) as daily_pnl,
                     COUNT(*) as trades_count
-                FROM trade_history
+                FROM trades
                 WHERE entry_time >= datetime('now', '-30 days')
                 GROUP BY DATE(entry_time)
                 ORDER BY trade_date ASC
@@ -664,7 +664,7 @@ def api_risk_metrics():
             # Get all trades ordered by time
             cursor.execute("""
                 SELECT entry_time, pnl
-                FROM trade_history
+                FROM trades
                 ORDER BY entry_time ASC
             """)
             trades = cursor.fetchall()
