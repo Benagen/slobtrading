@@ -417,12 +417,31 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <i class="bi bi-funnel"></i> Setup Pipeline - Live State Breakdown
-                        <span class="badge bg-primary ms-2" id="pipeline-total">0 Total</span>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-funnel"></i> Setup Pipeline - Live State Breakdown
+                            <span class="badge bg-primary ms-2" id="pipeline-total">0 Total</span>
+                            <span class="badge bg-info ms-2" id="pipeline-active">0 Active</span>
+                        </span>
+                        <span id="consol-resets-badge" style="display: none;">
+                            <i class="bi bi-arrow-repeat"></i>
+                            <span class="badge bg-warning text-dark" id="consol-resets-count" title="Consolidation resets (LIQ #1 persistence)">0 Resets</span>
+                        </span>
                     </div>
                     <div class="card-body">
                         <div id="pipelineChart" style="height: 350px;"></div>
+                        <!-- Consolidation Reset Info Box -->
+                        <div id="consol-reset-info" class="mt-3 p-3" style="background: rgba(255,193,7,0.1); border: 1px solid #d29922; border-radius: 8px; display: none;">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle text-warning me-2" style="font-size: 1.2rem;"></i>
+                                <div>
+                                    <strong class="text-warning">LIQ #1 Persistence Active</strong>
+                                    <p class="mb-0 small text-muted">
+                                        <span id="consol-reset-details">-</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -669,14 +688,58 @@
             if (setups.length === 0) {
                 setupsList.innerHTML = '<p class="text-muted text-center">No active setups</p>';
             } else {
-                setupsList.innerHTML = setups.map(setup => `
-                    <div class="alert alert-info">
-                        <strong>Setup ${setup.id ? setup.id.substring(0, 8) : 'Unknown'}</strong><br>
-                        State: ${setup.state || 'Unknown'}<br>
-                        ${setup.liq1_detected ? 'LIQ #1 detected' : ''}<br>
-                        ${setup.liq2_detected ? 'LIQ #2 detected' : ''}
-                    </div>
-                `).join('');
+                setupsList.innerHTML = setups.map(setup => {
+                    // Determine alert color based on state
+                    let alertClass = 'alert-info';
+                    if (setup.state === 'WATCHING_CONSOL') alertClass = 'alert-primary';
+                    if (setup.state === 'WATCHING_LIQ2') alertClass = 'alert-info';
+                    if (setup.state === 'SEARCHING_NOWICK_AFTER_LIQ2') alertClass = 'alert-warning';
+                    if (setup.state === 'WAITING_ENTRY') alertClass = 'alert-warning';
+
+                    // Build consolidation info
+                    let consolInfo = '';
+                    if (setup.state === 'WATCHING_CONSOL' || setup.consol_candles_count > 0) {
+                        const resetCount = setup.consol_reset_count || 0;
+                        const consolCandles = setup.consol_candles_count || 0;
+                        const consolRange = setup.consol_range ? setup.consol_range.toFixed(2) : '-';
+
+                        consolInfo = `
+                            <div class="mt-2 p-2" style="background: rgba(0,0,0,0.2); border-radius: 4px;">
+                                <small>
+                                    <strong>Consolidation:</strong> ${consolCandles} min
+                                    ${setup.consol_high ? ` | H: ${setup.consol_high.toFixed(2)}` : ''}
+                                    ${setup.consol_low ? ` | L: ${setup.consol_low.toFixed(2)}` : ''}
+                                    ${setup.consol_range ? ` | Range: ${consolRange}` : ''}
+                                    ${resetCount > 0 ? `<br><span class="text-warning"><i class="bi bi-arrow-repeat"></i> Resets: ${resetCount}</span>` : ''}
+                                </small>
+                            </div>
+                        `;
+                    }
+
+                    // Direction badge
+                    const directionBadge = setup.direction ?
+                        `<span class="badge ${setup.direction === 'SHORT' ? 'bg-danger' : 'bg-success'} ms-2">${setup.direction}</span>` : '';
+
+                    return `
+                        <div class="alert ${alertClass} mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <strong>Setup ${setup.id ? setup.id.substring(0, 8) : 'Unknown'}</strong>
+                                ${directionBadge}
+                            </div>
+                            <div class="mt-1">
+                                <span class="badge bg-secondary">${setup.state || 'Unknown'}</span>
+                            </div>
+                            <div class="mt-2">
+                                ${setup.liq1_detected ? '<i class="bi bi-check-circle-fill text-success"></i> LIQ #1' : '<i class="bi bi-circle text-muted"></i> LIQ #1'}
+                                ${setup.liq1_price ? ` @ ${setup.liq1_price.toFixed(2)}` : ''}
+                                <br>
+                                ${setup.liq2_detected ? '<i class="bi bi-check-circle-fill text-success"></i> LIQ #2' : '<i class="bi bi-circle text-muted"></i> LIQ #2'}
+                                ${setup.liq2_price ? ` @ ${setup.liq2_price.toFixed(2)}` : ''}
+                            </div>
+                            ${consolInfo}
+                        </div>
+                    `;
+                }).join('');
             }
 
             // Recent Trades
@@ -996,9 +1059,36 @@
                 .then(data => {
                     const pipeline = data.pipeline || [];
                     const total = data.total || 0;
+                    const active = data.active || 0;
+                    const consolResets = data.consol_resets || {};
 
-                    // Update total badge
+                    // Update total and active badges
                     document.getElementById('pipeline-total').textContent = `${total} Total`;
+                    document.getElementById('pipeline-active').textContent = `${active} Active`;
+
+                    // Update consolidation reset stats
+                    const totalResets = consolResets.total_resets || 0;
+                    const setupsWithResets = consolResets.setups_with_resets || 0;
+                    const maxResets = consolResets.max_resets || 0;
+
+                    const resetBadge = document.getElementById('consol-resets-badge');
+                    const resetInfo = document.getElementById('consol-reset-info');
+                    const resetDetails = document.getElementById('consol-reset-details');
+
+                    if (totalResets > 0) {
+                        // Show reset badge and info
+                        resetBadge.style.display = 'inline';
+                        document.getElementById('consol-resets-count').textContent = `${totalResets} Resets`;
+
+                        resetInfo.style.display = 'block';
+                        resetDetails.innerHTML = `
+                            ${setupsWithResets} setup(s) have reset consolidation search while preserving LIQ #1.
+                            Total resets: <strong>${totalResets}</strong> | Max on single setup: <strong>${maxResets}</strong>
+                        `;
+                    } else {
+                        resetBadge.style.display = 'none';
+                        resetInfo.style.display = 'none';
+                    }
 
                     if (pipeline.length === 0) {
                         document.getElementById('pipelineChart').innerHTML =

@@ -169,6 +169,9 @@ class SetupCandidate:
     consol_confirmed: bool = False
     consol_confirmed_time: Optional[datetime] = None
 
+    # Consolidation reset tracking (for LIQ #1 persistence)
+    consol_reset_count: int = 0
+
     # ─────────────────────────────────────────────────────────────
     # NO-WICK CANDLE (bullish with minimal upper wick)
     # ─────────────────────────────────────────────────────────────
@@ -317,6 +320,7 @@ class SetupCandidate:
             'consol_quality_score': self.consol_quality_score,
             'consol_confirmed': self.consol_confirmed,
             'consol_confirmed_time': self.consol_confirmed_time.isoformat() if self.consol_confirmed_time else None,
+            'consol_reset_count': self.consol_reset_count,
 
             # No-wick
             'nowick_found': self.nowick_found,

@@ -572,5 +572,52 @@ Every transition is logged for debugging and analysis.
 
 ---
 
-**Last Updated**: 2025-12-17
-**Status**: Design complete, ready for implementation
+---
+
+## Consolidation Reset Behavior (2026-01-29)
+
+### Previous Behavior (before 2026-01-29)
+- If consolidation range exceeded max (0.7%) → INVALIDATED
+- New LIQ #1 was created on next candle
+- Resulted in ~223 setups per 48h from the same LIQ event
+
+### New Behavior
+- If consolidation range exceeds max → RESET consolidation
+- LIQ #1 is preserved ("checkbox" for the day)
+- Continues searching for valid consolidation
+- Only GAP_DETECTED and MARKET_CLOSED invalidate during consolidation search
+
+### Consolidation Reset Count
+- `consol_reset_count` tracks number of resets
+- Used for statistics and debugging
+- No maximum limit (can reset indefinitely until market close)
+
+### What Happens During Reset
+```python
+# Reset consolidation data - preserve LIQ #1!
+candidate.consol_candles.clear()
+candidate.consol_high = None
+candidate.consol_low = None
+candidate.consol_range = None
+candidate.consol_quality_score = None
+candidate.consol_confirmed = False
+candidate.consol_confirmed_time = None
+candidate.consol_reset_count += 1
+
+# State remains WATCHING_CONSOL
+# LIQ #1 data (liq1_time, liq1_price, direction) preserved
+```
+
+### Invalidation Rules Summary
+
+| Condition | Before 2026-01-29 | After 2026-01-29 |
+|-----------|-------------------|------------------|
+| Range > 0.7% | INVALIDATED | RESET (continue search) |
+| CONSOL_TIMEOUT | INVALIDATED | Removed (no timeout) |
+| GAP_DETECTED | INVALIDATED | INVALIDATED |
+| MARKET_CLOSED | INVALIDATED | INVALIDATED |
+
+---
+
+**Last Updated**: 2026-01-29
+**Status**: Design complete, LIQ #1 persistence implemented

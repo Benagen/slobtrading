@@ -590,6 +590,32 @@ def api_setup_pipeline():
                 ORDER BY state ASC
             """)
 
+            # Also get consolidation reset stats (LIQ #1 persistence tracking)
+            cursor.execute("""
+                SELECT
+                    COALESCE(SUM(consol_reset_count), 0) as total_resets,
+                    COUNT(CASE WHEN consol_reset_count > 0 THEN 1 END) as setups_with_resets,
+                    MAX(consol_reset_count) as max_resets
+                FROM setups
+                WHERE created_at >= datetime('now', '-24 hours')
+                AND state NOT IN ('INVALIDATED', 'SETUP_COMPLETE')
+            """)
+            reset_stats = cursor.fetchone()
+            total_resets = reset_stats['total_resets'] if reset_stats else 0
+            setups_with_resets = reset_stats['setups_with_resets'] if reset_stats else 0
+            max_resets = reset_stats['max_resets'] if reset_stats else 0
+
+            # Re-run the state query
+            cursor.execute("""
+                SELECT
+                    state,
+                    COUNT(*) as count
+                FROM setups
+                WHERE created_at >= datetime('now', '-24 hours')
+                GROUP BY state
+                ORDER BY state ASC
+            """)
+
             rows = cursor.fetchall()
 
         # State mapping with friendly names and colors (keys match database state strings)
@@ -597,7 +623,7 @@ def api_setup_pipeline():
             'WATCHING_LIQ1': {'label': 'Watching LIQ #1', 'color': '#8b949e', 'order': 1},
             'WATCHING_CONSOL': {'label': 'Watching Consolidation', 'color': '#58a6ff', 'order': 2},
             'WATCHING_LIQ2': {'label': 'Watching LIQ #2', 'color': '#1f6feb', 'order': 3},
-            'SEARCHING_NOWICK': {'label': 'Searching No-Wick', 'color': '#a371f7', 'order': 4},
+            'SEARCHING_NOWICK_AFTER_LIQ2': {'label': 'Searching No-Wick', 'color': '#a371f7', 'order': 4},
             'WAITING_ENTRY': {'label': 'Waiting Entry', 'color': '#f0883e', 'order': 5},
             'SETUP_COMPLETE': {'label': 'Setup Complete', 'color': '#3fb950', 'order': 6},
             'INVALIDATED': {'label': 'Invalidated', 'color': '#f85149', 'order': 7}
@@ -646,7 +672,13 @@ def api_setup_pipeline():
             'pipeline': pipeline,
             'total': total_setups,
             'active': active_setups,
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            # Consolidation reset stats (LIQ #1 persistence)
+            'consol_resets': {
+                'total_resets': total_resets,
+                'setups_with_resets': setups_with_resets,
+                'max_resets': max_resets
+            }
         })
 
     except Exception as e:

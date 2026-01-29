@@ -615,17 +615,36 @@ class SetupTracker:
         # HIGH confirmed after 5 min, LOW after 3 min
         self._track_internal_high_low(candidate, candle)
 
-        # Check timeout (max duration exceeded)
-        if len(candidate.consol_candles) > self.config.consol_max_duration:
-            StateTransitionValidator.invalidate(
-                candidate,
-                InvalidationReason.CONSOL_TIMEOUT
-            )
-            return CandleUpdate(
-                setup_invalidated=True,
-                candidate=candidate,
-                message=f"Consolidation timeout ({len(candidate.consol_candles)} min)"
-            )
+        # =============================================================================
+        # CONSOLIDATION SEARCH LOGIC (LIQ #1 Persistence)
+        # =============================================================================
+        #
+        # STRATEGI-REGEL (2026-01-29):
+        # LIQ #1 är en "checkbox" - när den är checkad behålls den under hela dagen.
+        # Om consolidation-range överskrids (>0.7%) ska vi INTE invalidera hela setupen.
+        # Istället: reset consolidation-data och fortsätt leta efter giltig consolidation.
+        #
+        # VARFÖR:
+        # - En riktig LIQ #1 (break av LSE High/Low) är statistiskt värdefull
+        # - Även om första consolidation-försöket misslyckas kan en ny giltig
+        #   consolidation bildas senare
+        # - Undviker att samma LIQ #1-händelse genererar dussintals duplicerade setups
+        #
+        # VAD SOM HÄNDER VID RANGE-RESET:
+        # - consol_candles töms
+        # - consol_high/low sätts till None
+        # - consol_reset_count ökas (för statistik)
+        # - State förblir WATCHING_CONSOL
+        # - LIQ #1-data (liq1_time, liq1_price, direction) bevaras
+        #
+        # VAD SOM FORTFARANDE INVALIDERAR:
+        # - GAP_DETECTED: Prisdata-problem, indikerar datafel
+        # - MARKET_CLOSED: Dagen slut (22:00 Stockholm)
+        # =============================================================================
+
+        # NOTE: CONSOL_TIMEOUT removed (2026-01-29)
+        # No time limit for consolidation search - only min-duration and range validation.
+        # LIQ #1 persists until market close or valid consolidation found.
 
         # Check if min duration reached
         # Note: We check for +1 because we pop() the current candle after this check (line 662)
@@ -638,16 +657,29 @@ class SetupTracker:
             ):
                 range_pct = ((candidate.consol_high - candidate.consol_low) /
                              candidate.consol_high) * 100
-                StateTransitionValidator.invalidate(
-                    candidate,
-                    InvalidationReason.CONSOL_RANGE_INVALID
+
+                # Track reset attempt (for statistics/logging)
+                candidate.consol_reset_count += 1
+
+                logger.warning(
+                    f"🔄 Consolidation reset #{candidate.consol_reset_count} for {candidate.id[:8]}: "
+                    f"range {range_pct:.3f}% exceeded {self.config.consol_max_range_pct}% - "
+                    f"keeping LIQ #1, restarting consolidation search"
                 )
+
+                # RESET consolidation data - preserve LIQ #1!
+                candidate.consol_candles.clear()
+                candidate.consol_high = None
+                candidate.consol_low = None
+                candidate.consol_range = None
+                candidate.consol_quality_score = None
+                candidate.consol_confirmed = False
+                candidate.consol_confirmed_time = None
+
+                # Stay in WATCHING_CONSOL - continue searching
                 return CandleUpdate(
-                    setup_invalidated=True,
-                    candidate=candidate,
-                    message=f"Range {range_pct:.3f}% invalid "
-                           f"(must be {self.config.consol_min_range_pct}-"
-                           f"{self.config.consol_max_range_pct}%)"
+                    message=f"Consolidation reset (range {range_pct:.3f}% > {self.config.consol_max_range_pct}%) - "
+                           f"continuing search with LIQ #1 preserved"
                 )
 
             # Set quality score for backward compatibility
