@@ -1110,7 +1110,7 @@ class OrderExecutor:
             logger.error(f"Capital validation failed: {e}")
             return False  # Fail-safe: reject trade if can't validate
 
-    def calculate_position_size(
+    async def calculate_position_size(
         self,
         entry_price: float,
         stop_loss_price: float,
@@ -1134,7 +1134,7 @@ class OrderExecutor:
             int: Number of NQ contracts to trade
         """
         # Sync account balance from IB
-        account_balance = self.get_account_balance()
+        account_balance = await self.get_account_balance()
 
         # Delegate to RiskManager
         result = self.risk_manager.calculate_position_size(

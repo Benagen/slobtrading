@@ -247,7 +247,7 @@ class LiveTradingEngine:
             self.telegram.notify_setup_detected(setup_data)
 
         # Calculate position size using RiskManager
-        position_size = self.order_executor.calculate_position_size(
+        position_size = await self.order_executor.calculate_position_size(
             entry_price=setup.entry_price,
             stop_loss_price=setup.sl_price,
             atr=getattr(setup, 'atr', None)  # Use ATR if available
