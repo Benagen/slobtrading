@@ -514,6 +514,34 @@ class StateManager:
 
         self.sqlite_conn.commit()
 
+    async def cleanup_stale_active_setups(self):
+        """
+        Remove all remaining records from active_setups table.
+
+        Called at 22:00 invalidation to ensure no stale setups linger in the DB
+        across trading days. Any setup still in active_setups at market close
+        should be removed since all setups are invalidated daily.
+        """
+        cursor = self.sqlite_conn.cursor()
+        cursor.execute("SELECT COUNT(*) as cnt FROM active_setups")
+        count = cursor.fetchone()['cnt']
+
+        if count > 0:
+            cursor.execute("DELETE FROM active_setups")
+            self.sqlite_conn.commit()
+            logger.info(f"Cleaned up {count} stale setups from active_setups table")
+
+            # Also clean Redis active keys
+            if self.redis_available and self.redis_client:
+                try:
+                    keys = await self._redis_keys("setup:active:*")
+                    for key in keys:
+                        await self._redis_delete(key)
+                    if keys:
+                        logger.info(f"Cleaned up {len(keys)} stale setups from Redis")
+                except Exception as e:
+                    logger.error(f"Failed to clean Redis active setups: {e}")
+
     async def load_active_setups(self) -> List[SetupCandidate]:
         """
         Load all active setup candidates from Redis (or SQLite if Redis unavailable).

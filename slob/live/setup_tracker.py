@@ -26,6 +26,7 @@ from collections import deque
 from typing import Dict, List, Optional, Tuple, Deque
 from datetime import datetime, time, timedelta, timezone
 from dataclasses import dataclass
+from uuid import uuid4
 
 from .setup_state import (
     SetupState,
@@ -160,6 +161,64 @@ class SetupTracker:
         logger.info(
             f"Daily invalidation: {self.config.daily_invalidation_hour}:00 {self.config.daily_invalidation_timezone}"
         )
+
+    async def restore_setup(self, setup_data: dict):
+        """
+        Restore a setup from database into active_candidates.
+
+        Called during state recovery on startup to reload persisted setups
+        so they can be properly tracked and invalidated at 22:00.
+
+        Args:
+            setup_data: Dict with setup fields from database
+        """
+        try:
+            setup_id = setup_data.get('id', str(uuid4()))
+            state_name = setup_data.get('state', 'WATCHING_LIQ1')
+
+            # Parse state enum
+            try:
+                state = SetupState[state_name]
+            except KeyError:
+                logger.warning(f"Unknown state '{state_name}' for setup {setup_id[:8]}, skipping")
+                return
+
+            # Skip if already completed or invalidated
+            if state in (SetupState.INVALIDATED, SetupState.SETUP_COMPLETE):
+                logger.info(f"Skipping restore of {setup_id[:8]}: state={state_name} (not active)")
+                return
+
+            # Reconstruct candidate from dict
+            candidate = SetupCandidate(id=setup_id)
+            candidate.state = state
+
+            # Restore key fields
+            if setup_data.get('direction'):
+                candidate.direction = TradeDirection(setup_data['direction'])
+            if setup_data.get('created_at'):
+                try:
+                    candidate.created_at = datetime.fromisoformat(setup_data['created_at'])
+                except (ValueError, TypeError):
+                    pass
+            candidate.lse_high = setup_data.get('lse_high')
+            candidate.lse_low = setup_data.get('lse_low')
+            candidate.liq1_detected = setup_data.get('liq1_detected', False)
+            candidate.liq1_price = setup_data.get('liq1_price')
+            candidate.liq2_detected = setup_data.get('liq2_detected', False)
+            candidate.liq2_price = setup_data.get('liq2_price')
+            candidate.entry_price = setup_data.get('entry_price')
+            candidate.sl_price = setup_data.get('sl_price')
+            candidate.tp_price = setup_data.get('tp_price')
+            candidate.consol_reset_count = setup_data.get('consol_reset_count', 0)
+            candidate.symbol = setup_data.get('symbol', self.config.symbol)
+
+            self.active_candidates[candidate.id] = candidate
+            self.stats['candidates_active'] = len(self.active_candidates)
+            logger.info(
+                f"Restored setup {candidate.id[:8]}: state={state_name}"
+            )
+        except Exception as e:
+            logger.error(f"Failed to restore setup: {e}")
 
     async def _save_candidate(self, candidate: SetupCandidate):
         """
@@ -365,7 +424,7 @@ class SetupTracker:
                 await self._invalidate_all_setups_22_00()
 
     async def _invalidate_all_setups_22_00(self):
-        """Invalidate all active setups at 22:00."""
+        """Invalidate all active setups at 22:00 and clean stale DB records."""
         invalidated_count = 0
 
         for candidate in list(self.active_candidates.values()):
@@ -381,6 +440,14 @@ class SetupTracker:
 
         self.active_candidates.clear()
         self.stats['candidates_active'] = 0
+
+        # Also clean any stale records from active_setups table
+        # This catches setups that weren't loaded into memory but still linger in DB
+        if self.state_manager:
+            try:
+                await self.state_manager.cleanup_stale_active_setups()
+            except Exception as e:
+                logger.error(f"Failed to cleanup stale DB setups: {e}")
 
         if invalidated_count > 0:
             logger.info(f"✅ {invalidated_count} setups invalidated at 22:00 Swedish time")

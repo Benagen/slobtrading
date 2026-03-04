@@ -220,8 +220,19 @@ class LiveTradingEngine:
         if update and update.message:
             self.logger.info(update.message)
 
-        for setup in self.setup_tracker.completed_setups:
-            await self._handle_setup_found({'setup': setup})
+        # Process completed setups, then clear the list to prevent re-processing
+        if self.setup_tracker.completed_setups:
+            setups_to_process = list(self.setup_tracker.completed_setups)
+            self.setup_tracker.completed_setups.clear()
+
+            for setup in setups_to_process:
+                try:
+                    await self._handle_setup_found({'setup': setup})
+                except Exception as e:
+                    self.logger.error(
+                        f"Failed to handle setup {setup.id[:8]}: {e}",
+                        exc_info=True
+                    )
 
     async def _handle_setup_found(self, data: dict):
         setup = data.get('setup')
@@ -336,10 +347,22 @@ class LiveTradingEngine:
             
         self.logger.info("🟢 Engine loop started. Waiting for market data...")
         
-        # Health monitor loop
+        # Health monitor loop with OrderExecutor reconnection
         while self.running:
-            await asyncio.sleep(60) # Log status every minute
+            await asyncio.sleep(60)
             self.logger.info("💓 Engine heartbeat - Running...")
+
+            # Check OrderExecutor connection and reconnect if needed
+            if not self.order_executor.is_connected():
+                self.logger.warning("OrderExecutor disconnected - attempting reconnect...")
+                try:
+                    success = await self.order_executor.reconnect()
+                    if success:
+                        self.logger.info("OrderExecutor reconnected successfully")
+                    else:
+                        self.logger.error("OrderExecutor reconnection failed - will retry next heartbeat")
+                except Exception as e:
+                    self.logger.error(f"OrderExecutor reconnection error: {e}")
 
     async def start(self):
         await self.run()
