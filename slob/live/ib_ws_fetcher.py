@@ -91,7 +91,7 @@ class IBWSFetcher:
                 # 2 = Frozen (last available, free)
                 # 3 = Delayed (15-20 min delay, free)
                 # 4 = Delayed frozen (frozen delayed, free)
-                market_data_type = 1  # Live real-time data
+                market_data_type = 3  # Delayed until live subscription is activated
 
                 try:
                     self.ib.reqMarketDataType(market_data_type)
